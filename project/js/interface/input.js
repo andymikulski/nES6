@@ -1,26 +1,11 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 
 this.Gui = this.Gui || {};
 
 (function(){
 	"use strict";
-	
+
 	var gamepad_consts = {
 		top1:	0, // Top button 1 ("A" on the Xbox 360 controller; cross on the PS3 controller)
 		top2:	1, // Top button 2 ("B" on the Xbox 360 controller; circle on the PS3 controller)
@@ -43,25 +28,25 @@ this.Gui = this.Gui || {};
 		rightStickHoriz: 2, // gp_axisrh	Right stick horizontal axis (analogue)
 		rightStickVert: 3 // gp_axisrv	Right stick vertical axis (analogue)
 	};
-	
-	
-	
+
+
+
 	var GamePad = function( rawPad ) {
-		
+
 		this._axisThreshold = 0.5;
 		this._buttonStates = new Int32Array( rawPad['buttons'].length );
 		this._axesStates = new Int32Array( rawPad['axes'].length );
 	};
-	
-	
+
+
 	GamePad.prototype.getButtonCount = function() {
 		return this._buttonStates.length;
 	};
-	
-	
+
+
 	// Returns 0 for not changed, 1 for pressed, 2 for not pressed
 	GamePad.prototype.getButtonState = function( rawPad, buttonIndex ) {
-		
+
 		var isPressed = rawPad['buttons'][ buttonIndex ]['pressed'];
 		var intState = ( isPressed ? 1 : 0 );
 		if ( this._buttonStates[ buttonIndex ] !== intState ) {
@@ -70,16 +55,16 @@ this.Gui = this.Gui || {};
 		}
 		return 0;
 	};
-	
-	
+
+
 	GamePad.prototype.getAxisCount = function() {
 		return this._axesStates.length;
 	};
-	
-	
+
+
 	// Returns 0 for not changed, 1 for pressed, 2 for not pressed
 	GamePad.prototype.getAxisState = function( rawPad, axisIndex ) {
-		
+
 		var isPressed = rawPad['axes'][ axisIndex ] >= this._axisThreshold || rawPad['axes'][ axisIndex ] <= -this._axisThreshold;
 		var intState = ( isPressed ? 1 : 0 );
 		if ( this._axesStates[ axisIndex ] !== intState ) {
@@ -87,17 +72,17 @@ this.Gui = this.Gui || {};
 			return isPressed ? 1 : 2;
 		}
 		return 0;
-	};	
-	
-	
+	};
+
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
-	
-	
+
+
 	var Input = function( mainboard ) {
-	
+
 		this._mainboard = mainboard;
 		this._pads = [];
-		
+
 		this._loadKeyBindingsFromLocalStorage();
 
 		// these values are guessed - need testing
@@ -111,7 +96,7 @@ this.Gui = this.Gui || {};
 			'SELECT': [ gamepad_consts.select ],
 			'START': [ gamepad_consts.start ]
 		};
-		
+
 		this._gamepadAxisMap = {
 			'UP': [ { axis: gamepad_consts.leftStickVert, type: 'positive' }, { axis: gamepad_consts.rightStickVert, type: 'positive' } ],
 			'DOWN': [ { axis: gamepad_consts.leftStickVert, type: 'negative' }, { axis: gamepad_consts.rightStickVert, type: 'negative' } ],
@@ -120,26 +105,26 @@ this.Gui = this.Gui || {};
 			'A': [ { axis: gamepad_consts.shoulderLeftTrigger, type: 'positive' } ],
 			'B': [ { axis: gamepad_consts.shoulderRightTrigger, type: 'positive' } ]
 		};
-		
+
 		var that = this;
-		
+
 		// keyboard support
 		window.addEventListener( 'keydown', function( event ) { if ( that._doKeyboardButtonPress( Number( event.keyCode ), true ) ) { event.preventDefault(); } }, false );
 		window.addEventListener( 'keyup', function( event ) { if ( that._doKeyboardButtonPress( Number( event.keyCode ), false ) ) { event.preventDefault(); } }, false );
-		
+
 		this._gamepadsSupported = navigator['getGamepads'] !== undefined;
-		
+
 		if ( this._gamepadsSupported ) {
 			this._populateGamepads();
-			
+
 			$( window ).on( "gamepadconnected", function() { that._populateGamepads(); } );
 			$( window ).on( "gamepaddisconnected", function() { that._populateGamepads(); } );
 		}
 	};
-	
-	
+
+
 	Input.prototype._populateGamepads = function() {
-	
+
 		this._pads.length = 0;
 		if ( this._gamepadsSupported ) {
 			var gamepads = navigator['getGamepads']();
@@ -151,22 +136,22 @@ this.Gui = this.Gui || {};
 			}
 		}
 	};
-	
-	
+
+
 	Input.prototype.poll = function() {
-	
+
 		if ( this._gamepadsSupported ) {
 			this._pollGamepads();
 		}
 	};
-	
-	
+
+
 	Input.prototype._pollGamepads = function() {
-	
+
 		var pads = navigator['getGamepads']();
 		for ( var i=0; i<this._pads.length; ++i ) {
 			var pad = this._pads[i];
-			
+
 			// do buttons
 			for ( var buttonIndex=0; buttonIndex<pad.getButtonCount(); ++buttonIndex ) {
 				var buttonState = pad.getButtonState( pads[ i ], buttonIndex );
@@ -175,7 +160,7 @@ this.Gui = this.Gui || {};
 					this._doGamepadButton( i, buttonIndex, buttonState === 1 );
 				}
 			}
-			
+
 			// do axes
 			for ( var axisIndex=0; axisIndex<pad.getAxisCount(); ++axisIndex ) {
 				var axisState = pad.getAxisState( pads[ i ], axisIndex );
@@ -185,10 +170,10 @@ this.Gui = this.Gui || {};
 			}
 		}
 	};
-	
-	
+
+
 	Input.prototype._doGamepadAxis = function( gamepadIndex, axisIndex, isPressed, axisType ) {
-	
+
 		var joypad = this._mainboard.inputdevicebus.getJoypad( gamepadIndex );
 
 		if ( joypad ) {
@@ -197,7 +182,7 @@ this.Gui = this.Gui || {};
 
 					var buttonArray = this._gamepadButtonMap[ buttonName ];
 					for ( var i=0; i<buttonArray.length; ++i ) {
-						
+
 						var but = buttonArray[ i ];
 						if ( but.axis === axisIndex && but.type === axisType ) {
 							joypad.pressButton( Number( JOYPAD_NAME_TO_ID( buttonName ) ), isPressed );
@@ -207,10 +192,10 @@ this.Gui = this.Gui || {};
 			}
 		}
 	};
-	
-	
+
+
 	Input.prototype._doGamepadButton = function( gamepadIndex, buttonIndex, isPressed ) {
-	
+
 		var joypad = this._mainboard.inputdevicebus.getJoypad( gamepadIndex );
 
 		if ( joypad ) {
@@ -226,20 +211,20 @@ this.Gui = this.Gui || {};
 			}
 		}
 	};
-	
-	
+
+
 	Input.prototype._doKeyboardButtonPress = function( keyCode, pressed ) {
-	
+
 		var len = Math.min( 2, this._playerKeyboardMaps.length );
 		var wasPressed = false;
-		
+
 		for ( var playerIndex = 0; playerIndex < len; ++playerIndex ) {
-		
+
 			var joypad = this._mainboard.inputdevicebus.getJoypad( playerIndex );
 			var map = this._playerKeyboardMaps[ playerIndex ];
-			
+
 			if ( map && joypad ) {
-				for ( var buttonIndex=0; buttonIndex<map.length; ++buttonIndex ) {	
+				for ( var buttonIndex=0; buttonIndex<map.length; ++buttonIndex ) {
 					var buttonArray = map[ buttonIndex ];
 					for ( var i=0; i<buttonArray.length; ++i ) {
 						if ( buttonArray[ i ] === keyCode ) {
@@ -252,24 +237,24 @@ this.Gui = this.Gui || {};
 		}
 		return wasPressed;
 	};
-	
-	
+
+
 	Input.prototype.saveKeyBindings = function( playerId, key, keysAssigned ) {
-		
+
 		this._playerKeyboardMaps[ playerId ][ key ] = keysAssigned.slice( 0 );
 		this._saveKeyBindingsToLocalStorage();
 	};
-		
-		
+
+
 	Input.prototype.getKeyBindings = function( playerId, key ) {
-		
+
 		return this._playerKeyboardMaps[ playerId ][ key ].slice( 0 );
 	};
-	
-	
+
+
 	Input.prototype._loadKeyBindingsFromLocalStorage = function() {
 		this._playerKeyboardMaps = Gui.loadFromLocalStorage( "webnes_keybindings" );
-				
+
 		// Load defaults if no local storage found
 		if ( !this._playerKeyboardMaps ) {
 			this._playerKeyboardMaps = [
@@ -317,12 +302,12 @@ this.Gui = this.Gui || {};
 			];
 		}
 	};
-	
-	
+
+
 	Input.prototype._saveKeyBindingsToLocalStorage = function() {
 		Gui.saveToLocalStorage( "webnes_keybindings", this._playerKeyboardMaps );
 	};
-	
+
 
 	Gui.Input = Input;
 

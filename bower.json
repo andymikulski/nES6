@@ -3,7 +3,6 @@
   "version": "0.0.1-snapshot.0",
   "dependencies": {
     "gl-matrix": "~2.2.1",
-    "jszip": "~2.0.0",
     "jsziptools": "~2.4.4",
     "jquery": "~2.1.1",
     "FileSaver": "11751a6a65",

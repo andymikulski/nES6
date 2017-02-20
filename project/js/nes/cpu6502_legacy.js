@@ -1,25 +1,10 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
 (function(){
 	"use strict";
-	
+
 	var cpu6502 = function( mainboard ) {
 		var that = this;
 		this.mainboard = mainboard;
@@ -29,14 +14,14 @@ this.Nes = this.Nes || {};
 		this.isRunning = true;
 		this.resetVariables();
 	};
-	
-	
+
+
 	cpu6502.prototype.breakPoint = function( resume ) {
-	
+
 		this.isRunning = resume;
 	};
 
-	
+
 	cpu6502.prototype.resetVariables = function() {
 		this.programCounter = 0;
 		this.subcycle = 0;
@@ -44,13 +29,13 @@ this.Nes = this.Nes || {};
 
 		this.pageBoundaryCrossed = false;
 		this.branchTaken = false;
-		
+
 		this.waitOneInstructionAfterCli = false;
 		this.resetPending = false;
 		this.nmiPending = false;
 		this.irqLineLow = false;
 		this.triggerNmiAfterNextInstruction = false;
-		
+
 		this.regStatus = {
 			Carry : false,
 			Zero : false,
@@ -61,23 +46,23 @@ this.Nes = this.Nes || {};
 			Overflow : false,
 			Sign : false
 		};
-		
+
 		this.regS = 0;
 		this.regX = this.regY = this.regA = 0;
 		this.SAYHighByte = 0;
 	};
-	
-	
+
+
 	cpu6502.prototype.setExecuteCallback = function( cb ) {
 		this.executeCallback = cb;
 	};
-	
-	
+
+
 	cpu6502.prototype.getSubCycle = function() {
 		return this.subcycle;
 	};
-	
-	
+
+
 	cpu6502.prototype.handlePendingInterrupts = function() {
 
 		// TODO: if an NMI interrupt is interrupted by a BRK, dont execute the BRK (6502 bug - fixed in the CMOS version)
@@ -105,7 +90,7 @@ this.Nes = this.Nes || {};
 				this.triggerNmiAfterNextInstruction = false;
 				return 0;
 			}
-			
+
 			// NMI interrupt
 			this.pushStack( ( this.programCounter >> 8 ) & 0xFF );
 			this.incrementStackReg();
@@ -132,7 +117,7 @@ this.Nes = this.Nes || {};
 			this.incrementStackReg();
 			this.pushStack( this.programCounter & 0xFF );
 			this.incrementStackReg();
-			
+
 			this.irqLineLow = false; // TODO: might be incorrect
 
 			this.regStatus.Break = false;
@@ -148,8 +133,8 @@ this.Nes = this.Nes || {};
 		}
 		return 0;
 	};
-	
-	
+
+
 	cpu6502.prototype.nonMaskableInterrupt = function( ppuMasterTickCount ) {
 		this.nmiPending = true;
 		var hasCpuCaughtUp = ( this.mainboard.synchroniser.getCpuMTC() - COLOUR_ENCODING_MTC_PER_CPU ) <= ppuMasterTickCount;// g_nesMainboard->GetSynchroniser()->GetCpuMTC() - g_nesMainboard->GetModeConstants()->MasterCyclesPerCPU() <= ;
@@ -167,8 +152,8 @@ this.Nes = this.Nes || {};
 		this.resetVariables();
 		this.resetPending = true;
 	};
-	
-	
+
+
 	cpu6502.prototype.holdIrqLineLow = function( low ) {
 		this.irqLineLow = low === undefined ? true : low;
 	};
@@ -186,8 +171,8 @@ this.Nes = this.Nes || {};
 		b |= ( this.regStatus.Sign ? 0x80 : 0 );
 		return b;
 	};
-	
-	
+
+
 	cpu6502.prototype.statusRegFromByte = function( b ) {
 		this.regStatus.Carry = ( b & 0x1 ) > 0;
 		this.regStatus.Zero = ( b & 0x2 ) > 0;
@@ -198,32 +183,32 @@ this.Nes = this.Nes || {};
 		this.regStatus.Overflow = ( b & 0x40 ) > 0;
 		this.regStatus.Sign = ( b & 0x80 ) > 0;
 	};
-	
-	
+
+
 	cpu6502.prototype.incrementStackReg = function() {
 		this.regS--;
 		if ( this.regS < 0 )
 			this.regS = 0xFF;
 	};
-	
-	
+
+
 	cpu6502.prototype.decrementStackReg = function() {
 		this.regS++;
 		if ( this.regS > 0xFF )
 			this.regS = 0;
 	};
-	
-	
+
+
 	cpu6502.prototype.pushStack = function( value ) {
 		this.mainboard.memory.write8( Nes.wrap16( 0x100 + this.regS ), value & 0xFF );
 	};
-	
-	
+
+
 	cpu6502.prototype.popStack = function( value ) {
 		return this.mainboard.memory.read8( Nes.wrap16( 0x100 + this.regS ) );
 	};
-	
-	
+
+
 	cpu6502.prototype.setCarry = function( value ) {
 		this.regStatus.Carry = value > 0xff;
 	};
@@ -233,7 +218,7 @@ this.Nes = this.Nes || {};
 		this.regStatus.Carry = value >= 0 && value < 0x100;
 	};
 
-	
+
 	cpu6502.prototype.setSign = function( value ) {
 		this.regStatus.Sign = (value & 0x80) > 0;
 	};
@@ -248,13 +233,13 @@ this.Nes = this.Nes || {};
 		this.setSign( value );
 		this.setZero( value );
 	};
-	
-	
+
+
 	cpu6502.prototype.setOverflow = function( regA, temp, value ) {
 		this.regStatus.Overflow = ( (( regA ^ value ) & 0x80) && ((regA ^ temp ) & 0x80) );
 	};
 
-	
+
 	cpu6502.prototype.incrementSubCycle = function( isLastCycle ) {
 		// if ( this.isLastSubCycle && isLastCycle ) {
 			// throw( 'invalid isLastSubCycle' );
@@ -262,12 +247,12 @@ this.Nes = this.Nes || {};
 		this.subcycle++;
 		this.isLastSubCycle = isLastCycle;
 	};
-	
-	
+
+
 	cpu6502.prototype.read16FromMem = function( offsetAddress, lastCycle, iszeropage ) {
 
 		iszeropage = iszeropage || false;
-	
+
 		this.incrementSubCycle( false );
 		var ret = this.mainboard.memory.read8( offsetAddress );
 		this.incrementSubCycle();
@@ -280,13 +265,13 @@ this.Nes = this.Nes || {};
 		ret |= ( secondByte << 8 );
 		return ret;
 	};
-	
-	
+
+
 	cpu6502.prototype.calculateDummyReadAddress = function( address, index ) {
 		return (address & 0xFF00) | ((address + index) & 0xFF);
 	};
 
-	
+
 	cpu6502.prototype.performDummyRead = function( instruction, baseAddress, addition ) {
 		this.pageBoundaryCrossed = false;
 
@@ -303,12 +288,12 @@ this.Nes = this.Nes || {};
 			this.mainboard.memory.read8( this.calculateDummyReadAddress( baseAddress, addition ) );
 		}
 	};
-	
-	
+
+
 	cpu6502.prototype.readInArgViaAddressingMode_DEBUG = function( instruction, instructionBytes, addressingModeArgs ) {
 		var readInValue = 0;
 		var arg, offset, address;
-		
+
 		switch ( instruction.addressingmode )
 		{
 		case Nes.ADDRESSING_MODE.RELATIVE:
@@ -417,15 +402,15 @@ this.Nes = this.Nes || {};
 			addressingModeArgs.push( readInValue );
 		break;
 		}
-		
+
 		return readInValue;
 	};
-	
-	
+
+
 	cpu6502.prototype.readInArgViaAddressingMode = function( instruction ) {
 		var readInValue = 0;
 		var arg, offset, address;
-		
+
 		switch ( instruction.addressingmode )
 		{
 		case Nes.ADDRESSING_MODE.RELATIVE:
@@ -499,40 +484,40 @@ this.Nes = this.Nes || {};
 			readInValue = Nes.wrap16( address + this.regX ); // SAY writes to absolute X but needs the high byte of the address to operate on
 		break;
 		}
-		
+
 		return readInValue;
 	};
-	
-	
+
+
 	cpu6502.prototype.noneOperation = function( value, instruction ) {
 		this.executeAction( value, instruction );
 	};
-	
-	
+
+
 	cpu6502.prototype.immediateOperation = function( value, instruction ) {
 		this.executeAction( value, instruction );
 	};
-	
-	
+
+
 	cpu6502.prototype.accumulatorOperation = function( value, instruction ) {
 		this.incrementSubCycle( true );
 		this.regA = this.executeAction( value, instruction ) & 0xFF;
 	};
-	
-	
+
+
 	cpu6502.prototype.readOperation = function( value, instruction ) {
 		this.incrementSubCycle( true );
 		var b = this.mainboard.memory.read8( value );
 		this.executeAction( b, instruction );
 	};
 
-	
+
 	cpu6502.prototype.rmwOperation = function( value, instruction ) {
 		this.incrementSubCycle( false );
 		var data = this.mainboard.memory.read8( value );
 		this.incrementSubCycle( false );
 		this.mainboard.memory.write8( value, data );
-		
+
 		this.incrementSubCycle( true );
 		var ret = this.executeAction( data, instruction );
 		this.mainboard.memory.write8( value, ret & 0xFF );
@@ -544,8 +529,8 @@ this.Nes = this.Nes || {};
 		var b = this.executeAction( value, instruction );
 		this.mainboard.memory.write8( value, b );
 	};
-	
-	
+
+
 	cpu6502.prototype.calculateRelativeDifference = function( b ) {
 		var isSigned = (b & 0x80) > 0;
 		if ( isSigned )
@@ -557,9 +542,9 @@ this.Nes = this.Nes || {};
 			return b;
 	};
 
-	
+
 	cpu6502.prototype.branchOperation = function( value, instruction ) {
-	
+
 		this.branchTaken = this.executeAction( null, instruction );
 		if ( this.branchTaken ) {
 			this.incrementSubCycle( false );
@@ -577,8 +562,8 @@ this.Nes = this.Nes || {};
 			this.programCounter = Nes.wrap16( this.programCounter + instruction.size );
 		}
 	};
-	
-	
+
+
 	cpu6502.prototype.executeOperation = function( value, instruction ) {
 		var that = this;
 		switch ( instruction.opmode ) {
@@ -592,10 +577,10 @@ this.Nes = this.Nes || {};
 		}
 		return null;
 	};
-	
+
 
 	cpu6502.prototype.executeAction = function( value, instruction ) {
-	
+
 		switch ( instruction.functiontype ) {
 			case Nes.FUNCTION_TYPES.ADC:			return this.actionADC( value, instruction );
 			case Nes.FUNCTION_TYPES.AND:			return this.actionAND( value, instruction );
@@ -678,11 +663,11 @@ this.Nes = this.Nes || {};
 			case Nes.FUNCTION_TYPES.ANC:			return this.actionANC( value, instruction );
 			case Nes.FUNCTION_TYPES.LAS:			return this.actionLAS( value, instruction );
 		}
-		
+
 		return null;
 	};
-	
-	
+
+
 	cpu6502.prototype.execute = function() {
 		this.subcycle = 0;
 	//	this.isLastSubCycle = false;
@@ -690,7 +675,7 @@ this.Nes = this.Nes || {};
 		this.pageBoundaryCrossed = false;
 		if ( this.waitOneInstructionAfterCli )
 			this.waitOneInstructionAfterCli = false;
-			
+
 		var opcode = this.mainboard.memory.read8( this.programCounter );
 		var instruction = Nes.getInstructionByOpcode( opcode );
 		// if ( instruction === undefined ) {
@@ -703,16 +688,16 @@ this.Nes = this.Nes || {};
 
 		//if ( this.executeCallback )
 		//	this.executeCallback( this.programCounter, instruction, instructionBytes, addressingModeArgs );
-	
+
 		//Nes.log( 'cpu', this.formatInstructionStatusString( this.programCounter, instruction, instructionBytes, addressingModeArgs ) );
 	//	console.log(
 	//		this.formatInstructionStatusString( this.programCounter, instruction, instructionBytes, addressingModeArgs )
 	//		+ " " + this.mainboard.ppu.formatStatusString()
 	//	);
-			
+
 		if ( instruction.addressingmode !== Nes.ADDRESSING_MODE.RELATIVE )
 			this.programCounter = Nes.wrap16( this.programCounter + instruction.size );
-		
+
 		this.executeOperation( readInValue, instruction );
 
 		// var verifyTicks = instruction.basecycles;
@@ -720,7 +705,7 @@ this.Nes = this.Nes || {};
 			// verifyTicks += instruction.pagecycles;
 		// if ( this.branchTaken )
 			// verifyTicks++;
-		
+
 		// if ( subCyclesTaken !== verifyTicks ) {
 			// throw( 'instruction ' + instruction.name + ' does not match subcycles' );
 		// }
@@ -730,8 +715,8 @@ this.Nes = this.Nes || {};
 		//return verifyTicks;
 		return this.subcycle + 1;
 	};
-	
-	
+
+
 	cpu6502.prototype.actionADC = function( value ) {
 		var temp = ( value & 0xFF ) + this.regA + (this.regStatus.Carry ? 1 : 0);
 		this.setCarry( temp );
@@ -797,7 +782,7 @@ this.Nes = this.Nes || {};
 		this.incrementStackReg();
 
 		this.programCounter = this.read16FromMem( Nes.consts.IRQ_ADDRESS, true );
-		
+
 		this.regStatus.Interrupt = true;
 		if ( this.cmosVersion ) // Decimal flag is cleared in the CMOS version
 			this.regStatus.Decimal = false;
@@ -818,7 +803,7 @@ this.Nes = this.Nes || {};
 	};
 	cpu6502.prototype.actionCLI = function( value ) {
 		this.incrementSubCycle( true );
-		this.waitOneInstructionAfterCli = this.regStatus.Interrupt === true;	
+		this.waitOneInstructionAfterCli = this.regStatus.Interrupt === true;
 		this.regStatus.Interrupt = false;
 	};
 	cpu6502.prototype.actionCLV = function( value ) {
@@ -923,7 +908,7 @@ this.Nes = this.Nes || {};
 		return temp;
 	};
 	cpu6502.prototype.actionORA = function( value ) {
-		this.regA |= value & 0xFF; 
+		this.regA |= value & 0xFF;
 		this.setSignAndZero( this.regA );
 	};
 	cpu6502.prototype.actionPHA = function( value ) {
@@ -996,7 +981,7 @@ this.Nes = this.Nes || {};
 		this.incrementSubCycle( false );
 		this.statusRegFromByte( this.popStack() );
 		this.decrementStackReg();
-		
+
 		this.incrementSubCycle( false );
 		this.programCounter = this.popStack();
 		this.decrementStackReg();
@@ -1184,13 +1169,13 @@ this.Nes = this.Nes || {};
 	};
 	cpu6502.prototype.actionSAX = function( value ) {
 	/*
-SAX ANDs the contents of the A and X registers (leaving the contents of A 
+SAX ANDs the contents of the A and X registers (leaving the contents of A
 intact), subtracts an immediate value, and then stores the result in X.
-... A few points might be made about the action of subtracting an immediate 
-value.  It actually works just like the CMP instruction, except that CMP 
-does not store the result of the subtraction it performs in any register.  
-This subtract operation is not affected by the state of the Carry flag, 
-though it does affect the Carry flag.  It does not affect the Overflow 
+... A few points might be made about the action of subtracting an immediate
+value.  It actually works just like the CMP instruction, except that CMP
+does not store the result of the subtraction it performs in any register.
+This subtract operation is not affected by the state of the Carry flag,
+though it does affect the Carry flag.  It does not affect the Overflow
 flag.
 	*/
 		var t = ( this.regA & this.regX ) - value;
@@ -1211,9 +1196,9 @@ flag.
 		var result = this.regY & Nes.wrap8( this.SAYHighByte + 1 );
 		return result;
 	};
-	cpu6502.prototype.actionXAS = function( value ) { console.log('illegal instruction not implemented'); 
+	cpu6502.prototype.actionXAS = function( value ) { console.log('illegal instruction not implemented');
 	};
-	cpu6502.prototype.actionAXA = function( value ) { console.log('illegal instruction not implemented'); 
+	cpu6502.prototype.actionAXA = function( value ) { console.log('illegal instruction not implemented');
 	};
 	cpu6502.prototype.actionANC = function( value ) {
 		this.regA &= value;
@@ -1223,7 +1208,7 @@ flag.
 	cpu6502.prototype.actionLAS = function( value ) { console.log('illegal instruction not implemented'); };
 
 	cpu6502.prototype.formatInstructionStatusString = function( programCounter, instruction, instructionBytesArray, addressingModeArgs ) {
-	
+
 		// program counter
 		var str = Nes.ZERO_PAD_HEX( programCounter, 4 );
 		str += "  ";
@@ -1236,10 +1221,10 @@ flag.
 				str += "  ";
 			str += " ";
 		}
-		
+
 		// instruction
 		str += instruction.name + " ";
-		
+
 		// addressing mode string
 		if ( addressingModeArgs && addressingModeArgs.length > 0 ) {
 			switch ( instruction.addressingmode )
@@ -1286,24 +1271,24 @@ flag.
 			break;
 			}
 		}
-		
+
 		while ( str.length < 47 ) {
 			str += ' ';
 		}
-		
+
 		// cpu registers
 		str += " A:" + Nes.ZERO_PAD_HEX( this.regA, 2 );
 		str += " X:" + Nes.ZERO_PAD_HEX( this.regX, 2 );
 		str += " Y:" + Nes.ZERO_PAD_HEX( this.regY, 2 );
 		str += " P:" + Nes.ZERO_PAD_HEX( this.statusRegToByte(), 2 );
 		str += " SP:" + Nes.ZERO_PAD_HEX( this.regS, 2 );
-		
+
 		return str;
 	};
 
 
 	cpu6502.prototype.saveState = function() {
-	
+
 		var data = {};
 		data.programCounter = this.programCounter;
 		data.subcycle = this.subcycle;
@@ -1326,7 +1311,7 @@ flag.
 
 
 	cpu6502.prototype.loadState = function( state ) {
-	
+
 		this.programCounter = state.programCounter;
 		this.subcycle = state.subcycle;
 		this.isLastSubCycle = state.isLastSubCycle;
@@ -1345,8 +1330,8 @@ flag.
 		this.SAYHighByte = state.SAYHighByte;
 	};
 
-	
-	
+
+
 	Nes.cpu6502 = cpu6502;
 
 }());

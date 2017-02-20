@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
@@ -39,7 +24,7 @@ var mapper206 = function() {
 mapper206.prototype = Object.create( Nes.basemapper.prototype );
 
 mapper206.prototype.mapperSaveState = function( state ) {
-	
+
 	state.bankSwapByte = this.bankSwapByte;
 	state.banks = Nes.uintArrayToString( this.banks );
 };
@@ -76,7 +61,7 @@ mapper206.prototype.syncBanks = function( doPrg, doChr ) {
 */
 	if ( doChr ) {
 		this.mainboard.synchroniser.synchronise();
-		
+
 		var bank0 = this.banks[0] & 0x3E;
 		var bank1 = this.banks[1] & 0x3E;
 
@@ -105,17 +90,17 @@ mapper206.prototype.reset = function() {
 
 	this.banks[6] = 0;
 	this.banks[7] = 1;
-	
+
 	if ( this.get1kChrBankCount() === 0 ) {
 		this.useVRAM( 8 );
 	}
-	
+
 	this.syncBanks( true, true );
 	this.mainboard.ppu.changeMirroringMethod( this.mirroringMethod );
 };
 
 mapper206.prototype.write8PrgRom = function( offset, data ) {
-	
+
 	if ( ( offset & 0x1 ) === 0 )
 	{ // even
 		if ( this.bankSwapByte !== data & 0xFF ) {

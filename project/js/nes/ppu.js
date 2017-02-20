@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
@@ -28,12 +13,12 @@ var ppu = function( mainboard ) {
 	this.spriteMemory = new Int32Array( 0x100 );
 	this._invokeA12Latch = false;
 	this._bitOperationOn2002 = false;
-	
+
 	this.nameTablesMap = new Int32Array( 4 );
 	this.nameTables = [];
 	for ( var i=0; i<4; ++i )
 		this.nameTables.push( new Int32Array( 0x400 ) );
-	
+
 	this.paletteTables = [ new Int32Array( 0x10 ), new Int32Array( 0x10 ) ];
 	this.frameCounter = 0;
 	this._ppuRenderBg = new Nes.PpuRenderBg( this );
@@ -86,7 +71,7 @@ ppu.prototype.resetVariables = function( cold ) {
 
 
 ppu.prototype.hookSyncEvents = function( synchroniser ) {
-	
+
 	var that = this;
 	this._clockSkipEventId = synchroniser.addEvent( 'ppu clockskip', this.getMasterTicksTillClockSkip(), function() { that._eventClockskip(); } );
 	this._vblankClearEventId = synchroniser.addEvent( 'ppu vblank clear', COLOUR_ENCODING_VBLANK_MTC, function( eventTime ) { that._eventVblankClear( eventTime ); } );
@@ -96,7 +81,7 @@ ppu.prototype.hookSyncEvents = function( synchroniser ) {
 
 
 ppu.prototype._eventClockskip = function() {
-		
+
 	// Skip a PPU clock cycle if the background is enabled
 	if ( this.isOddFrame && ( this.control2 & 0x8 ) > 0 /*ppuControl2.backgroundSwitch*/ && COLOUR_ENCODING_NAME === "NTSC" ) {
 		this._sync.advanceCpuMTC( MASTER_CYCLES_PER_PPU );
@@ -118,7 +103,7 @@ ppu.prototype._eventNmiTrigger = function( eventTime ) {
 	if ( ( ( this.control1 & 0x80 ) > 0 /* ppuControl1.vBlankNmi*/ && ( this.status & 0x80 ) > 0/* ppuStatus.vBlank*/ ) ) {
 		this.mainboard.cpu.nonMaskableInterrupt( eventTime );
 	}
-	
+
 	this._sync.changeEventTime( this._ppuNmiEventId, -1 );
 };
 
@@ -135,7 +120,7 @@ ppu.prototype._eventSpriteZeroHit = function( eventTime ) {
 
 
 ppu.prototype._eventSpriteOverflow = function( eventTime ) {
-	
+
 	//var realmtc = this._sync.getCpuMTC();
 	//console.log( "Sprite overflow at: " + realmtc + " [" + JSON.stringify( this.ticksToScreenCoordinates( realmtc ) )
 	//	+ " due: " + eventTime + " [" + JSON.stringify( this.ticksToScreenCoordinates( eventTime ) ) + "]" );
@@ -168,7 +153,7 @@ ppu.prototype.ticksToScreenCoordinates = function( tickCount ) {
 
 
 ppu.prototype.screenCoordinatesToTicks = function( x, y ) {
-	
+
 	return ( x * MASTER_CYCLES_PER_PPU ) + ( ( y + COLOUR_ENCODING_VBLANK_SCANLINES + 1 ) * MASTER_CYCLES_PER_SCANLINE );
 };
 
@@ -177,7 +162,7 @@ ppu.prototype.isRenderingEnabled = function() {
 	return ( this.control2 & 0x18 ) > 0;
 };
 
-	
+
 ppu.prototype.isRendering = function( tickCount, includeHblank ) {
 	if ( this.isRenderingEnabled() )
 	{
@@ -259,7 +244,7 @@ ppu.prototype.handleSpriteTransfer = function() {
 	if ( this.doSpriteTransferAfterNextCpuInstruction) {
 		this.doSpriteTransferAfterNextCpuInstruction = false;
 		this._sync.synchronise();
-		// TODO: Optimise 
+		// TODO: Optimise
 		this._sync.advanceCpuMTC( 1 * COLOUR_ENCODING_MTC_PER_CPU );
 		this.spriteaddress &= 0xFF
 		for ( var i=0; i<0x100; ++i )
@@ -292,8 +277,8 @@ ppu.prototype._writeTo2000 = function( offset, data ) {
 			this.suppressNmi = true;
 		}
 	} else {
-		// NMI should occur if enabled when VBL already set		
-		// vblank = true && vblanknmi = false 
+		// NMI should occur if enabled when VBL already set
+		// vblank = true && vblanknmi = false
 		if ( ( this.status & 0x80 ) > 0 && ( this.control1 & 0x80 ) === 0 ) { // there be a 1-PPU clock latency for this
 			var triggerTime = this._sync.getCpuMTC() + MASTER_CYCLES_PER_PPU * 1;
 			//console.log( "NMI trigger due: " + triggerTime );
@@ -302,7 +287,7 @@ ppu.prototype._writeTo2000 = function( offset, data ) {
 	}
 
 	this._sync.synchronise();
-	
+
 	// update nametable switch
 	this.ppuLatchAddress &= 0xF3FF;
 	this.ppuLatchAddress |= ((data & 3) << 10);
@@ -327,7 +312,7 @@ ppu.prototype._writeTo2001 = function( offset, data ) {
 	this._sync.synchronise();
 	var renderingEnabledChanged = ( ( this.control2 & 0x18 ) > 0 ) !== ( ( data & 0x18 ) > 0 );
 	//var spriteVisibleOrClippingChanged = ( ( this.control2 & 0x14 ) > 0 ) !== ( ( data & 0x14 ) > 0 );
-	
+
 	this.control2 = data;
 
 	if ( renderingEnabledChanged )
@@ -367,7 +352,7 @@ Emulators that don't use cycle-accurate PPU rendering will not correctly handle 
 	}
 
 	this.ppuSecondAddressWrite = !this.ppuSecondAddressWrite;
-	
+
 	//Nes.Trace.writeLine( 'ppu', '2005 write: ' + data.toString( 16 ) );
 };
 
@@ -387,7 +372,7 @@ ppu.prototype._writeTo2006 = function( offset, data ) {
 	{
 		this.ppuLatchAddress &= 0xFF00;
 		this.ppuLatchAddress |= data;
-		
+
 		this.updatePPUReadAddress( this.ppuLatchAddress, true );
 	}
 
@@ -410,7 +395,7 @@ ppu.prototype._writeTo2007 = function( offset, data ) {
 	it will presumably not double-increment the relevant counter.
 	*/
 	this._sync.synchronise();
-	
+
 	var bufferedAddress = 0;
 	var newAddress = 0;
 
@@ -430,7 +415,7 @@ ppu.prototype._writeTo2007 = function( offset, data ) {
 	if ( this.mainboard.cart.memoryMapper.MMC2Latch ) {
 		this.mainboard.cart.memoryMapper.MMC2Latch( this.ppuReadAddress );
 	}
-	
+
 	//Nes.Trace.writeLine( 'ppu', '2007 write: ' + data.toString( 16 ) );
 };
 
@@ -506,7 +491,7 @@ ppu.prototype._readFromRegister2002 = function() {
 		// }
 		// this._bitOperationOn2002 = false;
 	// }
-	
+
 	var ret = this.status;
 	//console.log( "0x2002 read : " + Number( ret ) + " status: " + Number( this.status ) );
 	this.ppuSecondAddressWrite = false; // reset latch on read to 0x2002
@@ -622,7 +607,7 @@ ppu.prototype.read8 = function( offset, renderingSprites, readType ) {
 	var pagepos = 0;
 	var paletteOffset = 0;
 	var targetPalette = 0;
-	
+
 	if ( ( offset & 0x2000 ) === 0 ) { // IS_INT_BETWEEN( offset, 0, 0x2000 )
 		// pattern tables
 		return this.mainboard.cart.memoryMapper.read8ChrRom( offset & 0x1FFF, renderingSprites, readType ) | 0;
@@ -656,7 +641,7 @@ ppu.prototype.synchronise = function( startTicks, endTicks ) {
 
 
 ppu.prototype.onEndFrame = function() {
-	
+
 	// start vblank period
 	if ( !this.suppressVblank )
 	{
@@ -676,7 +661,7 @@ ppu.prototype.onEndFrame = function() {
 	this.frameCounter++;
 	this._ppuRenderBg.onEndFrame();
 	this._ppuRenderSprites.onEndFrame();
-	
+
 	if ( Nes.Trace.enabled() ) {
 		Nes.Trace.writeLine( Nes.trace_ppu, '[' + this.frameCounter + '] Frame finished' );
 	}
@@ -712,25 +697,25 @@ ppu.prototype.formatStatusString = function() {
 
 
 ppu.prototype.saveState = function() {
-	
+
 	var data = {};
 	data.mirroringMethod = this.mirroringMethod;
 	data.isOddFrame = this.isOddFrame;
 	data.suppressNmi = this.suppressNmi;
 	data.suppressVblank = this.suppressVblank;
 	data.forceNmi = this.forceNmi;
-	
+
 	data.control1 = this.control1;
 	data.control2 = this.control2;
 	data.status = this.status;
-	
+
 	data.bufferedppuread = this.bufferedppuread;
 	data.ppuReadAddress = this.ppuReadAddress;
 	data.ppuLatchAddress = this.ppuLatchAddress;
-	
+
 	data.spriteaddress = this.spriteaddress;
 	data.ppuSecondAddressWrite = this.ppuSecondAddressWrite;
-	
+
 	data.fineX = this.fineX;
 
 	data.lastTransferredValue = this.lastTransferredValue;
@@ -739,7 +724,7 @@ ppu.prototype.saveState = function() {
 
 	data.doSpriteTransferAfterNextCpuInstruction = this.doSpriteTransferAfterNextCpuInstruction;
 	data.spriteTransferArgument = this.spriteTransferArgument;
-	
+
 	data.spriteMemory = Nes.uintArrayToString( this.spriteMemory );
 	data.nameTables = [];
 	for ( var i=0; i<this.nameTables.length; ++i ) {
@@ -750,7 +735,7 @@ ppu.prototype.saveState = function() {
 		data.paletteTables.push( Nes.uintArrayToString( this.paletteTables[i] ) );
 	}
 	data.nameTablesMap = Nes.uintArrayToString( this.nameTablesMap );
-	
+
 	this._ppuRenderBg.saveState( data );
 	this._ppuRenderSprites.saveState( data );
 	return data;
@@ -763,27 +748,27 @@ ppu.prototype.loadState = function( state ) {
 	this.suppressNmi = state.suppressNmi;
 	this.suppressVblank = state.suppressVblank;
 	this.forceNmi = state.forceNmi;
-	
+
 	this.control1 = state.control1;
 	this.control2 = state.control2;
 	this.status = state.status;
-	
+
 	this.bufferedppuread = state.bufferedppuread;
 	this.ppuReadAddress = state.ppuReadAddress;
 	this.ppuLatchAddress = state.ppuLatchAddress;
-	
+
 	this.spriteaddress = state.spriteaddress;
 	this.ppuSecondAddressWrite = state.ppuSecondAddressWrite;
-	
+
 	this.fineX = state.fineX;
 
 	this.lastTransferredValue = state.lastTransferredValue;
 	this.frameCounter = state.frameCounter;
-	
+
 	this.doSpriteTransferAfterNextCpuInstruction = state.doSpriteTransferAfterNextCpuInstruction;
 	this.spriteTransferArgument = state.spriteTransferArgument;
 	this._invokeA12Latch = state._invokeA12Latch;
-	
+
 	this.spriteMemory = Nes.stringToUintArray( state.spriteMemory );
 	this.nameTables = [];
 	for ( var i=0; i<state.nameTables.length; ++i ) {
@@ -794,7 +779,7 @@ ppu.prototype.loadState = function( state ) {
 		this.paletteTables.push( Nes.stringToUintArray( state.paletteTables[i] ) );
 	}
 	this.nameTablesMap = Nes.stringToUintArray( state.nameTablesMap );
-	
+
 	this._ppuRenderBg.loadState( state );
 	this._ppuRenderSprites.loadState( state );
 };

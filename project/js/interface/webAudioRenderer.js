@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Gui = this.Gui || {};
 
@@ -28,7 +13,7 @@ var WebAudioBuffer = function( audioContext, masterVolNode, size ) {
 	this.audioNode = null;
 	this._gainNode = this.audioContext['createGain']();
 	this._gainNode['connect']( masterVolNode );
-	
+
 	this.audioBuffer = this.audioContext['createBuffer']( 1, size, this.audioContext['sampleRate'] );
 
 };
@@ -44,7 +29,7 @@ WebAudioBuffer.prototype.lockBuffer = function() {
 WebAudioBuffer.prototype.unlockBuffer = function() {
 
 	this._locked = false;
-	
+
 	// Alternative method using audio node buffer instead of onaudioprocess
 	if ( this.audioNode ) {
 		 this.audioNode['disconnect']();
@@ -52,7 +37,7 @@ WebAudioBuffer.prototype.unlockBuffer = function() {
 	}
 	this.audioNode = this.audioContext['createBufferSource']();
 	this.audioNode['buffer'] = this.audioBuffer;
-	
+
 	this.audioNode['connect'](this._gainNode);
 	this.audioNode['start'](0);
 };

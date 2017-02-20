@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
@@ -118,18 +103,18 @@ PpuRenderBg.prototype._renderTile = function( ppuReadAddress, tilenum, posy, cli
 	}
 
 	//Nes.Trace.writeLine( 'ppu', 'Tile rendered pos: ' + tilenum + ' tileid: ' + tileNumber + ' h=' + htile + ' v=' + vtile + ' ppuAddress=' + ppuReadAddress.toString( 16 ) );
-	
+
 	// pattern table reads
 	var firstByte = this.ppu.read8( tileAddress, false, 2 );
 	var secondByte = this.ppu.read8( tileAddress + 8, false, 3 );
-	
+
 	if ( this._useMMC2Latch ) {
 		this.ppu.mainboard.cart.memoryMapper.MMC2Latch( tileAddress + 8 );
 	}
-	
+
 	// render tiles from right-most pixel first - allows us to shift the first & second pattern table byte to get the palette
 	// index we want.
-	
+
 	var startPixel = baseindex - this.ppu.fineX;
 	var endPixel = startPixel + 7;
 	var realStartPixel = Math.max( startPixel, 0 );
@@ -141,7 +126,7 @@ PpuRenderBg.prototype._renderTile = function( ppuReadAddress, tilenum, posy, cli
 	{
 		paletteIndex = ( firstByte & byteMask ) > 0 ? 0x1 : 0;
 		paletteIndex |= ( secondByte & byteMask ) > 0 ? 0x2 : 0;
-		
+
 		byteMask >>= 1;
 
 		if ( x >= startXRendering && x < SCREEN_WIDTH ) {
@@ -150,9 +135,9 @@ PpuRenderBg.prototype._renderTile = function( ppuReadAddress, tilenum, posy, cli
 
 				if ( ( paletteIndex & 0x3 ) === 0 )
 					paletteIndex = 0;
-					
+
 				if ( this._renderBuffer.renderPixel( x, renderScanline, TYPED_ARRAY_GET_INT32( this.ppu.paletteTables[ 0 ], paletteIndex & 0xF ) | 0 ) ) {
-					
+
 					// Sprite zero hit - will happen in the future as this is the prefetch
 					if ( !this._spriteZeroHit ) {
 						triggerTime = this.ppu.screenCoordinatesToTicks( x, renderScanline );
@@ -197,7 +182,7 @@ PpuRenderBg.prototype._incrementY = function( ppuReadAddress ) {
 
 		if ((ppuReadAddress & 0x03E0) === 0x03A0) {
 			// wrap tile y and switch name table bit 11, if tile y is 29
-			ppuReadAddress ^= 0x0800; 
+			ppuReadAddress ^= 0x0800;
 			ppuReadAddress &= 0xFC1F;
 		} else if ((ppuReadAddress & 0x03E0) === 0x03E0) {
 			// wrap tile y if it is 31
@@ -208,7 +193,7 @@ PpuRenderBg.prototype._incrementY = function( ppuReadAddress ) {
 		}
 	} else {
 		// increment tile y offset
-		ppuReadAddress += 0x1000; 
+		ppuReadAddress += 0x1000;
 	}
 	return ppuReadAddress;
 };
@@ -267,12 +252,12 @@ PpuRenderBg.prototype.renderTo = function( startTicks, endTicks, ppuReadAddress,
 	ticksAtFirstScanline = startTicks - ticksInFirstLine;
 	ticksAtFirstRenderingScanline = ticksAtFirstScanline - MASTER_CYCLES_PER_SCANLINE + ( SecondLastTileReloadTime * MASTER_CYCLES_PER_PPU );
 	ticksAtFirstRenderingScanlineEnd = ticksAtFirstRenderingScanline + MASTER_CYCLES_PER_SCANLINE; // ( 34 * 8 * MASTER_CYCLES_PER_PPU );
-	
+
 	while ( ticksAtFirstRenderingScanlineEnd < startTicks || ticksAtFirstRenderingScanline < backgroundRenderingStart ) {
 		ticksAtFirstRenderingScanline += MASTER_CYCLES_PER_SCANLINE;
 		ticksAtFirstRenderingScanlineEnd += MASTER_CYCLES_PER_SCANLINE;
 	}
-		
+
 	if ( backgroundScrollReloadTime > startTicks && backgroundScrollReloadTime <= endTicks ) {
 		// reset ppu address on cycle 304 of pre-render scanline
 		ppuReadAddress = (ppuReadAddress & 0x41F) | (ppuLatchAddress & 0x7BE0);
@@ -289,16 +274,16 @@ PpuRenderBg.prototype.renderTo = function( startTicks, endTicks, ppuReadAddress,
 		reloadTime = scanlineStart + XReloadTimeRendering;
 
 		for ( tilenum=0; tilenum<backgroundTileCount; ++tilenum ) {
-		
+
 			tileTickPosition = scanlineStart + ( tilenum * 8 * MASTER_CYCLES_PER_PPU );
-							
+
 			if ( tileTickPosition > endTicks || tileTickPosition > backgroundRenderingEnd ) {
 				break;
 			}
 			if ( tileTickPosition <= startTicks ) {
 				continue;
 			}
-			
+
 			if ( backgroundRenderingEnabled ) {
 				this._renderTile( ppuReadAddress, tilenum, scanline, clippingEnabled );
 			}
@@ -314,7 +299,7 @@ PpuRenderBg.prototype.renderTo = function( startTicks, endTicks, ppuReadAddress,
 		if ( reloadTime < backgroundRenderingEnd && reloadTime > startTicks && reloadTime <= endTicks ) {
 			ppuReadAddress = (ppuReadAddress & 0xFBE0) | (ppuLatchAddress & 0x041F);
 		}
-		
+
 		scanlineStart += MASTER_CYCLES_PER_SCANLINE;
 		scanline++;
 	}

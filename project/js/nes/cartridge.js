@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
@@ -91,7 +76,7 @@ cartridge.prototype._getMapperFromDatabase = function( mapperIdFromInes ) {
 		if ( foundInesMapper ) {
 			return mapperIdFromInes;
 		}
-		
+
 		// iNes mapper was not found in DB - use the most likely mapper ID found
 		var mostFrequentMapperId = getHighestFrequencyElement( mapperIdFrequency );
 		if ( mostFrequentMapperId !== null ) {
@@ -117,12 +102,12 @@ cartridge.prototype._workOutColourEncodingFromFilename = function( filename ) {
 
 
 cartridge.prototype._determineColourEncodingType = function( filename ) {
-	
-	// look in database	
+
+	// look in database
 	var stringStartsWith = function( str, test ) {
 		return str.slice( 0, test.length ) === test;
 	};
-	
+
 	var systemFrequency = {};
 	if ( this._dbData && this._dbData['cartridge'] ) {
 		this._dbData['cartridge'].forEach( function( cart ) {
@@ -138,14 +123,14 @@ cartridge.prototype._determineColourEncodingType = function( filename ) {
 				}
 			}
 		} );
-		
+
 		var mostFrequentType = getHighestFrequencyElement( systemFrequency );
 		if ( mostFrequentType !== null ) {
 			this._colourEncodingType = mostFrequentType;
 			return;
 		}
 	}
-	
+
 	this._colourEncodingType = this._workOutColourEncodingFromFilename( filename );
 };
 
@@ -174,10 +159,10 @@ cartridge.prototype._loadData = function( name, binaryString, completeCallback )
 	var that = this;
 	try {
 		this._name = name;
-		
+
 		var stringIndex = 0;
 		var correctHeader = [ 78, 69, 83, 26 ];
-		
+
 		for ( var i=0; i<correctHeader.length; ++i )
 		{
 			if ( correctHeader[ i ] !== binaryString[ stringIndex++ ] )
@@ -188,16 +173,16 @@ cartridge.prototype._loadData = function( name, binaryString, completeCallback )
 		var chrPageCount = binaryString[ stringIndex++ ];
 		var controlByte1 = binaryString[ stringIndex++ ];
 		var controlByte2 = binaryString[ stringIndex++ ];
-		
+
 		if ( prgPageCount === 0 ) {
 			prgPageCount = 1; // 0 means 1
 		}
-		
+
 		var horizontalMirroring = (controlByte1 & 0x01) === 0;
 		var sramEnabled = (controlByte1 & 0x02) > 0;
 		var hasTrainer = (controlByte1 & 0x04) > 0;
 		var fourScreenRamLayout = (controlByte1 & 0x08) > 0;
-		
+
 		var mirroringMethod = 0;
 		if ( fourScreenRamLayout )
 			mirroringMethod = PPU_MIRRORING_FOURSCREEN;
@@ -205,7 +190,7 @@ cartridge.prototype._loadData = function( name, binaryString, completeCallback )
 			mirroringMethod = PPU_MIRRORING_VERTICAL;
 		else
 			mirroringMethod = PPU_MIRRORING_HORIZONTAL;
-			
+
 		var mapperId = ( (controlByte1 & 0xF0) >> 4 ) | (controlByte2 & 0xF0);
 
 		stringIndex = 16;
@@ -213,9 +198,9 @@ cartridge.prototype._loadData = function( name, binaryString, completeCallback )
 			stringIndex += 512;
 
 		// calculate SHA1 on PRG and CHR data, look it up in the db, then load it
-		this._sha1 = Nes.calculateSha1( binaryString, stringIndex );			
+		this._sha1 = Nes.calculateSha1( binaryString, stringIndex );
 		console.log( "SHA1: " + this._sha1 );
-	
+
 		Nes.dbLookup( this._sha1, function( err, data ) {
 			if ( err ) {
 				completeCallback( err );
@@ -230,7 +215,7 @@ cartridge.prototype._loadData = function( name, binaryString, completeCallback )
 				} else {
 					console.log( "Game not found in database" );
 				}
-			
+
 				var mapperFromDb = that._getMapperFromDatabase( mapperId );
 
 				if ( mapperFromDb !== null && mapperFromDb !== mapperId ) {
@@ -239,26 +224,26 @@ cartridge.prototype._loadData = function( name, binaryString, completeCallback )
 				}
 
 				that.memoryMapper = Nes.createMapper( mapperId, that.mainboard, mirroringMethod );
-				
+
 				// read in program code
 				var prg8kChunkCount = prgPageCount * 2; // read in 8k chunks, prgPageCount is 16k chunks
 				var prgSize = 0x2000 * prg8kChunkCount;
 				that.memoryMapper.setPrgData( create32IntArray( binaryString.subarray( stringIndex, stringIndex + prgSize ), prgSize ), prg8kChunkCount );
 				stringIndex += prgSize;
-				
+
 				// read in character maps
 				var chr1kChunkCount = chrPageCount * 8; // 1kb per pattern table, chrPageCount is the 8kb count
 				var chrSize = 0x400 * chr1kChunkCount;
 				that.memoryMapper.setChrData( create32IntArray( binaryString.subarray( stringIndex, stringIndex + chrSize ), chrSize ), chr1kChunkCount );
 				stringIndex += chrSize;
-				
+
 				// determine NTSC or PAL
 				that._determineColourEncodingType( name );
 				setColourEncodingType( that._colourEncodingType );
 				var prgKb = prg8kChunkCount * 8;
 				console.log( 'Cartridge \'' + name + '\' loaded. Mapper ' + mapperId + ', ' + Nes.mirroringMethodToString( mirroringMethod ) + ' mirroring, ' + prgKb + 'kb PRG, ' + chr1kChunkCount + 'kb CHR' );
 				console.log( 'Encoding: ' + that._colourEncodingType );
-				
+
 				completeCallback();
 			}
 			catch ( err2 ) {

@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
@@ -38,17 +23,17 @@ mapper41.prototype.reset = function() {
 mapper41.prototype.write8SRam = function( offset, data ) {
 
 	if ( ( offset & 0xF800 ) === 0x6000 ) {
-		
+
 		this.mainboard.synchroniser.synchronise();
 		this._prgBank = offset & 0x7;
 		this._chrOuter = ( offset & 0x18 ) >> 1;
-		
+
 		if ( ( offset & 0x20 ) === 0 ) {
 			this.mainboard.ppu.changeMirroringMethod( PPU_MIRRORING_VERTICAL );
 		} else {
 			this.mainboard.ppu.changeMirroringMethod( PPU_MIRRORING_HORIZONTAL );
 		}
-		
+
 		this._sync();
 	}
 };
