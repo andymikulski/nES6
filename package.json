@@ -16,7 +16,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "babel src -d app --watch & webpack app/main.js app/webnes.js --config ./webpack.config.js --watch",
     "server": "cd app && python -m SimpleHTTPServer 8000 & cd ..",
-    "dev": "npm run watch & npm run server"
+    "dev": "npm run watch & npm run server",
+    "build": "babel src -d app && webpack app/main.js app/webnes.js --config ./webpack.build.config.js"
   },
   "devDependencies": {
     "babel-cli": "6.23.0",

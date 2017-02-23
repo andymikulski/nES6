@@ -124,19 +124,9 @@ var NES = function () {
       this._options.triggerFrameRenderedEvent = this._options.triggerFrameRenderedEvent === undefined ? false : this._options.triggerFrameRenderedEvent;
       this._options.createGuiComponents = !!this._options.createGuiComponents;
 
-      var that = this;
-
-      // window.addEventListener('contextmenu', function(event) {
-      //   event.preventDefault();
-      // }, false);
-      //
-      //
-
       this._fpsMeter = new _stats2.default();
       this._fpsMeter.showPanel(1);
       document.body.appendChild(this._fpsMeter.dom);
-      // this._fpsMeter.hide();
-
 
       this._canvasParent = new _CanvasParent2.default();
       this._renderSurface = null;
@@ -148,17 +138,7 @@ var NES = function () {
 
       this._mainboard = new _Mainboard2.default(this._renderSurface);
       this._mainboard.connect('reset', this._onReset.bind(this));
-
-      // if (this._options.createGuiComponents) {
-      // this._ggDialog = new Gui.GameGenieDialog(this);
-      // this._controlBar = new Gui.ControlBar(this);
-      // this._controlBar.connect('romLoaded', function(name, binaryString) {
-      // that._loadRomCallback(name, binaryString);
-      // });
-      // this._keyboardRemapDialog = new Gui.KeyboardRemapper(this);
-      // }
       this._input = new _Input2.default(this._mainboard);
-
       this._stateManager = new _StateManager2.default(this, this._options.createGuiComponents);
 
       this.animate();
@@ -287,8 +267,6 @@ var NES = function () {
   }, {
     key: '_animate',
     value: function _animate() {
-      var that = this;
-
       if (this._fpsMeter) {
         this._fpsMeter.begin();
       }
@@ -304,43 +282,24 @@ var NES = function () {
         this._eventBus.invoke('cartLoaded', this._cart);
       }
 
-      if (this._encodingTypeToSet.length > 0) {
-        setColourEncodingType(this._encodingTypeToSet);
-        this._encodingTypeToSet = '';
-      }
-
       if (this._isPaused) {
+        if (this._fpsMeter) {
+          this._fpsMeter.end();
+        }
         setTimeout(this.animate, 300);
         return;
       }
 
-      if (this._readyToRender()) {
-
-        if (this._input) {
-          this._input.poll();
-        }
-
-        var bgColour = this._mainboard.renderBuffer.pickColour(this._mainboard.ppu.getBackgroundPaletteIndex());
-        this._renderSurface.clearBuffers(bgColour);
-        this._mainboard.renderBuffer.clearBuffer();
-
-        this._mainboard.doFrame();
-        this._renderSurface.render(this._mainboard);
-
-        if (this._options.triggerFrameRenderedEvent) {
-          this._eventBus.invoke('frameRendered', this._renderSurface, this._mainboard.ppu.frameCounter);
-        }
+      if (this._input) {
+        this._input.poll();
       }
 
-      if (this._pauseNextFrame) {
-        this._pauseNextFrame = false;
-        this.pause(true);
-      }
+      var bgColour = this._mainboard.renderBuffer.pickColour(this._mainboard.ppu.getBackgroundPaletteIndex());
+      this._renderSurface.clearBuffers(bgColour);
+      this._mainboard.renderBuffer.clearBuffer();
 
-      if (this._pauseOnFrame >= 0 && this._pauseOnFrame === this._mainboard.ppu.frameCounter) {
-        this._pauseOnFrame = -1;
-        this.pause(true);
-      }
+      this._mainboard.doFrame();
+      this._renderSurface.render(this._mainboard);
 
       this._stateManager.onFrame();
 
@@ -348,7 +307,7 @@ var NES = function () {
         this._fpsMeter.end();
       }
 
-      setImmediate(this.animate);
+      requestAnimationFrame(this.animate);
     }
   }, {
     key: '_doRomLoad',

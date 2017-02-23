@@ -249,8 +249,6 @@ export class OrthoCamera {
 	}
 }
 
-
-
 export function getGlContext( canvas ) {
 	return canvas.getContext("webgl") || canvas.getContext("experimental-webgl")
 }
