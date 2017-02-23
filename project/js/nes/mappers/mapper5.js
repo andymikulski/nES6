@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
@@ -27,7 +12,7 @@ this.Nes = this.Nes || {};
 var mapper5 = function() {
 
 	this.mRenderingEnabled = false;
-	
+
 	this._chrMode = 0;
 	this._prgMode = 0;
 	this._exRamMode = 0;
@@ -37,7 +22,7 @@ var mapper5 = function() {
 	this._prgRam = new Int32Array( 0x10000 ); // 64kb
 	this._prgRamPage = 0;
 	this._bigSpritesEnabled = false;
-	
+
 	this._writeProtectA = false;
 	this._writeProtectB = false;
 	this._currentScanline = 0;
@@ -47,11 +32,11 @@ var mapper5 = function() {
 	this._triggerMtc = -1;
 	this._multiplier1 = 0;
 	this._multiplier2 = 0;
-	
-	this._prgRamMap = new Int32Array( 4 ); // 8k ram banks that map to 0x8000 -> 0x10000 
+
+	this._prgRamMap = new Int32Array( 4 ); // 8k ram banks that map to 0x8000 -> 0x10000
 	this._prgRamIsActive = new Int32Array( 4 );
 	this._nameTableMap = new Int32Array( 4 );
-	
+
 	this._chrRegsA = new Int32Array( 8 );
 	this._chrRegsB = new Int32Array( 4 );
 	this._chrUseBMap = false;
@@ -63,20 +48,20 @@ var mapper5 = function() {
 mapper5.prototype = Object.create( Nes.basemapper.prototype );
 
 mapper5.prototype.mapperSaveState = function( state ) {
-	
+
 	state.mRenderingEnabled = this.mRenderingEnabled;
 	state._chrMode = this._chrMode;
 	state._prgMode = this._prgMode;
 	state._exRamMode = this._exRamMode;
-	
+
 	state._prgRegisters = Nes.uintArrayToString( this._prgRegisters );
 	state._nameTableFill = Nes.uintArrayToString( this._nameTableFill );
 	state._internalExRam = Nes.uintArrayToString( this._internalExRam );
 	state._prgRam = Nes.uintArrayToString( this._prgRam );
-	
+
 	state._prgRamPage = this._prgRamPage;
 	state._bigSpritesEnabled = this._bigSpritesEnabled;
-	
+
 	state._writeProtectA = this._writeProtectA;
 	state._writeProtectB = this._writeProtectB;
 	state._currentScanline = this._currentScanline;
@@ -86,14 +71,14 @@ mapper5.prototype.mapperSaveState = function( state ) {
 	state._triggerMtc = this._triggerMtc;
 	state._multiplier1 = this._multiplier1;
 	state._multiplier2 = this._multiplier2;
-	
+
 	state._prgRamMap = Nes.uintArrayToString( this._prgRamMap );
 	state._prgRamIsActive = Nes.uintArrayToString( this._prgRamIsActive );
 	state._nameTableMap = Nes.uintArrayToString( this._nameTableMap );
-	
+
 	state._chrRegsA = Nes.uintArrayToString( this._chrRegsA );
 	state._chrRegsB = Nes.uintArrayToString( this._chrRegsB );
-	
+
 	state._chrUseBMap = this._chrUseBMap;
 	state._chrMapA = Nes.uintArrayToString( this._chrMapA );
 	state._chrMapB = Nes.uintArrayToString( this._chrMapB );
@@ -101,20 +86,20 @@ mapper5.prototype.mapperSaveState = function( state ) {
 };
 
 mapper5.prototype.mapperLoadState = function( state ) {
-	
+
 	this.mRenderingEnabled = state.mRenderingEnabled;
 	this._chrMode = state._chrMode;
 	this._prgMode = state._prgMode;
 	this._exRamMode = state._exRamMode;
-	
+
 	this._prgRegisters = Nes.stringToUintArray( state._prgRegisters );
 	this._nameTableFill = Nes.stringToUintArray( state._nameTableFill );
 	this._internalExRam = Nes.stringToUintArray( state._internalExRam );
 	this._prgRam = Nes.stringToUintArray( state._prgRam );
-	
+
 	this._prgRamPage = state._prgRamPage;
 	this._bigSpritesEnabled = state._bigSpritesEnabled;
-	
+
 	this._writeProtectA = state._writeProtectA;
 	this._writeProtectB = state._writeProtectB;
 	this._currentScanline = state._currentScanline;
@@ -124,14 +109,14 @@ mapper5.prototype.mapperLoadState = function( state ) {
 	this._triggerMtc = state._triggerMtc;
 	this._multiplier1 = state._multiplier1;
 	this._multiplier2 = state._multiplier2;
-	
+
 	this._prgRamMap = Nes.stringToUintArray( state._prgRamMap );
 	this._prgRamIsActive = Nes.stringToUintArray( state._prgRamIsActive );
 	this._nameTableMap = Nes.stringToUintArray( state._nameTableMap );
-	
+
 	this._chrRegsA = Nes.stringToUintArray( state._chrRegsA );
 	this._chrRegsB = Nes.stringToUintArray( state._chrRegsB );
-	
+
 	this._chrUseBMap = state._chrUseBMap;
 	this._chrMapA = Nes.stringToUintArray( state._chrMapA );
 	this._chrMapB = Nes.stringToUintArray( state._chrMapB );
@@ -158,7 +143,7 @@ mapper5.prototype.reset = function() {
 	this._triggerMtc = -1;
 	this._chrUseBMap = false;
 	this._bigSpritesEnabled = false;
-	
+
 	for ( var i=0; i<this._prgRamMap.length; ++i ) {
 		this._prgRamMap[i] = 0;
 		this._prgRamIsActive[i] = 0;
@@ -166,7 +151,7 @@ mapper5.prototype.reset = function() {
 	for ( var i=0; i<this._nameTableMap.length; ++i ) {
 		this._nameTableMap[i] = 0;
 	}
-	
+
 	for ( var i=0; i<this._prgRegisters.length; ++i ) {
 		this._prgRegisters[ i ] = this.get8kPrgBankCount() - 4 + i;
 	}
@@ -185,9 +170,9 @@ mapper5.prototype.reset = function() {
 	this._syncPrg();
 	this._syncChr();
 	this.switch8kChrBank( 0 );
-	
+
 	this.mainboard.ppu.changeMirroringMethod( this.mirroringMethod );
-	
+
 	// TODO: Need to remove this event on mapper unload
 	var that = this;
 	this._irqEventId = this.mainboard.synchroniser.addEvent( 'mmc5 irq', -1, function( eventTime ) { that._irqEvent( eventTime ); } );
@@ -210,12 +195,12 @@ mapper5.prototype._irqEvent = function( eventTime ) {
 mapper5.prototype._syncPrg = function() {
 
 	this.mainboard.synchroniser.synchronise();
-			
+
 	for ( var i=0; i<this._prgRamMap.length; ++i ) {
 		this._prgRamMap[i] = 0;
 		this._prgRamIsActive[i] = 0;
 	}
-	
+
 	switch ( this._prgMode ) {
 		default:
 		case 0:
@@ -238,7 +223,7 @@ mapper5.prototype._syncPrg = function() {
 		case 2:
 			// 8k bank at 0xE000
 			this.switch8kPrgBank( ( this._prgRegisters[3] & 0x7f ), 3 );
-			
+
 			// 8k bank at 0xC000
 			if ( ( this._prgRegisters[ 2 ] & 0x80 ) === 0 ) {
 				this._prgRamIsActive[ 2 ] = 1;
@@ -246,7 +231,7 @@ mapper5.prototype._syncPrg = function() {
 			} else {
 				this.switch8kPrgBank( ( this._prgRegisters[2] & 0x7f ), 2 );
 			}
-			
+
 			// 16k bank at 0x8000
 			if ( ( this._prgRegisters[ 1 ] & 0x80 ) === 0 ) {
 				this._prgRamIsActive[ 0 ] = 1;
@@ -287,7 +272,7 @@ mapper5.prototype._syncPrg = function() {
 
 
 mapper5.prototype._chrBank = function( chrMap, banksize, bankpos, banknum ) {
-	
+
 	for ( var i=0; i<banksize; ++i ) {
 		chrMap[ i + bankpos ] = ( banknum + i ) % this.get1kChrBankCount();
 	}
@@ -366,7 +351,7 @@ mapper5.prototype._predictIrq = function( cpuMTC ) {
 		}
 		return;
 	}
-	
+
 	if ( this._triggerMtc !== -1 ) {
 		this._triggerMtc = -1;
 		this.mainboard.synchroniser.changeEventTime( this._irqEventId, -1 );
@@ -518,7 +503,7 @@ mapper5.prototype.write8EXRam = function( offset, data ) {
 		this._multiplier2 = data;
 	break;
 	}
-	
+
 	if ( offset >= 0x5C00 ) {
 		// TODO: Remove synchronise and work out isRendering by mtc
 		this.mainboard.synchroniser.synchronise();
@@ -534,7 +519,7 @@ mapper5.prototype.write8EXRam = function( offset, data ) {
 			this._internalExRam[ offset - 0x5C00 ] = data;
 		}
 	}
-	
+
 	//Nes.basemapper.prototype.write8EXRam.call( this, offset, data );
 };
 
@@ -563,13 +548,13 @@ mapper5.prototype.read8EXRam = function( offset ) {
 		return ((this._multiplier1 * this._multiplier2) >> 8) & 0xff;
 	break;
 	}
-	
+
 	if ( offset >= 0x5C00 ) {
 		if ( this._exRamMode === 2 || this._exRamMode === 3 ) {
 			return this._internalExRam[ offset - 0x5C00 ];
 		}
 	}
-	
+
 	return 0; // supposed to be open bus
 };
 
@@ -601,12 +586,12 @@ mapper5.prototype.read8ChrRom = function( offset, renderingSprites, readType ) {
 		return TYPED_ARRAY_GET_INT32( this._chrData, chrOffset );
 	}/* else {
 		if ( this._exRamMode === 1 ) {
-			
+
 		}
 	}*/
-	
+
 	var useMapB = false;
-	
+
 	if ( this._bigSpritesEnabled ) {
 		useMapB = !renderingSprites;
 	} else {
@@ -660,7 +645,7 @@ mapper5.prototype.nameTableWrite = function( nameTables, pageId, pageOffset, dat
 };
 
 mapper5.prototype.spriteSizeChanged = function( bigSprites ) {
-	
+
 	this._bigSpritesEnabled = bigSprites;
 };
 

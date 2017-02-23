@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
@@ -59,7 +44,7 @@ and not at every 4 pixels like the NTSC 2C02
 technical document describes.
 */
 var spriteEvaluationStart = 64;
-	
+
 var isRangeOverlapping = function( a1, a2, b1, b2 ) {
 	// http://stackoverflow.com/questions/3269434/whats-the-most-efficient-way-to-test-two-integer-ranges-for-overlap
 	return a2 >= b1 && a1 <= b2;
@@ -77,7 +62,7 @@ PpuRenderSprites.prototype._renderSprite = function( spriteHeight, spritenum, st
 	var behindBackground = ( attribs & 0x20 ) > 0;
 	var flipHorz = ( attribs & 0x40 ) > 0;
 	var flipVert = ( attribs & 0x80 ) > 0;
-	
+
 	var renderScanlineStart = Math.max( spritey, startline );
 	var renderScanlineEnd = Math.min( spritey + spriteHeight - 1, endline );
 	var ppuAddress = 0;
@@ -123,7 +108,7 @@ PpuRenderSprites.prototype._renderSprite = function( spriteHeight, spritenum, st
 		firstByte = this.ppu.read8( ppuAddress, true, 0 );
 		secondByte = this.ppu.read8( ppuAddress + 8, true, 0 );
 		paletteMergeByte = (attribs & 3) << 2;
-		
+
 		if ( this._useMMC2Latch ) {
 			this.ppu.mainboard.cart.memoryMapper.MMC2Latch( ppuAddress + 8 );
 		}
@@ -139,9 +124,9 @@ PpuRenderSprites.prototype._renderSprite = function( spriteHeight, spritenum, st
 			if ( absx > 255 ) {
 				break;
 			}
-		
+
 			mask = 0x80 >> ( flipHorz ? 7 - x : x );
-				
+
 			// get 2 lower bits from the pattern table for the colour index
 			var paletteindex = ( firstByte & mask ) > 0 ? 1 : 0; // first bit
 			paletteindex |= ( secondByte & mask ) > 0 ? 2 : 0; // second bit
@@ -151,7 +136,7 @@ PpuRenderSprites.prototype._renderSprite = function( spriteHeight, spritenum, st
 				paletteindex |= paletteMergeByte;
 				this.ppu.mainboard.renderBuffer.renderSpritePixel( spritenum, behindBackground, absx, scanline, TYPED_ARRAY_GET_INT32( this.ppu.paletteTables[ 1 ], paletteindex & 0xF ) | 0 );
 			}
-							
+
 		//	if ( this.ppu.mainboard.debuggingEnabled ) {
 		//		this.ppu.mainboard.renderBuffer.renderSpritePixelDebug( spritenum, absx, scanline );
 		//	}
@@ -159,7 +144,7 @@ PpuRenderSprites.prototype._renderSprite = function( spriteHeight, spritenum, st
 	}
 };
 
-	
+
 //*** Cycles 0-63: Secondary OAM (32-byte buffer for current sprites on scanline) is initialized to $FF - attempting to read $2004 will return $FF
 //*** Cycles 64-255: Sprite evaluation
 //* On even cycles, data is read from (primary) OAM
@@ -187,7 +172,7 @@ PpuRenderSprites.prototype.renderTo = function( startTicks, endTicks ) {
 	// Further optimisations can be made: Keep list of visible sprites, update on memory changes -
 	// don't need to iterate over 64 of them each time then
 	// (dont think this'll work as you need to go over 64 sprites anyway for overflow check)
-	
+
 	var firstSpriteEvaluation = this.ppu.screenCoordinatesToTicks( spriteEvaluationStart-1, -1 );
 	var lastSpriteEvaluation = this.ppu.screenCoordinatesToTicks( spriteEvaluationStart, 238 );
 	var spritesVisible = ( this.ppu.control2 & 0x10 ) > 0 /*ppuControl2.spritesVisible*/;
@@ -201,7 +186,7 @@ PpuRenderSprites.prototype.renderTo = function( startTicks, endTicks ) {
 	var spritenum = 0;
 	var spritey = 0;
 	var that = this;
-	
+
 	if ( !spritesVisible ) {
 		return;
 	}
@@ -212,7 +197,7 @@ PpuRenderSprites.prototype.renderTo = function( startTicks, endTicks ) {
 	if ( endTicks > lastSpriteEvaluation ) {
 		endTicks = lastSpriteEvaluation;
 	}
-	
+
 	if ( endTicks <= startTicks ) {
 		return;
 	}
@@ -221,11 +206,11 @@ PpuRenderSprites.prototype.renderTo = function( startTicks, endTicks ) {
 	while ( nextSpriteEval <= startTicks ) {
 		nextSpriteEval += MASTER_CYCLES_PER_SCANLINE;
 	}
-	
+
 	if ( nextSpriteEval > endTicks ) {
 		return; // not yet time for the next evaluation period
 	}
-	
+
 	startline = this.ppu.ticksToScreenCoordinates( nextSpriteEval ).y + 1;
 	endline = startline;
 	while ( nextSpriteEval <= endTicks ) {
@@ -233,7 +218,7 @@ PpuRenderSprites.prototype.renderTo = function( startTicks, endTicks ) {
 		endline++;
 	}
 	endline = Math.min( endline, 239 );
-	
+
 //		Nes.Trace.writeLine( 'ppu', 'sprite sync=' + JSON.stringify( this.ppu.ticksToScreenCoordinates( startTicks ) ) + ' end=' + JSON.stringify( this.ppu.ticksToScreenCoordinates( endTicks ) ) + ' startline=' + startline + ' endline=' + endline );
 
 	// check each sprite to see which fall within the area to check.
@@ -255,7 +240,7 @@ PpuRenderSprites.prototype.renderTo = function( startTicks, endTicks ) {
 					// // var ticksWhenToSetOverflow = ( (scanline + COLOUR_ENCODING_VBLANK_SCANLINES) * PPU_TICKS_PER_SCANLINE * MASTER_CYCLES_PER_PPU );
 					// // ticksWhenToSetOverflow += ( 64 * MASTER_CYCLES_PER_PPU );
 					// // ticksWhenToSetOverflow += ( spritenum * 2 * MASTER_CYCLES_PER_PPU ) + ( 8 * 6 * MASTER_CYCLES_PER_PPU );
-					
+
 					// // this._overflowSet = true;
 					// // this.ppu.mainboard.synchroniser.addEvent( 'ppu sprite overflow', ticksWhenToSetOverflow, function( eventTime ) { that.ppu._eventSpriteOverflow( eventTime ); } );
 				// // }

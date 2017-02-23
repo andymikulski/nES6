@@ -1,25 +1,10 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
 "use strict";
 
-	
+
 var mapper65 = function() {
 };
 
@@ -31,15 +16,15 @@ mapper65.prototype.reset = function() {
 	this._irqCounter = 0;
 	this._irqReload = 0;
 	this._nextIrqRaise = -1;
-	
+
 	this.switch8kPrgBank( 0, 0 );
 	this.switch8kPrgBank( 1, 1 );
 	this.switch8kPrgBank( 0xFE, 2 );
 	this.switch8kPrgBank( this.get8kPrgBankCount() - 1, 3 );
 	this.switch8kChrBank( this.get8kChrBankCount() - 1 );
-	
+
 	this.mainboard.ppu.changeMirroringMethod( this.mirroringMethod );
-	
+
 	// TODO: Need to remove this event on mapper unload
 	var that = this;
 	this._irqEventId = this.mainboard.synchroniser.addEvent( 'mapper65 irq', -1, function() {} );
@@ -48,7 +33,7 @@ mapper65.prototype.reset = function() {
 mapper65.prototype.write8PrgRom = function( offset, data ) {
 
 	this.mainboard.synchroniser.synchronise();
-	
+
 	switch ( offset & 0xF000 ) {
 		case 0x8000: // prg select
 			this.switch8kPrgBank( data, 0 );

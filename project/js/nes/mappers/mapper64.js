@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
@@ -48,7 +33,7 @@ var mapper64 = function() {
 
 	this.banks[6] = 0;
 	this.banks[7] = 1;
-	
+
 	this.banks[8] = 2;
 	this.banks[9] = 3;
 	// inbetween banks not used
@@ -57,13 +42,13 @@ var mapper64 = function() {
 
 mapper64.prototype = Object.create( Nes.basemapper.prototype );
 
-mapper64.prototype._eventIrq = function() { 
+mapper64.prototype._eventIrq = function() {
 	// don't do anything - call to synchronise() will trigger the irq
 	this.mainboard.synchroniser.changeEventTime( this._irqEventId, -1 );
 };
 
 mapper64.prototype.mapperSaveState = function( state ) {
-	
+
 	state.bankSwapByte = this.bankSwapByte;
 	state.prgRamDisableWrite = this.prgRamDisableWrite;
 	state.chipEnable = this.chipEnable;
@@ -124,10 +109,10 @@ mapper64.prototype.syncBanks = function( doPrg, doChr ) {
 */
 	if ( doChr ) {
 		this.mainboard.synchroniser.synchronise();
-		
+
 		var bank0 = this.banks[0] & 0xFE;
 		var bank1 = this.banks[1] & 0xFE;
-		
+
 		// RAMBO-1 supports a full 1k chr bank mode in addition to the 2kb/1kb bank swap
 		switch ( this.bankSwapByte & 0xA0 ) {
 			case 0x00: // 2 KiB switchable CHR banks at $0000, $0800; 1 KiB switchable CHR banks at $1000, $1400, $1800, $1C00
@@ -168,7 +153,7 @@ mapper64.prototype.syncBanks = function( doPrg, doChr ) {
 				this.switch1kChrBank( this.banks[0], 4 );
 				this.switch1kChrBank( this.banks[8], 5 );
 				this.switch1kChrBank( this.banks[1], 6 );
-				this.switch1kChrBank( this.banks[9], 7 );	
+				this.switch1kChrBank( this.banks[9], 7 );
 			break;
 		}
 	}
@@ -182,7 +167,7 @@ mapper64.prototype.reset = function() {
 
 	this._A12LowerLimit = ( COLOUR_ENCODING_VBLANK_SCANLINES ) * MASTER_CYCLES_PER_SCANLINE;
 	this._A12UpperLimit = ( COLOUR_ENCODING_FRAME_SCANLINES - 1 ) * MASTER_CYCLES_PER_SCANLINE;
-		
+
 
 	this.lastA12Raise = 0;
 
@@ -203,26 +188,26 @@ mapper64.prototype.reset = function() {
 
 	this.banks[6] = 0;
 	this.banks[7] = 1;
-	
+
 	this.banks[8] = 2;
 	this.banks[9] = 3;
 	// inbetween banks not used
 	this.banks[15] = this.get8kPrgBankCount()-2;
-	
+
 	if ( this.get1kChrBankCount() === 0 ) {
 		this.useVRAM( 8 );
 	}
-	
+
 	var that = this;
 	// TODO: Need to remove this event on mapper unload
 	this._irqEventId = this.mainboard.synchroniser.addEvent( 'mapper64 irq', -1, function() { that._eventIrq(); } );
-	
+
 	this.syncBanks( true, true );
 	this.mainboard.ppu.changeMirroringMethod( this.mirroringMethod );
 };
 
 mapper64.prototype.write8PrgRom = function( offset, data ) {
-	
+
 	var top3Bits = offset & 0xE000;
 	switch ( top3Bits ) {
 		case 0x8000:
@@ -310,13 +295,13 @@ mapper64.prototype.decrementIrqCounter = function( tickCount ) {
 
 	this.lastA12Raise = tickCount;
 	var doIrq = false;
-	
+
 	if ( this.mReloadFlag )
 	{
 		//doIrq = this.irqLatch === 0;// MMC3 revA behaviour
 		this.irqCounter = this.irqLatch + 1;
 		this.mReloadFlag = false;
-		
+
 	}
 	else if ( this.irqCounter === 0 ) {
 		this.irqCounter = this.irqLatch;
@@ -329,7 +314,7 @@ mapper64.prototype.decrementIrqCounter = function( tickCount ) {
 			this.irqCounter--;
 		doIrq = this.irqCounter === 0;
 	}
-	
+
 	if ( doIrq && this.interruptsEnabled && !this._interruptInProgress ) {
 		//console.log( "[" + this.mainboard.ppu.frameCounter + "]" + pos.x + "x" + pos.y + " IRQ cpu: " + cpupos.x + "x" + cpupos.y );
 		this._interruptInProgress = true;
@@ -394,12 +379,12 @@ mapper64.prototype.updateIRQTime = function( cpuTime, doSync ) {
 	if ( doSync ) {
 		this.mainboard.synchroniser.synchronise();
 	}
-	
+
 	var newEvent = -1;
-	
+
 	if ( !this._cpuCycleMode ) {
 		// tickLimit is the start of the rendering frame - only started being clocked when rendering
-		
+
 		var nextRaise = 0;
 		var scanlines = 0;
 		if ( this.interruptsEnabled ) {
@@ -466,11 +451,11 @@ mapper64.prototype.synchronise = function( startTicks, endTicks ) {
 
 	BG rise points: 4, 12, 20, ... , 244, 252
 	Sp rise points: 260, 268, ..., 308, 316
-	BG rise points: 324, 332 
-		
+	BG rise points: 324, 332
+
 	If sprites are set to $1000-1FFF and the background is set to $0000-0FFF, then A12 will change from 0 to 1 at cycle 260 of each scanline, then change from 1 to 0 at cycle 320 of each scanline.
 
-	If sprites are set to $0000-0FFF and the background is set to $1000-1FFF, then A12 will change from 1 to 0 at cycle 256 of each scanline, then change from 0 to 1 at cycle 324 of each scanline. 
+	If sprites are set to $0000-0FFF and the background is set to $1000-1FFF, then A12 will change from 1 to 0 at cycle 256 of each scanline, then change from 0 to 1 at cycle 324 of each scanline.
 	*/
 		// tickLimit is the start of the rendering frame - only started being clocked when rendering
 		var startMtc = this.calculateNextA12Raise( startTicks+1 );

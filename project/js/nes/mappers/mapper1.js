@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
@@ -28,7 +13,7 @@ var mapper1 = function() {
 	this.registers = new Int32Array( 4 ); // size 4
 	this.registers[0] = 0x0C;
 	this.registers[1] = this.registers[2] = this.registers[3] = 0;
-	
+
 	this.wRamEnabled = true;
 	this.soromlatch = false;
 };
@@ -155,7 +140,7 @@ mapper1.prototype.write8PrgRom = function( offset, data ) {
 					break;
 				}
 
-				this.mainboard.ppu.changeMirroringMethod( mirroringMethod );				
+				this.mainboard.ppu.changeMirroringMethod( mirroringMethod );
 			break;
 			case 0xA000:
 				this.registers[1] = this.val & 0x1F;

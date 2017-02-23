@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
@@ -30,7 +15,7 @@ var CPU_NMI_ADDRESS = 0xFFFA;
 var SCREEN_WIDTH = 256;
 var SCREEN_HEIGHT = 240;
 
-	
+
 var IS_INT_BETWEEN = function( offset, min, max ) {
 	return min <= offset && offset < max;
 };
@@ -73,7 +58,7 @@ var setColourEncodingType = function( name ) {
 		COLOUR_ENCODING_VBLANK_SCANLINES = 20;
 		COLOUR_ENCODING_FRAME_SCANLINES = 262;
 	}
-	
+
 	COLOUR_ENCODING_VBLANK_MTC = COLOUR_ENCODING_VBLANK_SCANLINES * MASTER_CYCLES_PER_SCANLINE;
 	COLOUR_ENCODING_FRAME_MTC = COLOUR_ENCODING_FRAME_SCANLINES * MASTER_CYCLES_PER_SCANLINE;
 };

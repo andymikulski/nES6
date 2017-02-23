@@ -1,32 +1,17 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 
 this.Nes = this.Nes || {};
 
 (function(){
 	"use strict";
-		
+
 	// autoExtendsMode: 'none', 'exact', 'double'
 	var CircularBuffer = function( bufferSize, autoExtendsMode, arrayBufferType ) {
 
-		this._arrayBufferType = arrayBufferType || Int16Array;	
+		this._arrayBufferType = arrayBufferType || Int16Array;
 		this._autoExtendsMode = autoExtendsMode || 'double';
-		
+
 		this._buffer = null;
 		this._readIndex = 0;
 		this._writeIndex = 0;
@@ -94,16 +79,16 @@ this.Nes = this.Nes || {};
 			this._buffer = newBuffer;
 		}
 	};
-	
-	
+
+
 	CircularBuffer.prototype._isArrayBuffer = function( buffer ) {
-	
+
 		return buffer instanceof this._arrayBufferType;
 	};
-	
-	
+
+
 	CircularBuffer.prototype._copyArray = function( src, srcIndex, dest, destIndex, length ) {
-	
+
 		if ( this._isArrayBuffer( src ) && this._isArrayBuffer( dest ) ) {
 			dest.set( src.subarray( srcIndex, srcIndex + length ), destIndex );
 		} else {
@@ -114,11 +99,11 @@ this.Nes = this.Nes || {};
 			}
 		}
 	};
-	
+
 
 	CircularBuffer.prototype.push = function( arrayBuffer, length, sourceIndex ) {
 		sourceIndex = sourceIndex || 0;
-		
+
 		this._createBufferIfRequired( length );
 		if ( this._writeIndex >= this._readIndex ) {
 			var endOfBufferAvailable = this._buffer.length - this._writeIndex;
@@ -143,9 +128,9 @@ this.Nes = this.Nes || {};
 
 	CircularBuffer.prototype.pop = function( arrayBuffer, length, destIndex ) {
 		destIndex = destIndex || 0;
-		
+
 		var readCount = Math.min( length, this.sizeOccupied() );
-		
+
 		if ( readCount > 0 ) {
 			//console.log( "readCount wi=" + this._writeIndex + " ri=" + this._readIndex );
 			if ( this._writeIndex >= this._readIndex ) {
@@ -167,37 +152,37 @@ this.Nes = this.Nes || {};
 				}
 			}
 		}
-		
+
 		return readCount;
 	};
-	
-	
+
+
 	CircularBuffer.prototype.setElement = function( offset, data ) {
-		
+
 		this._buffer[ ( this._writeIndex + offset ) % this._buffer.length ] = data;
 	};
-	
-	
+
+
 	CircularBuffer.prototype.getElement = function( offset ) {
-		
+
 		return this._buffer[ ( this._readIndex + offset ) % this._buffer.length ];
 	};
-	
-	
+
+
 	CircularBuffer.prototype.reset = function() {
-	
+
 		this._writeIndex = 0;
 		this._readIndex = 0;
 	};
-	
-	
+
+
 	CircularBuffer.prototype.advanceRead = function( amount ) {
-	
+
 		amount = Math.min( amount, this.sizeOccupied() );
 		this._readIndex = ( this._readIndex + amount ) % this._buffer.length;
 	};
 
-	
+
 	Nes.CircularBuffer = CircularBuffer;
-	
+
 }());

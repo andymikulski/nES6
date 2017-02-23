@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
@@ -49,13 +34,13 @@ var mapper4 = function() {
 
 mapper4.prototype = Object.create( Nes.basemapper.prototype );
 
-mapper4.prototype._eventIrq = function() { 
+mapper4.prototype._eventIrq = function() {
 	// don't do anything - call to synchronise() will trigger the irq
 	this.mainboard.synchroniser.changeEventTime( this._irqEventId, -1 );
 };
 
 mapper4.prototype.mapperSaveState = function( state ) {
-	
+
 	state.bankSwapByte = this.bankSwapByte;
 	state.prgRamDisableWrite = this.prgRamDisableWrite;
 	state.chipEnable = this.chipEnable;
@@ -119,7 +104,7 @@ mapper4.prototype.syncBanks = function( doPrg, doChr ) {
 */
 	if ( doChr ) {
 		this.mainboard.synchroniser.synchronise();
-		
+
 		var bank0 = this.banks[0] & 0xFE;
 		var bank1 = this.banks[1] & 0xFE;
 		if ( ( this.bankSwapByte & 0x80 ) > 0 )
@@ -128,7 +113,7 @@ mapper4.prototype.syncBanks = function( doPrg, doChr ) {
 			this.switch1kChrBank( this.banks[3], 1 );
 			this.switch1kChrBank( this.banks[4], 2 );
 			this.switch1kChrBank( this.banks[5], 3 );
-			
+
 			this.switch1kChrBank( bank0, 4 );
 			this.switch1kChrBank( bank0 + 1, 5 );
 			this.switch1kChrBank( bank1, 6 );
@@ -151,7 +136,7 @@ mapper4.prototype.syncBanks = function( doPrg, doChr ) {
 
 
 mapper4.prototype._lookInDbForMMC6 = function() {
-	
+
 	if ( this.mainboard.cart && this.mainboard.cart._dbData ) {
 		var db = this.mainboard.cart._dbData;
 		if ( db['cartridge'] && db['cartridge'][0]['board'] && db['cartridge'][0]['board'][0] ) {
@@ -175,7 +160,7 @@ mapper4.prototype.reset = function() {
 
 	this._A12LowerLimit = ( COLOUR_ENCODING_VBLANK_SCANLINES ) * MASTER_CYCLES_PER_SCANLINE;
 	this._A12UpperLimit = ( COLOUR_ENCODING_FRAME_SCANLINES - 1 ) * MASTER_CYCLES_PER_SCANLINE;
-		
+
 
 	this.lastA12Raise = 0;
 
@@ -197,21 +182,21 @@ mapper4.prototype.reset = function() {
 
 	this.banks[6] = 0;
 	this.banks[7] = 1;
-	
+
 	if ( this.get1kChrBankCount() === 0 ) {
 		this.useVRAM( 8 );
 	}
-	
+
 	var that = this;
 	// TODO: Need to remove this event on mapper unload
 	this._irqEventId = this.mainboard.synchroniser.addEvent( 'mmc3 irq', -1, function() { that._eventIrq(); } );
-	
+
 	this.syncBanks( true, true );
 	this.mainboard.ppu.changeMirroringMethod( this.mirroringMethod );
 };
 
 mapper4.prototype.write8PrgRom = function( offset, data ) {
-	
+
 	var top3Bits = offset & 0xE000;
 	switch ( top3Bits ) {
 		case 0x8000:
@@ -219,7 +204,7 @@ mapper4.prototype.write8PrgRom = function( offset, data ) {
 			{ // even
 				if ( this.bankSwapByte !== data & 0xFF ) {
 					this.bankSwapByte = data & 0xFF;
-							
+
 					if ( this._isMMC6 ) {
 						var prgRamEnabled = ( this.bankSwapByte & 0x20 ) > 0;
 						if ( !prgRamEnabled ) {
@@ -308,7 +293,7 @@ mapper4.prototype.decrementIrqCounter = function( tickCount ) {
 
 	this.lastA12Raise = tickCount;
 	var doIrq = false;
-	
+
 	//console.log( "[" + this.mainboard.ppu.frameCounter + "] Doing decrement at " + pos.x + "x" + pos.y + " cpu: " + cpupos.x + "x" + cpupos.y + " : " + this.irqCounter );
 
 	if ( this.mReloadFlag )
@@ -316,7 +301,7 @@ mapper4.prototype.decrementIrqCounter = function( tickCount ) {
 		doIrq = this.irqLatch === 0;// MMC3 revA behaviour
 		this.irqCounter = this.irqLatch;
 		this.mReloadFlag = false;
-		
+
 	}
 	else if ( this.irqCounter === 0 ) {
 		this.irqCounter = this.irqLatch;
@@ -333,7 +318,7 @@ mapper4.prototype.decrementIrqCounter = function( tickCount ) {
 			this.irqCounter--;
 		doIrq = this.irqCounter === 0;
 	}
-	
+
 	if ( doIrq && this.interruptsEnabled && !this._interruptInProgress ) {
 		//	if ( this.mainboard.ppu.frameCounter === 43 && pos.x === 260 && pos.y === 0 ) {
 	//				debugger;
@@ -405,7 +390,7 @@ mapper4.prototype.updateIRQTime = function( cpuTime, doSync ) {
 	if ( doSync ) {
 		this.mainboard.synchroniser.synchronise();
 	}
-	
+
 	// tickLimit is the start of the rendering frame - only started being clocked when rendering
 	var newEvent = -1;
 	var nextRaise = 0;
@@ -432,7 +417,7 @@ mapper4.prototype.updateIRQTime = function( cpuTime, doSync ) {
 	this.mainboard.synchroniser.changeEventTime( this._irqEventId, newEvent );
 };
 
-	
+
 mapper4.prototype.spriteScreenEnabledUpdate = function( spriteAddress, screenAddress ) {
 	this.mSpriteAddress = spriteAddress;
 	this.mScreenAddress = screenAddress;
@@ -453,11 +438,11 @@ These 42 times per scanline are key times which I call "rise points":
 
 BG rise points: 4, 12, 20, ... , 244, 252
 Sp rise points: 260, 268, ..., 308, 316
-BG rise points: 324, 332 
-	
+BG rise points: 324, 332
+
 If sprites are set to $1000-1FFF and the background is set to $0000-0FFF, then A12 will change from 0 to 1 at cycle 260 of each scanline, then change from 1 to 0 at cycle 320 of each scanline.
 
-If sprites are set to $0000-0FFF and the background is set to $1000-1FFF, then A12 will change from 1 to 0 at cycle 256 of each scanline, then change from 0 to 1 at cycle 324 of each scanline. 
+If sprites are set to $0000-0FFF and the background is set to $1000-1FFF, then A12 will change from 1 to 0 at cycle 256 of each scanline, then change from 0 to 1 at cycle 324 of each scanline.
 */
 	// tickLimit is the start of the rendering frame - only started being clocked when rendering
 	var startMtc = this.calculateNextA12Raise( startTicks+1 );
@@ -494,7 +479,7 @@ mapper4.prototype.write8SRam = function( offset, data ) {
 };
 
 mapper4.prototype.read8SRam = function( offset ) {
-	
+
 	if ( this._isMMC6 && offset >= 0x7000 ) {
 		if ( offset >= 0x7000 ) {
 			var mirroredOffset = offset & 0x3FF;

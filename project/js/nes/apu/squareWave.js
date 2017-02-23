@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
@@ -22,14 +7,14 @@ this.Nes = this.Nes || {};
 
 var lengthCounterTable = [
 	0x0A, 0xFE, 0x14, 0x02, 0x28, 0x04, 0x50, 0x06,
-	0xA0, 0x08, 0x3C, 0x0A, 0x0E, 0x0C, 0x1A, 0x0E, 
+	0xA0, 0x08, 0x3C, 0x0A, 0x0E, 0x0C, 0x1A, 0x0E,
 	0x0C, 0x10, 0x18, 0x12, 0x30, 0x14, 0x60, 0x16,
 	0xC0, 0x18, 0x48, 0x1A, 0x10, 0x1C, 0x20, 0x1E
 ];
 
 
 var ApuSquareWaveOscillator = function( buffer ) {
-	
+
 	this._buffer = buffer;
 	this._enabled = false;
 	this._timer = 0;
@@ -38,7 +23,7 @@ var ApuSquareWaveOscillator = function( buffer ) {
 	this._useConstantVolume = false;
 	this._volumeValue = 0;
 	this._envelope = new Nes.ApuEnvelope();
-	
+
 	this._delay = 0;
 };
 
@@ -106,10 +91,10 @@ ApuSquareWaveOscillator.prototype.synchronise = function( startTicks, endTicks )
 
 	var volume = this._getVolume();
 	var period = this._timer;
-	
+
 	// TODO: apply sweep shift
 	var offset = 0;
-	
+
 	// OPTIMISE: When silent, dont do loop - just calculate next phase
 	var timer_period = ( period + 1 ) * 16 * COLOUR_ENCODING_MTC_PER_CPU; // APU cycle is 2* cpu cycle - pulse timer period is 16* cpu cycle due to sequencer having 8 steps
 	var timeUp = Math.floor( timer_period / 2 ); // TODO: implement correct duty cycle: this is 50/50 here

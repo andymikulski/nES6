@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
@@ -28,7 +13,7 @@ for ( var ii=0; ii<g_ClearScreenArray.length; ++ii ) {
 
 
 var renderbuffer = function( mainboard, renderSurface ) {
-		
+
 	this._mainboard = mainboard;
 	this._renderSurface = renderSurface;
 	// this.defaultPalette = [
@@ -49,7 +34,7 @@ var renderbuffer = function( mainboard, renderSurface ) {
 		// [ 0xFF,0xF7,0x9C ], [ 0xD7,0xE8,0x95 ], [ 0xA6,0xED,0xAF ], [ 0xA2,0xF2,0xDA ],
 		// [ 0x99,0xFF,0xFC ], [ 0xDD,0xDD,0xDD ], [ 0x11,0x11,0x11 ], [ 0x11,0x11,0x11 ]
 	// ];
-	
+
 	var paletteArray = [ 0x808080, 0xA63D00, 0xB01200, 0x960044,
 		0x5E00A1, 0x2800C7, 0x0006BA, 0x00178C,
 		0x002F5C, 0x004510, 0x004A05, 0x2E4700,
@@ -67,7 +52,7 @@ var renderbuffer = function( mainboard, renderSurface ) {
 		0x9CF7FF, 0x95E8D7, 0xAFEDA6, 0xDAF2A2,
 		0xFCFF99, 0xDDDDDD, 0x111111, 0x111111,
 		0x000000 ];
-	
+
 	this.defaultPalette32BitVals = new Uint32Array( paletteArray.length );
 	// var paletteArray = [ 0xFF808080, 0xFFA63D00, 0xFFB01200, 0xFF960044,
 		// 0xFF5E00A1, 0xFF2800C7, 0xFF0006BA, 0xFF00178C,
@@ -90,7 +75,7 @@ var renderbuffer = function( mainboard, renderSurface ) {
 	for ( var i=0; i<paletteArray.length; ++i ) {
 		this.defaultPalette32BitVals[i] = paletteArray[i];
 	}
-	
+
 	var that = this;
 	this._clipTopAndBottomY = false;
 	this._mainboard.connect( 'reset', function( cold ) { that._reset( cold ); } );
@@ -126,7 +111,7 @@ renderbuffer.prototype._renderPixel = function( bufferIndex, insertIndex, y, pal
 	if ( this._clipTopAndBottomY && ( y < 8 || y > 231 ) ) {
 		return;
 	}
-	
+
 	var colour = this.pickColour( paletteIndex|0 );
 	this._renderSurface.writeToBuffer( bufferIndex, insertIndex, colour );
 };
@@ -143,9 +128,9 @@ renderbuffer.prototype.renderSpritePixel = function( spritenum, isBehind, x, y, 
 	var bufferIndex = isBehind ? 0 : 2;
 	if ( TYPED_ARRAY_GET_INT32( this.priorityBuffer, index ) === 0 ) {
 		TYPED_ARRAY_SET_INT32( this.priorityBuffer, index, spritenum + 1 );
-		this._renderPixel( bufferIndex, index, y, paletteIndex );	
+		this._renderPixel( bufferIndex, index, y, paletteIndex );
 	}
-};	
+};
 
 
 renderbuffer.prototype.renderPixel = function( x, y, paletteIndex ) {
@@ -160,15 +145,15 @@ renderbuffer.prototype.renderPixel = function( x, y, paletteIndex ) {
 
 
 renderbuffer.prototype.saveState = function() {
-	
+
 	return { priorityBuffer: Nes.uintArrayToString( this.priorityBuffer ) };
 };
 
 
 renderbuffer.prototype.loadState = function( state ) {
-	
+
 	this.priorityBuffer = Nes.stringToUintArray( state.priorityBuffer );
 };
-	
+
 
 Nes.renderbuffer = renderbuffer;

@@ -1,25 +1,10 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
 //////////////////////////////////////////////////////////////////////////
 // 7456 cycles after init, triggers quarter frame
-// 14912 cycles after init, triggers quarter+half frames 
+// 14912 cycles after init, triggers quarter+half frames
 // 22370 cycles after init, triggers quarter frame
 // mode 0 - 29828 cycles after init, triggers quarter+half frames, checks IRQ
 // 29829 and 30 - checks IRQ
@@ -64,7 +49,7 @@ ApuFrameCounter.prototype.getNextFrameClock = function( ticks ) {
 
 
 ApuFrameCounter.prototype._getNextIrqClock = function( ticks ) {
-	
+
 	var nextIrqTicks = this._lastFrameStartMtc + APU_IRQ_FRAME_EVENT;
 	if ( nextIrqTicks >= COLOUR_ENCODING_FRAME_MTC ) {
 		nextIrqTicks -= COLOUR_ENCODING_FRAME_MTC;

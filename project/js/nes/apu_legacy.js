@@ -1,46 +1,31 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 this.Gui = this.Gui || {};
-	
+
 var APUOutBufferSize = 4096;
 var APUBaseRate = 1789773;
 
 
 var ApuLegacy = function( mainboard ) {
-	
+
 	var that = this;
-	
+
 	this._outBufferSize = 4096;
 	this._soundRate = 44100;
-	
+
 	this.mainboard = mainboard;
 	this.mainboard.connect( 'reset', function( cold ) { that._onReset( cold ); } );
 	this.nextIrq = -1;
 	this._irqActive = false;
 	this.mLastCalculatedNextIrqTime = -1;
-	
+
 	this._enabled = true;
 	this._justRenabled = 0;
 	var soundRate = 44100;
 
 	this.apu = new Nes.Nes_Apu();
-	
+
 	try {
 		this._renderer = new Gui.WebAudioRenderer( APUOutBufferSize );
 		this._outBuffer = this._renderer.createBuffer( this._outBufferSize );
@@ -48,7 +33,7 @@ var ApuLegacy = function( mainboard ) {
 		this.buf = new Nes.Blip_Buffer();
 	//	this._writer = new Nes.Wave_Writer( soundRate );
 	//	this._writer.activate();
-			
+
 		this.buf.clock_rate( APUBaseRate );
 		this.apu.output( this.buf );
 		this.buf.sample_rate( soundRate );
@@ -58,8 +43,8 @@ var ApuLegacy = function( mainboard ) {
 		this._enabled = false;
 		console.log( "WebAudio unsupported in this browser. Sound will be disabled..." );
 	}
-	
-	this.apu.dmc_reader( function( addr ) { 
+
+	this.apu.dmc_reader( function( addr ) {
 		return mainboard.memory.read8( addr );
 	} );
 	this.apu.irq_notifier( function() {
@@ -109,7 +94,7 @@ ApuLegacy.prototype.readFromRegister = function( offset ) {
 	var ret = 0;
 	if ( offset === this.apu.status_addr ) {
 		this.mainboard.synchroniser.synchronise();
-		var realTime = Math.floor( this.mainboard.synchroniser.getCpuMTC() / COLOUR_ENCODING_MTC_PER_CPU );			
+		var realTime = Math.floor( this.mainboard.synchroniser.getCpuMTC() / COLOUR_ENCODING_MTC_PER_CPU );
 		if ( offset === 0x4015 && this._irqActive ) {
 			// irq acknowledge
 			this._irqActive = false;
@@ -133,7 +118,7 @@ ApuLegacy.prototype.writeToRegister = function( offset, data ) {
 ApuLegacy.prototype.synchronise = function( startTicks, endTicks ) {
 	var cpuClocks = Math.floor( startTicks / COLOUR_ENCODING_MTC_PER_CPU ) - 1;
 	this.apu.run_until( cpuClocks >= 0 ? cpuClocks : 0 );
-	
+
 	if ( this.apu.earliest_irq() === Nes.Nes_Apu.irq_waiting ) {
 		//console.log( "Triggering APU IRQ" );
 		//this.mainboard.cpu.holdIrqLineLow();
@@ -162,7 +147,7 @@ ApuLegacy.prototype.onEndFrame = function( cpuMtc ) {
 		//	this._writer.write( buffer, count );
 		}
 	}
-	
+
 	this.CalculateWhenIrqDue();
 };
 

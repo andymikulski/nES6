@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
@@ -38,11 +23,11 @@ Mapper 071: 14
 Mapper 113: 12
 Mapper 245: 11
 Mapper 023: 11
-Mapper 069: 11 
+Mapper 069: 11
 */
 
 Nes.mappers = {};
-	
+
 "use strict";
 
 
@@ -57,16 +42,16 @@ basemapper.prototype.construct = function( mainboard, mirroringMethod ) {
 	this.prgPagesMap = new Int32Array( 4 );
 	this._prgData = null;
 	this._prgPageCount = 0;
-	
+
 	this.chrPages = [];
 	this.chrPagesMap = new Int32Array( 8 );
 	this._chrData = null;
 	this._chrPageCount = 0;
 	this._usingChrVram = false;
-	
+
 	this._gameGenieActive = false;
 	this._gameGeniePokes = {};
-	
+
 	this.sram = new Int32Array( 0x2000 );
 	this.expansionRam = new Int32Array( 0x1FE0 );
 };
@@ -217,7 +202,7 @@ basemapper.prototype.switch8kChrBank = function( id ) {
 
 
 basemapper.prototype.useVRAM = function( numBanks ) {
-	
+
 	numBanks = numBanks || 8;
 	this._usingChrVram = true;
 	this._chrData = new Int32Array( 0x400 * numBanks );
@@ -235,7 +220,7 @@ basemapper.prototype.write8PrgRom = function( offset, data ) {
 
 
 basemapper.prototype.read8PrgRom = function( offset ) {
-	
+
 	var pageid = ( offset & 0x6000 ) >> 13; // Math.floor( ( prgOffset ) / 0x2000 );
 	var pagepos = TYPED_ARRAY_GET_INT32( this.prgPagesMap, pageid );
 	var aid = offset & 0x1FFF;
@@ -250,7 +235,7 @@ basemapper.prototype.read8PrgRom = function( offset ) {
 };
 
 
-basemapper.prototype._checkGameGenieCode = function( readValue, offset ) {	
+basemapper.prototype._checkGameGenieCode = function( readValue, offset ) {
 	// Game genie override
 	var gg = this._gameGeniePokes[ offset ];
 	if ( gg.compare === -1 || gg.compare === readValue ) {
@@ -311,7 +296,7 @@ basemapper.prototype.gameGeniePoke = function( codeName, address, value, compare
 };
 
 basemapper.prototype.removeGameGeniePoke = function( codeName ) {
-	
+
 	var keyArray = Object.keys( this._gameGeniePokes );
 	for ( var i=0; i<keyArray.length; ++i ) {
 		var prop = keyArray[i];
@@ -322,7 +307,7 @@ basemapper.prototype.removeGameGeniePoke = function( codeName ) {
 			}
 		}
 	}
-	
+
 	var codesActive = Object.keys( this._gameGeniePokes ).length;
 	this._gameGenieActive = codesActive > 0;
 };
@@ -331,7 +316,7 @@ basemapper.prototype.removeGameGeniePoke = function( codeName ) {
 basemapper.prototype.saveState = function() {
 
 	var data = {};
-	
+
 	data.mirroringMethod = this.mirroringMethod;
 	data._usingChrVram = this._usingChrVram;
 	//data.prgPagesMap = $.extend( {}, this.prgPagesMap );

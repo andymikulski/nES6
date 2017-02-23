@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
@@ -33,9 +18,9 @@ var cpu6502 = function( mainboard ) {
 	this._previousTraceProgramCountersIndex = 0;
 	this._inTraceLoop = false;
 	this._traceLoopCount = 0;
-	
+
 	//var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
-	
+
 	this._useSwitchStatement = false;// isFirefox;
 	this._instructionSet = Nes.cpuInstructions; // Default to 'fast' versions
 	this._instructionSwitch = Nes.cpuInstructionsSwitch;
@@ -78,7 +63,7 @@ cpu6502.prototype.resetVariables = function() {
 	this._flagUnused = true;
 	this._flagOverflow = false;
 	this._flagSign = false;
-	
+
 	this.regS = 0;
 	this.regX = 0;
 	this.regY = 0;
@@ -231,7 +216,7 @@ cpu6502.prototype.handlePendingInterrupts = function() {
 			this.triggerNmiAfterNextInstruction = false;
 			return 0;
 		}
-		
+
 		// NMI interrupt
 		this.pushStack( ( this.programCounter >> 8 ) & 0xFF );
 		this.incrementStackReg();
@@ -258,7 +243,7 @@ cpu6502.prototype.handlePendingInterrupts = function() {
 		this.incrementStackReg();
 		this.pushStack( this.programCounter & 0xFF );
 		this.incrementStackReg();
-		
+
 		this._flagBreak = false;
 
 		this.pushStack( this.statusRegToByte() );
@@ -396,7 +381,7 @@ cpu6502.prototype.execute = function() {
 	this.subcycle = 0;
 	if ( this.waitOneInstructionAfterCli )
 		this.waitOneInstructionAfterCli = false;
-	
+
 	var opcode = this.mainboard.memory.read8( this.programCounter );
 	var cyclesTaken = 0;
 	if ( !this._useSwitchStatement ) {
@@ -424,7 +409,7 @@ cpu6502.prototype._hasProgramCounterBeenSeenBefore = function( pg ) {
 
 
 cpu6502.prototype._doTrace = function() {
-	
+
 	var instructionData = Nes.cpuTrace;
 	// check previous instructions for the same program counter
 	var prevIndex = this._hasProgramCounterBeenSeenBefore( instructionData.programCounter );
@@ -442,7 +427,7 @@ cpu6502.prototype._doTrace = function() {
 			this._traceLoopCount = 0;
 		}
 	}
-	
+
 	if ( !this._inTraceLoop ) {
 		this._previousTraceProgramCounters[ this._previousTraceProgramCountersIndex ] = instructionData.programCounter;
 		this._previousTraceProgramCountersIndex = ( this._previousTraceProgramCountersIndex + 1 ) & 0x1F;
@@ -462,7 +447,7 @@ cpu6502.prototype.saveState = function() {
 	data.nmiPending = this.nmiPending;
 	data.irqLineLow = this.irqLineLow;
 	data.triggerNmiAfterNextInstruction = this.triggerNmiAfterNextInstruction;
-	
+
 	data._flagCarry = this._flagCarry;
 	data._flagZero = this._flagZero;
 	data._flagInterrupt = this._flagInterrupt;
@@ -471,7 +456,7 @@ cpu6502.prototype.saveState = function() {
 	data._flagUnused = this._flagUnused;
 	data._flagOverflow = this._flagOverflow;
 	data._flagSign = this._flagSign;
-	
+
 	data.regS = this.regS;
 	data.regX = this.regX;
 	data.regY = this.regY;
@@ -490,7 +475,7 @@ cpu6502.prototype.loadState = function( state ) {
 	this.nmiPending = state.nmiPending;
 	this.irqLineLow = state.irqLineLow;
 	this.triggerNmiAfterNextInstruction = state.triggerNmiAfterNextInstruction;
-	
+
 	this._flagCarry = state._flagCarry;
 	this._flagZero = state._flagZero;
 	this._flagInterrupt = state._flagInterrupt;
@@ -499,7 +484,7 @@ cpu6502.prototype.loadState = function( state ) {
 	this._flagUnused = state._flagUnused;
 	this._flagOverflow = state._flagOverflow;
 	this._flagSign = state._flagSign;
-	
+
 	this.regS = state.regS;
 	this.regX = state.regX;
 	this.regY = state.regY;

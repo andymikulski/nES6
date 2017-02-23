@@ -1,19 +1,4 @@
-/*
-This file is part of WebNES.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
 this.Nes = this.Nes || {};
 
@@ -38,7 +23,7 @@ var synchroniser = function( mainboard ) {
 	this._eventBus = new Nes.EventBus();
 	this._cpuMTCatEndOfInstruction = new Int32Array( 8 ); // Array of ppu MTC counts which the last X instructions have ended on.
 	this._cpuMTCatEndOfInstructionIndex = 0; // This is for determining if an NMI trigger should delay by an instruction or not.
-	
+
 	this._events = [];
 	this._objects = [];
 };
@@ -115,7 +100,7 @@ synchroniser.prototype.addObject = function( name, obj ) {
 synchroniser.prototype.synchronise = function() {
 
 	var frameEnd = COLOUR_ENCODING_FRAME_MTC;
-	
+
 	if ( this._isSynchronising ) {
 		//debugger;
 		throw new Error( "Cannot call synchroniser.prototype.synchronise when in synchronisation phase" );
@@ -142,7 +127,7 @@ synchroniser.prototype.synchronise = function() {
 
 		this._isSynchronising = true;
 		this._currentSyncValue = syncTo;
-		
+
 		for ( objIndex=0; objIndex<this._objects.length; ++objIndex ) {
 			// TODO: Objects should be forbidden from calling synchroniser.synchronise() whilst in the synchronise phase - if they
 			// want to force a synchronise they should do so using an event
@@ -153,7 +138,7 @@ synchroniser.prototype.synchronise = function() {
 			}
 		}
 		this._isSynchronising = false;
-	
+
 		this._executeEvents( this._lastSynchronisedMtc, syncTo );
 		this._lastSynchronisedMtc = syncTo;
 
@@ -201,7 +186,7 @@ synchroniser.prototype._executeEvents = function( startTime, endTime ) {
 
 
 synchroniser.prototype.runCycle = function() {
-	
+
 	var nextEventTime = this.getNextEventTime();
 
 	// run cpu
@@ -214,7 +199,7 @@ synchroniser.prototype.runCycle = function() {
 		this.cpuMtc += cpuTicks * COLOUR_ENCODING_MTC_PER_CPU;
 		TYPED_ARRAY_SET_INT32( this._cpuMTCatEndOfInstruction, this._cpuMTCatEndOfInstructionIndex, this.cpuMtc );
 		this._cpuMTCatEndOfInstructionIndex = ( this._cpuMTCatEndOfInstructionIndex + 1 ) & 0x7;
-		
+
 		if ( this._newEventInserted ) {
 			this._newEventInserted = false;
 			nextEventTime = this.getNextEventTime();
@@ -227,7 +212,7 @@ synchroniser.prototype.runCycle = function() {
 
 
 synchroniser.prototype.isPpuTickOnLastCycleOfCpuInstruction = function( ppuCount ) {
-	
+
 	for ( var i=0; i<this._cpuMTCatEndOfInstruction.length; ++i ) {
 		var cpuCount = this._cpuMTCatEndOfInstruction[ i ];
 		if ( cpuCount - COLOUR_ENCODING_MTC_PER_CPU <= ppuCount && cpuCount + MASTER_CYCLES_PER_PPU >= ppuCount ) {
