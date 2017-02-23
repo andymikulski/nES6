@@ -292,7 +292,7 @@ var Cpu6502 = function () {
 
 				this._flagInterrupt = true;
 				if (this.cmosVersion) this._flagDecimal = false;
-				this.programCounter = this.mainboard.memory.read16NoZeroPageWrap(CPU_IRQ_ADDRESS);
+				this.programCounter = this.mainboard.memory.read16NoZeroPageWrap(_consts.CPU_IRQ_ADDRESS);
 				return 7;
 			}
 			return 0;

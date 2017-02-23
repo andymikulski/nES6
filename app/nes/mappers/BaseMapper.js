@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-exports.Mapper0 = exports.BaseMapper = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /* Estimated number of games with mapper (other mappers had <10 games)
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      Mapper 004: 569
@@ -29,17 +28,11 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      Mapper 069: 11
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
 
-exports.mapperFactory = mapperFactory;
-
 var _serialisation = require('../../utils/serialisation');
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var BaseMapper = exports.BaseMapper = function () {
+var BaseMapper = function () {
 	function BaseMapper(mainboard, mirroringMethod) {
 		_classCallCheck(this, BaseMapper);
 
@@ -370,45 +363,4 @@ var BaseMapper = exports.BaseMapper = function () {
 	return BaseMapper;
 }();
 
-;
-
-var Mapper0 = exports.Mapper0 = function (_BaseMapper) {
-	_inherits(Mapper0, _BaseMapper);
-
-	function Mapper0() {
-		_classCallCheck(this, Mapper0);
-
-		return _possibleConstructorReturn(this, (Mapper0.__proto__ || Object.getPrototypeOf(Mapper0)).apply(this, arguments));
-	}
-
-	_createClass(Mapper0, [{
-		key: 'reset',
-		value: function reset() {
-			if (this.get32kPrgBankCount() >= 1) {
-				this.switch32kPrgBank(0);
-			} else if (this.get16kPrgBankCount() == 1) {
-				this.switch16kPrgBank(0, true);
-				this.switch16kPrgBank(0, false);
-			}
-
-			if (this.get1kChrBankCount() === 0) {
-				this.useVRAM();
-			} else {
-				this.switch8kChrBank(0);
-			}
-
-			this.mainboard.ppu.changeMirroringMethod(this.mirroringMethod);
-		}
-	}]);
-
-	return Mapper0;
-}(BaseMapper);
-
-function mapperFactory(mapperId, mainboard, mirroringMethod) {
-	var MapperClass = Mapper0; // Nes.mappers[ mapperId ];
-	if (!!!MapperClass) {
-		throw new Error('Mapper id ' + mapperId + ' is not supported');
-	}
-	var mapper = new MapperClass(mainboard, mirroringMethod);
-	return mapper;
-}
+exports.default = BaseMapper;

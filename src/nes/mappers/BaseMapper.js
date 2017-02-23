@@ -22,14 +22,14 @@ Mapper 023: 11
 Mapper 069: 11
 */
 
+
 import {
 	uintArrayToString,
 	stringToUintArray,
 } from '../../utils/serialisation';
 
-export class BaseMapper {
+export default class BaseMapper {
 	constructor( mainboard, mirroringMethod ) {
-
 		this.mainboard = mainboard;
 		this.mirroringMethod = mirroringMethod;
 		this.prgPagesMap = new Int32Array( 4 );
@@ -340,32 +340,4 @@ export class BaseMapper {
 			this.mapperLoadState( state );
 		}
 	}
-};
-
-export class Mapper0 extends BaseMapper {
-	reset() {
-		if (this.get32kPrgBankCount() >= 1) {
-			this.switch32kPrgBank(0);
-		} else if (this.get16kPrgBankCount() == 1) {
-			this.switch16kPrgBank(0, true);
-			this.switch16kPrgBank(0, false);
-		}
-
-		if (this.get1kChrBankCount() === 0) {
-			this.useVRAM();
-		} else {
-			this.switch8kChrBank(0);
-		}
-
-		this.mainboard.ppu.changeMirroringMethod(this.mirroringMethod);
-	}
-}
-
-export function mapperFactory( mapperId, mainboard, mirroringMethod ) {
-	var MapperClass = Mapper0; // Nes.mappers[ mapperId ];
-	if ( !!!MapperClass ) {
-		throw new Error( 'Mapper id ' + mapperId + ' is not supported' );
-	}
-	var mapper = new MapperClass(mainboard, mirroringMethod);
-	return mapper;
 }

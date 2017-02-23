@@ -1,3 +1,7 @@
+import {
+	CPU_IRQ_ADDRESS,
+} from '../../config/consts.js';
+
 let instructions = [];
 
 function BRK_NONE_0( cpu, memory ) {
@@ -53,7 +57,7 @@ function HLT_NONE_2( cpu, memory ) {
 	var cyclesTaken = 2;
 	cpu.setPC( ( cpu.getPC() + 1 ) & 0xFFFF );
 	var result = 0
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_2 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[ 2 ] = HLT_NONE_2;
@@ -292,7 +296,7 @@ function HLT_NONE_18( cpu, memory ) {
 	var cyclesTaken = 2;
 	cpu.setPC( ( cpu.getPC() + 1 ) & 0xFFFF );
 	var result = 0
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_18 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[ 18 ] = HLT_NONE_18;
@@ -565,7 +569,7 @@ function HLT_NONE_34( cpu, memory ) {
 	var cyclesTaken = 2;
 	cpu.setPC( ( cpu.getPC() + 1 ) & 0xFFFF );
 	var result = 0
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_34 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[ 34 ] = HLT_NONE_34;
@@ -825,7 +829,7 @@ function HLT_NONE_50( cpu, memory ) {
 	var cyclesTaken = 2;
 	cpu.setPC( ( cpu.getPC() + 1 ) & 0xFFFF );
 	var result = 0
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_50 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[ 50 ] = HLT_NONE_50;
@@ -1113,7 +1117,7 @@ function HLT_NONE_66( cpu, memory ) {
 	var cyclesTaken = 2;
 	cpu.setPC( ( cpu.getPC() + 1 ) & 0xFFFF );
 	var result = 0
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_66 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[ 66 ] = HLT_NONE_66;
@@ -1352,7 +1356,7 @@ function HLT_NONE_82( cpu, memory ) {
 	var cyclesTaken = 2;
 	cpu.setPC( ( cpu.getPC() + 1 ) & 0xFFFF );
 	var result = 0
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_82 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[ 82 ] = HLT_NONE_82;
@@ -1630,7 +1634,7 @@ function HLT_NONE_98( cpu, memory ) {
 	var cyclesTaken = 2;
 	cpu.setPC( ( cpu.getPC() + 1 ) & 0xFFFF );
 	var result = 0
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_98 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[ 98 ] = HLT_NONE_98;
@@ -1906,7 +1910,7 @@ function HLT_NONE_114( cpu, memory ) {
 	var cyclesTaken = 2;
 	cpu.setPC( ( cpu.getPC() + 1 ) & 0xFFFF );
 	var result = 0
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_114 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[ 114 ] = HLT_NONE_114;
@@ -2368,7 +2372,7 @@ function HLT_NONE_146( cpu, memory ) {
 	var cyclesTaken = 2;
 	cpu.setPC( ( cpu.getPC() + 1 ) & 0xFFFF );
 	var result = 0
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_146 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[ 146 ] = HLT_NONE_146;
@@ -2792,7 +2796,7 @@ function HLT_NONE_178( cpu, memory ) {
 	var cyclesTaken = 2;
 	cpu.setPC( ( cpu.getPC() + 1 ) & 0xFFFF );
 	var result = 0
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_178 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[ 178 ] = HLT_NONE_178;
@@ -3297,7 +3301,7 @@ function HLT_NONE_210( cpu, memory ) {
 	var cyclesTaken = 2;
 	cpu.setPC( ( cpu.getPC() + 1 ) & 0xFFFF );
 	var result = 0
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_210 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[ 210 ] = HLT_NONE_210;
@@ -3844,7 +3848,7 @@ function HLT_NONE_242( cpu, memory ) {
 	var cyclesTaken = 2;
 	cpu.setPC( ( cpu.getPC() + 1 ) & 0xFFFF );
 	var result = 0
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_242 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[ 242 ] = HLT_NONE_242;

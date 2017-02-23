@@ -3,13 +3,12 @@ import sha1 from 'sha1';
 import {
 	g_DefaultColourEncoding,
 	PPU_MIRRORING_VERTICAL,
+	PPU_MIRRORING_HORIZONTAL,
 	setColourEncodingType,
 	mirroringMethodToString,
 } from '../config/consts';
 
-import {
-	mapperFactory
-} from './mappers/BaseMapper';
+import mapperFactory from './mappers/mapperFactory';
 
 
 

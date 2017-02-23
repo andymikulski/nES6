@@ -195,7 +195,7 @@ var PPU = function () {
 		value: function isRendering(tickCount, includeHblank) {
 			if (this.isRenderingEnabled()) {
 				var pos = this.ticksToScreenCoordinates(tickCount);
-				return (includeHblank ? IS_INT_BETWEEN(pos.x, 0, 256) : true) && IS_INT_BETWEEN(pos.y, -1, 241);
+				return (includeHblank ? (0, _consts.IS_INT_BETWEEN)(pos.x, 0, 256) : true) && (0, _consts.IS_INT_BETWEEN)(pos.y, -1, 241);
 			} else return false;
 		}
 	}, {

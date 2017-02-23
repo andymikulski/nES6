@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 81);
+/******/ 	return __webpack_require__(__webpack_require__.s = 82);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -231,7 +231,7 @@ exports.writeLine = writeLine;
 exports.start = start;
 exports.stop = stop;
 
-var _fileSaver = __webpack_require__(4);
+var _fileSaver = __webpack_require__(5);
 
 var trace_cpu = exports.trace_cpu = 0;
 var trace_cpuInstructions = exports.trace_cpuInstructions = 1;
@@ -281,6 +281,47 @@ function stop() {
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.uintArrayToString = uintArrayToString;
+exports.stringToUintArray = stringToUintArray;
+exports.blobToString = blobToString;
+function uintArrayToString(uintArray) {
+  if (!(uintArray instanceof Int32Array)) {
+    throw new Error('uintArrayToString: Only accepts Int32Array parameter');
+  }
+  var str = '';
+  for (var i = 0, strLen = uintArray.length; i < strLen; i++) {
+    var saveValue = uintArray[i];
+    if (saveValue > 0xFFFF) {
+      throw new Error("Invalid value attempted to be serialised");
+    }
+    str += String.fromCharCode(saveValue);
+  }
+  return str;
+};
+
+function stringToUintArray(str) {
+  var buf = new Int32Array(str.length);
+  for (var i = 0, strLen = str.length; i < strLen; i++) {
+    buf[i] = str.charCodeAt(i) | 0;
+  }
+  return buf;
+};
+
+function blobToString(blob) {
+  var url = window.webkitURL || window.URL;
+  return url.createObjectURL(blob);
+};
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -359,48 +400,379 @@ var EventBus = exports.EventBus = function () {
 }();
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+	value: true
 });
-exports.uintArrayToString = uintArrayToString;
-exports.stringToUintArray = stringToUintArray;
-exports.blobToString = blobToString;
-function uintArrayToString(uintArray) {
-  if (!(uintArray instanceof Int32Array)) {
-    throw new Error('uintArrayToString: Only accepts Int32Array parameter');
-  }
-  var str = '';
-  for (var i = 0, strLen = uintArray.length; i < strLen; i++) {
-    var saveValue = uintArray[i];
-    if (saveValue > 0xFFFF) {
-      throw new Error("Invalid value attempted to be serialised");
-    }
-    str += String.fromCharCode(saveValue);
-  }
-  return str;
-};
 
-function stringToUintArray(str) {
-  var buf = new Int32Array(str.length);
-  for (var i = 0, strLen = str.length; i < strLen; i++) {
-    buf[i] = str.charCodeAt(i) | 0;
-  }
-  return buf;
-};
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /* Estimated number of games with mapper (other mappers had <10 games)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 004: 569
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 001: 481
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 000: 260
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 002: 200
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 003: 145
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 007: 56
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 011: 35
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 019: 32
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 016: 26
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 099: 25
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 005: 24
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 018: 16
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 066: 16
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 033: 15
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 079: 15
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 045: 14
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 071: 14
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 113: 12
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 245: 11
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 023: 11
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 069: 11
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     */
 
-function blobToString(blob) {
-  var url = window.webkitURL || window.URL;
-  return url.createObjectURL(blob);
-};
+var _serialisation = __webpack_require__(2);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var BaseMapper = function () {
+	function BaseMapper(mainboard, mirroringMethod) {
+		_classCallCheck(this, BaseMapper);
+
+		this.mainboard = mainboard;
+		this.mirroringMethod = mirroringMethod;
+		this.prgPagesMap = new Int32Array(4);
+		this._prgData = null;
+		this._prgPageCount = 0;
+
+		this.chrPages = [];
+		this.chrPagesMap = new Int32Array(8);
+		this._chrData = null;
+		this._chrPageCount = 0;
+		this._usingChrVram = false;
+
+		this._gameGenieActive = false;
+		this._gameGeniePokes = {};
+
+		this.sram = new Int32Array(0x2000);
+		this.expansionRam = new Int32Array(0x1FE0);
+	}
+
+	_createClass(BaseMapper, [{
+		key: 'onEndFrame',
+		value: function onEndFrame() {}
+	}, {
+		key: 'getNextEvent',
+		value: function getNextEvent() {
+			return -1;
+		}
+	}, {
+		key: 'synchronise',
+		value: function synchronise(startTicks, endTicks) {}
+
+		// MMC3 specific functions
+
+	}, {
+		key: 'spriteScreenEnabledUpdate',
+		value: function spriteScreenEnabledUpdate(spriteEnabled, screenEnabled) {}
+	}, {
+		key: 'renderingEnabledChanged',
+		value: function renderingEnabledChanged(enabled) {}
+	}, {
+		key: 'setPrgData',
+		value: function setPrgData(array, prg8kPageCount) {
+
+			this._prgData = array;
+			this._prgPageCount = prg8kPageCount;
+		}
+	}, {
+		key: 'setChrData',
+		value: function setChrData(array, chr1kPageCount) {
+
+			this._chrData = array;
+			this._chrPageCount = chr1kPageCount;
+		}
+
+		////// PRG switching
+
+
+	}, {
+		key: 'get1kChrBankCount',
+		value: function get1kChrBankCount() {
+			return this._chrPageCount;
+		}
+	}, {
+		key: 'get2kChrBankCount',
+		value: function get2kChrBankCount() {
+			return this._chrPageCount >> 1; // Math.floor( this.chrPages.length / 2 );
+		}
+	}, {
+		key: 'get4kChrBankCount',
+		value: function get4kChrBankCount() {
+			return this._chrPageCount >> 2; // Math.floor( this.chrPages.length / 4 );
+		}
+	}, {
+		key: 'get8kChrBankCount',
+		value: function get8kChrBankCount() {
+			return this._chrPageCount >> 3; // Math.floor( this.chrPages.length / 8 );
+		}
+	}, {
+		key: 'get8kPrgBankCount',
+		value: function get8kPrgBankCount() {
+			return this._prgPageCount;
+		}
+	}, {
+		key: 'get16kPrgBankCount',
+		value: function get16kPrgBankCount() {
+			return this._prgPageCount >> 1; // Math.floor( this.prgPages.length / 2 );
+		}
+	}, {
+		key: 'get32kPrgBankCount',
+		value: function get32kPrgBankCount() {
+			return this._prgPageCount >> 2; // Math.floor( this.prgPages.length / 4 );
+		}
+	}, {
+		key: 'switch8kPrgBank',
+		value: function switch8kPrgBank(id, pos) {
+			//Nes.Trace.writeLine( 'mapper', 'switch8kPrgBank:' + id );
+			this.setPrgPage(id % this._prgPageCount, pos);
+		}
+	}, {
+		key: 'switch16kPrgBank',
+		value: function switch16kPrgBank(id, low) {
+			if (this.get16kPrgBankCount() > 0) {
+				//Nes.Trace.writeLine( 'mapper', 'switch16kPrgBank:' + id );
+				var aid = id * 2 % this._prgPageCount;
+				for (var i = 0; i < 2; ++i) {
+					this.setPrgPage(aid + i, i + (low ? 0 : 2));
+				}
+			}
+		}
+	}, {
+		key: 'switch32kPrgBank',
+		value: function switch32kPrgBank(id) {
+			if (this.get32kPrgBankCount() > 0) {
+				//Nes.Trace.writeLine( 'mapper', 'switch32kPrgBank:' + id );
+				var aid = id * 4 % this._prgPageCount;
+				for (var i = 0; i < 4; ++i) {
+					this.setPrgPage(aid + i, i);
+				}
+			}
+		}
+	}, {
+		key: 'setPrgPage',
+		value: function setPrgPage(id, pos) {
+			if (this.prgPagesMap[pos] !== id) {
+				this.prgPagesMap[pos] = id * 0x2000;
+			}
+		}
+	}, {
+		key: 'setChrPage',
+		value: function setChrPage(id, pos) {
+			this.chrPagesMap[pos] = id * 0x400;
+		}
+	}, {
+		key: 'switch1kChrBank',
+		value: function switch1kChrBank(id, pos) {
+			this.setChrPage(id % this._chrPageCount, pos);
+		}
+	}, {
+		key: 'switch2kChrBank',
+		value: function switch2kChrBank(id, pos) {
+			if (this.get2kChrBankCount() > 0) {
+				var aid = id * 2 % this._chrPageCount;
+				for (var i = 0; i < 2; ++i) {
+					this.setChrPage(aid + i, pos * 2 + i);
+				}
+			}
+		}
+	}, {
+		key: 'switch4kChrBank',
+		value: function switch4kChrBank(id, low) {
+			if (this.get4kChrBankCount() > 0) {
+				var aid = id * 4 % this._chrPageCount;
+				for (var i = 0; i < 4; ++i) {
+					this.setChrPage(aid + i, i + (low ? 0 : 4));
+				}
+			}
+		}
+	}, {
+		key: 'switch8kChrBank',
+		value: function switch8kChrBank(id) {
+			if (this.get8kChrBankCount() > 0) {
+				var aid = id * 8 % this._chrPageCount;
+				for (var i = 0; i < 8; ++i) {
+					this.setChrPage(aid + i, i);
+				}
+			}
+		}
+	}, {
+		key: 'useVRAM',
+		value: function useVRAM(numBanks) {
+
+			numBanks = numBanks || 8;
+			this._usingChrVram = true;
+			this._chrData = new Int32Array(0x400 * numBanks);
+
+			this._chrPageCount = numBanks;
+			for (var i = 0; i < Math.min(8, numBanks); ++i) {
+				this.setChrPage(i, i);
+			}
+		}
+
+		// 0x8000 -> 0xFFFF
+
+	}, {
+		key: 'write8PrgRom',
+		value: function write8PrgRom(offset, data) {}
+	}, {
+		key: 'read8PrgRom',
+		value: function read8PrgRom(offset) {
+
+			var pageid = (offset & 0x6000) >> 13; // Math.floor( ( prgOffset ) / 0x2000 );
+			var pagepos = this.prgPagesMap[pageid];
+			var aid = offset & 0x1FFF;
+			var readValue = this._prgData[pagepos + aid];
+
+			if (this._gameGenieActive) {
+				if (this._gameGeniePokes.hasOwnProperty(offset)) {
+					return this._checkGameGenieCode(readValue, offset);
+				}
+			}
+			return readValue;
+		}
+	}, {
+		key: '_checkGameGenieCode',
+		value: function _checkGameGenieCode(readValue, offset) {
+			// Game genie override
+			var gg = this._gameGeniePokes[offset];
+			if (gg.compare === -1 || gg.compare === readValue) {
+				return gg.value;
+			}
+			return readValue | 0;
+		}
+
+		// VRAM 0x0000 -> 0x2000
+
+	}, {
+		key: 'write8ChrRom',
+		value: function write8ChrRom(offset, data) {
+			if (this._usingChrVram) {
+				var pageid = (offset & 0x1C00) >> 10; // Math.floor( offset / 0x400 );
+				var pagepos = this.chrPagesMap[pageid];
+				var writeOffset = pagepos + (offset & 0x3FF);
+				this._chrData[writeOffset] = data;
+			}
+		}
+	}, {
+		key: 'read8ChrRom',
+		value: function read8ChrRom(offset, renderingSprites, readType) {
+			var pageid = (offset & 0x1C00) >> 10; // Math.floor( offset / 0x400 );
+			var pagepos = this.chrPagesMap[pageid];
+			var readOffset = pagepos + (offset & 0x3FF);
+			return this._chrData[readOffset] | 0;
+		}
+	}, {
+		key: 'write8SRam',
+		value: function write8SRam(offset, data) {
+			this.sram[offset & 0x1FFF] = data;
+		}
+	}, {
+		key: 'read8SRam',
+		value: function read8SRam(offset) {
+			return this.sram[offset & 0x1FFF] | 0;
+		}
+	}, {
+		key: 'write8EXRam',
+		value: function write8EXRam(offset, data) {
+			this.expansionRam[offset - 0x4020] = data;
+		}
+	}, {
+		key: 'read8EXRam',
+		value: function read8EXRam(offset) {
+			return this.expansionRam[offset - 0x4020] | 0;
+		}
+	}, {
+		key: 'reset',
+		value: function reset() {}
+
+		// Called from gameGenie.js - modified the PRG at given value
+
+	}, {
+		key: 'gameGeniePoke',
+		value: function gameGeniePoke(codeName, address, value, compareValue) {
+
+			this._gameGenieActive = true;
+			this._gameGeniePokes[address] = { name: codeName, value: value, compare: compareValue };
+		}
+	}, {
+		key: 'removeGameGeniePoke',
+		value: function removeGameGeniePoke(codeName) {
+
+			var keyArray = Object.keys(this._gameGeniePokes);
+			for (var i = 0; i < keyArray.length; ++i) {
+				var prop = keyArray[i];
+				if (this._gameGeniePokes.hasOwnProperty(prop)) {
+					var gg = this._gameGeniePokes[prop];
+					if (gg && gg.name === codeName) {
+						delete this._gameGeniePokes[prop];
+					}
+				}
+			}
+
+			var codesActive = Object.keys(this._gameGeniePokes).length;
+			this._gameGenieActive = codesActive > 0;
+		}
+	}, {
+		key: 'saveState',
+		value: function saveState() {
+			var data = {};
+
+			data.mirroringMethod = this.mirroringMethod;
+			data._usingChrVram = this._usingChrVram;
+			//data.prgPagesMap = Object.assign( {}, this.prgPagesMap );
+			//data.chrPagesMap = Object.assign( {}, this.chrPagesMap ); // TODO: restore
+			data.sram = (0, _serialisation.uintArrayToString)(this.sram);
+			data.expansionRam = (0, _serialisation.uintArrayToString)(this.expansionRam);
+			data._gameGeniePokes = Object.assign({}, this._gameGeniePokes);
+			if (this._usingChrVram) {
+				//data.chrPages = this.chrPages.map( function( page ) { return uintArrayToString( page ); } );
+				data._chrData = (0, _serialisation.uintArrayToString)(this._chrData);
+			}
+			if (this.mapperSaveState) {
+				this.mapperSaveState(data);
+			}
+			return data;
+		}
+	}, {
+		key: 'loadState',
+		value: function loadState(state) {
+			this.mirroringMethod = state.mirroringMethod;
+			this._usingChrVram = state._usingChrVram;
+			//this.prgPagesMap = Object.assign( {}, state.prgPagesMap );
+			// this.chrPagesMap = Object.assign( {}, state.chrPagesMap ); // TODO: restore
+			this.sram = (0, _serialisation.stringToUintArray)(state.sram);
+			this.expansionRam = (0, _serialisation.stringToUintArray)(state.expansionRam);
+			this._gameGeniePokes = Object.assign({}, state._gameGeniePokes);
+			if (this._usingChrVram) {
+				this._chrData = (0, _serialisation.stringToUintArray)(state._chrData);
+			}
+			if (this.mapperLoadState) {
+				this.mapperLoadState(state);
+			}
+		}
+	}]);
+
+	return BaseMapper;
+}();
+
+exports.default = BaseMapper;
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;/* FileSaver.js
@@ -586,39 +958,12 @@ var saveAs = saveAs || (function(view) {
 
 if (typeof module !== "undefined" && module.exports) {
   module.exports.saveAs = saveAs;
-} else if (("function" !== "undefined" && __webpack_require__(79) !== null) && (__webpack_require__(80) !== null)) {
+} else if (("function" !== "undefined" && __webpack_require__(80) !== null) && (__webpack_require__(81) !== null)) {
   !(__WEBPACK_AMD_DEFINE_RESULT__ = function() {
     return saveAs;
   }.call(exports, __webpack_require__, exports, module),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 }
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports) {
-
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || Function("return this")() || (1,eval)("this");
-} catch(e) {
-	// This works if the window reference is available
-	if(typeof window === "object")
-		g = window;
-}
-
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
-
-module.exports = g;
 
 
 /***/ }),
@@ -638,7 +983,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 exports.getGlContext = getGlContext;
 exports.webGlSupported = webGlSupported;
 
-var _glMat = __webpack_require__(56);
+var _glMat = __webpack_require__(60);
 
 var _glMat2 = _interopRequireDefault(_glMat);
 
@@ -949,7 +1294,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _BlipImpulse = __webpack_require__(23);
+var _BlipImpulse = __webpack_require__(24);
 
 var _BlipImpulse2 = _interopRequireDefault(_BlipImpulse);
 
@@ -1208,6 +1553,33 @@ function identity(out) {
 
 /***/ }),
 /* 10 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1221,21 +1593,21 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _stats = __webpack_require__(77);
+var _stats = __webpack_require__(79);
 
 var _stats2 = _interopRequireDefault(_stats);
 
-var _Event = __webpack_require__(2);
+var _Event = __webpack_require__(3);
 
-var _TestRenderSurface = __webpack_require__(42);
+var _TestRenderSurface = __webpack_require__(46);
 
 var _TestRenderSurface2 = _interopRequireDefault(_TestRenderSurface);
 
-var _Mainboard = __webpack_require__(31);
+var _Mainboard = __webpack_require__(32);
 
 var _Mainboard2 = _interopRequireDefault(_Mainboard);
 
-var _Cartridge = __webpack_require__(30);
+var _Cartridge = __webpack_require__(31);
 
 var _Cartridge2 = _interopRequireDefault(_Cartridge);
 
@@ -1243,29 +1615,29 @@ var _Trace = __webpack_require__(1);
 
 var _Trace2 = _interopRequireDefault(_Trace);
 
-var _loadRom = __webpack_require__(44);
+var _loadRom = __webpack_require__(48);
 
-var _gameGenie = __webpack_require__(43);
+var _gameGenie = __webpack_require__(47);
 
-var _CanvasParent = __webpack_require__(11);
+var _CanvasParent = __webpack_require__(12);
 
 var _CanvasParent2 = _interopRequireDefault(_CanvasParent);
 
-var _WebGlRenderSurface = __webpack_require__(18);
+var _WebGlRenderSurface = __webpack_require__(19);
 
 var _WebGlRenderSurface2 = _interopRequireDefault(_WebGlRenderSurface);
 
 var _utils = __webpack_require__(6);
 
-var _CanvasRenderSurface = __webpack_require__(15);
+var _CanvasRenderSurface = __webpack_require__(16);
 
 var _CanvasRenderSurface2 = _interopRequireDefault(_CanvasRenderSurface);
 
-var _StateManager = __webpack_require__(12);
+var _StateManager = __webpack_require__(13);
 
 var _StateManager2 = _interopRequireDefault(_StateManager);
 
-var _Input = __webpack_require__(17);
+var _Input = __webpack_require__(18);
 
 var _Input2 = _interopRequireDefault(_Input);
 
@@ -1586,7 +1958,7 @@ var NES = function () {
 exports.default = NES;
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1600,7 +1972,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _consts = __webpack_require__(0);
 
-var _Event = __webpack_require__(2);
+var _Event = __webpack_require__(3);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1677,7 +2049,7 @@ var CanvasParent = function () {
 exports.default = CanvasParent;
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1761,7 +2133,7 @@ var SaveStateManager = function () {
 exports.default = SaveStateManager;
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1819,7 +2191,7 @@ var WebAudioBuffer = function () {
 exports.default = WebAudioBuffer;
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1831,7 +2203,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _WebAudioBuffer = __webpack_require__(13);
+var _WebAudioBuffer = __webpack_require__(14);
 
 var _WebAudioBuffer2 = _interopRequireDefault(_WebAudioBuffer);
 
@@ -1877,7 +2249,7 @@ var WebAudioRenderer = function () {
 exports.default = WebAudioRenderer;
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1889,7 +2261,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _fileSaver = __webpack_require__(4);
+var _fileSaver = __webpack_require__(5);
 
 var _consts = __webpack_require__(0);
 
@@ -1990,7 +2362,7 @@ var CanvasRenderSurface = function () {
 exports.default = CanvasRenderSurface;
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2060,7 +2432,7 @@ var GamePad = function () {
 exports.default = GamePad;
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2072,11 +2444,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _GamePad = __webpack_require__(16);
+var _GamePad = __webpack_require__(17);
 
 var _GamePad2 = _interopRequireDefault(_GamePad);
 
-var _utils = __webpack_require__(41);
+var _utils = __webpack_require__(45);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2319,7 +2691,7 @@ var Input = function () {
 exports.default = Input;
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2333,7 +2705,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _consts = __webpack_require__(0);
 
-var _fileSaver = __webpack_require__(4);
+var _fileSaver = __webpack_require__(5);
 
 var _utils = __webpack_require__(6);
 
@@ -2517,7 +2889,7 @@ var WebGlRenderSurface = function () {
 exports.default = WebGlRenderSurface;
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2543,7 +2915,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 // Nes_Snd_Emu 0.1.7. Copyright (C) 2003-2005 Shay Green. GNU LGPL license.
 
-var _Tones = __webpack_require__(24);
+var _Tones = __webpack_require__(25);
 
 var _BlipSynth = __webpack_require__(7);
 
@@ -2959,7 +3331,7 @@ var APU = function () {
 exports.default = APU;
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2973,15 +3345,15 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _Trace = __webpack_require__(1);
 
-var _APU = __webpack_require__(19);
+var _APU = __webpack_require__(20);
 
 var _APU2 = _interopRequireDefault(_APU);
 
-var _BlipBuffer = __webpack_require__(21);
+var _BlipBuffer = __webpack_require__(22);
 
 var _BlipBuffer2 = _interopRequireDefault(_BlipBuffer);
 
-var _WebAudioRenderer = __webpack_require__(14);
+var _WebAudioRenderer = __webpack_require__(15);
 
 var _WebAudioRenderer2 = _interopRequireDefault(_WebAudioRenderer);
 
@@ -3179,7 +3551,7 @@ var APULegacy = function () {
 exports.default = APULegacy;
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3516,7 +3888,7 @@ var BlipBuffer = function () {
 exports.default = BlipBuffer;
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3556,7 +3928,7 @@ var BlipEqT = function BlipEqT(treble, cutoff, samplerate) {
 exports.default = BlipEqT;
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3568,7 +3940,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _BlipEqT = __webpack_require__(22);
+var _BlipEqT = __webpack_require__(23);
 
 var _BlipEqT2 = _interopRequireDefault(_BlipEqT);
 
@@ -3814,7 +4186,7 @@ var BlipImpulse = function () {
 exports.default = BlipImpulse;
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4416,7 +4788,7 @@ var Dmc = exports.Dmc = function (_Osc3) {
 }(Osc);
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4431,17 +4803,17 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _Trace = __webpack_require__(1);
 
-var _fastInstructions = __webpack_require__(27);
+var _fastInstructions = __webpack_require__(28);
 
 var _fastInstructions2 = _interopRequireDefault(_fastInstructions);
 
-var _switchFastInstructions = __webpack_require__(28);
+var _switchFastInstructions = __webpack_require__(29);
 
 var _switchFastInstructions2 = _interopRequireDefault(_switchFastInstructions);
 
-var _traceInstructions = __webpack_require__(29);
+var _traceInstructions = __webpack_require__(30);
 
-var _cpuTraceString = __webpack_require__(26);
+var _cpuTraceString = __webpack_require__(27);
 
 var _cpuTraceString2 = _interopRequireDefault(_cpuTraceString);
 
@@ -4714,7 +5086,7 @@ var Cpu6502 = function () {
 
 				this._flagInterrupt = true;
 				if (this.cmosVersion) this._flagDecimal = false;
-				this.programCounter = this.mainboard.memory.read16NoZeroPageWrap(CPU_IRQ_ADDRESS);
+				this.programCounter = this.mainboard.memory.read16NoZeroPageWrap(_consts.CPU_IRQ_ADDRESS);
 				return 7;
 			}
 			return 0;
@@ -4954,7 +5326,7 @@ var Cpu6502 = function () {
 exports.default = Cpu6502;
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8511,7 +8883,7 @@ formatCpuTraceString[255] = function (formatData) {
 var traceFunctions = exports.traceFunctions = formatCpuTraceString;
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8520,6 +8892,9 @@ var traceFunctions = exports.traceFunctions = formatCpuTraceString;
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _consts = __webpack_require__(0);
+
 var instructions = [];
 
 function BRK_NONE_0(cpu, memory) {
@@ -8550,7 +8925,7 @@ function BRK_NONE_0(cpu, memory) {
 	} else {
 		cpu.regS--;
 	}
-	cpu.setPC(cpu.read16FromMemNoWrap(CPU_IRQ_ADDRESS));
+	cpu.setPC(cpu.read16FromMemNoWrap(_consts.CPU_IRQ_ADDRESS));
 	cpu.setInterrupt(true);
 	return cyclesTaken;
 };
@@ -8575,7 +8950,7 @@ function HLT_NONE_2(cpu, memory) {
 	var cyclesTaken = 2;
 	cpu.setPC(cpu.getPC() + 1 & 0xFFFF);
 	var result = 0;
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_2 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[2] = HLT_NONE_2;
@@ -8815,7 +9190,7 @@ function HLT_NONE_18(cpu, memory) {
 	var cyclesTaken = 2;
 	cpu.setPC(cpu.getPC() + 1 & 0xFFFF);
 	var result = 0;
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_18 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[18] = HLT_NONE_18;
@@ -9090,7 +9465,7 @@ function HLT_NONE_34(cpu, memory) {
 	var cyclesTaken = 2;
 	cpu.setPC(cpu.getPC() + 1 & 0xFFFF);
 	var result = 0;
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_34 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[34] = HLT_NONE_34;
@@ -9354,7 +9729,7 @@ function HLT_NONE_50(cpu, memory) {
 	var cyclesTaken = 2;
 	cpu.setPC(cpu.getPC() + 1 & 0xFFFF);
 	var result = 0;
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_50 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[50] = HLT_NONE_50;
@@ -9645,7 +10020,7 @@ function HLT_NONE_66(cpu, memory) {
 	var cyclesTaken = 2;
 	cpu.setPC(cpu.getPC() + 1 & 0xFFFF);
 	var result = 0;
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_66 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[66] = HLT_NONE_66;
@@ -9885,7 +10260,7 @@ function HLT_NONE_82(cpu, memory) {
 	var cyclesTaken = 2;
 	cpu.setPC(cpu.getPC() + 1 & 0xFFFF);
 	var result = 0;
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_82 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[82] = HLT_NONE_82;
@@ -10166,7 +10541,7 @@ function HLT_NONE_98(cpu, memory) {
 	var cyclesTaken = 2;
 	cpu.setPC(cpu.getPC() + 1 & 0xFFFF);
 	var result = 0;
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_98 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[98] = HLT_NONE_98;
@@ -10445,7 +10820,7 @@ function HLT_NONE_114(cpu, memory) {
 	var cyclesTaken = 2;
 	cpu.setPC(cpu.getPC() + 1 & 0xFFFF);
 	var result = 0;
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_114 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[114] = HLT_NONE_114;
@@ -10909,7 +11284,7 @@ function HLT_NONE_146(cpu, memory) {
 	var cyclesTaken = 2;
 	cpu.setPC(cpu.getPC() + 1 & 0xFFFF);
 	var result = 0;
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_146 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[146] = HLT_NONE_146;
@@ -11334,7 +11709,7 @@ function HLT_NONE_178(cpu, memory) {
 	var cyclesTaken = 2;
 	cpu.setPC(cpu.getPC() + 1 & 0xFFFF);
 	var result = 0;
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_178 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[178] = HLT_NONE_178;
@@ -11840,7 +12215,7 @@ function HLT_NONE_210(cpu, memory) {
 	var cyclesTaken = 2;
 	cpu.setPC(cpu.getPC() + 1 & 0xFFFF);
 	var result = 0;
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_210 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[210] = HLT_NONE_210;
@@ -12379,7 +12754,7 @@ function HLT_NONE_242(cpu, memory) {
 	var cyclesTaken = 2;
 	cpu.setPC(cpu.getPC() + 1 & 0xFFFF);
 	var result = 0;
-	console.log("illegal instruction HLT not implemented");
+	console.log("HLT_NONE_242 illegal instruction HLT not implemented");
 	return cyclesTaken;
 };
 instructions[242] = HLT_NONE_242;
@@ -12642,7 +13017,7 @@ instructions[255] = INS_ABSOLUTEX_255;
 exports.default = instructions;
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17287,7 +17662,7 @@ function executeCpuInstructionSwitch(opcode, cpu, memory) {
 }
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23583,7 +23958,7 @@ var cpuInstructionsTrace = exports.cpuInstructionsTrace = instructions_TRACE;
 var cpuTrace = exports.cpuTrace = formatData;
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23595,13 +23970,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _sha = __webpack_require__(76);
+var _sha = __webpack_require__(78);
 
 var _sha2 = _interopRequireDefault(_sha);
 
 var _consts = __webpack_require__(0);
 
-var _BaseMapper = __webpack_require__(40);
+var _mapperFactory = __webpack_require__(44);
+
+var _mapperFactory2 = _interopRequireDefault(_mapperFactory);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -23775,7 +24152,7 @@ var Cartridge = function () {
 				var fourScreenRamLayout = (controlByte1 & 0x08) > 0;
 
 				var mirroringMethod = 0;
-				if (fourScreenRamLayout) mirroringMethod = PPU_MIRRORING_FOURSCREEN;else if (!horizontalMirroring) mirroringMethod = _consts.PPU_MIRRORING_VERTICAL;else mirroringMethod = PPU_MIRRORING_HORIZONTAL;
+				if (fourScreenRamLayout) mirroringMethod = PPU_MIRRORING_FOURSCREEN;else if (!horizontalMirroring) mirroringMethod = _consts.PPU_MIRRORING_VERTICAL;else mirroringMethod = _consts.PPU_MIRRORING_HORIZONTAL;
 
 				var mapperId = (controlByte1 & 0xF0) >> 4 | controlByte2 & 0xF0;
 
@@ -23808,7 +24185,7 @@ var Cartridge = function () {
 							mapperId = mapperFromDb;
 						}
 
-						that.memoryMapper = (0, _BaseMapper.mapperFactory)(mapperId, that.mainboard, mirroringMethod);
+						that.memoryMapper = (0, _mapperFactory2.default)(mapperId, that.mainboard, mirroringMethod);
 
 						// read in program code
 						var prg8kChunkCount = prgPageCount * 2; // read in 8k chunks, prgPageCount is 16k chunks
@@ -23851,7 +24228,7 @@ var Cartridge = function () {
 exports.default = Cartridge;
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23863,33 +24240,33 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Event = __webpack_require__(2);
+var _Event = __webpack_require__(3);
 
-var _Memory = __webpack_require__(32);
+var _Memory = __webpack_require__(33);
 
 var _Memory2 = _interopRequireDefault(_Memory);
 
-var _PPU = __webpack_require__(36);
+var _PPU = __webpack_require__(37);
 
 var _PPU2 = _interopRequireDefault(_PPU);
 
-var _RenderBuffer = __webpack_require__(35);
+var _RenderBuffer = __webpack_require__(36);
 
 var _RenderBuffer2 = _interopRequireDefault(_RenderBuffer);
 
-var _APULegacy = __webpack_require__(20);
+var _APULegacy = __webpack_require__(21);
 
 var _APULegacy2 = _interopRequireDefault(_APULegacy);
 
-var _InputDeviceBus = __webpack_require__(38);
+var _InputDeviceBus = __webpack_require__(39);
 
 var _InputDeviceBus2 = _interopRequireDefault(_InputDeviceBus);
 
-var _Synchroniser = __webpack_require__(37);
+var _Synchroniser = __webpack_require__(38);
 
 var _Synchroniser2 = _interopRequireDefault(_Synchroniser);
 
-var _Cpu = __webpack_require__(25);
+var _Cpu = __webpack_require__(26);
 
 var _Cpu2 = _interopRequireDefault(_Cpu);
 
@@ -24032,7 +24409,7 @@ var Mainboard = function () {
 exports.default = Mainboard;
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24044,7 +24421,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _serialisation = __webpack_require__(3);
+var _serialisation = __webpack_require__(2);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -24198,7 +24575,7 @@ var Memory = function () {
 exports.default = Memory;
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24508,7 +24885,7 @@ var PPURenderBG = function () {
 exports.default = PPURenderBG;
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24733,7 +25110,7 @@ var PPURenderSprites = function () {
 exports.default = PPURenderSprites;
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24747,7 +25124,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _consts = __webpack_require__(0);
 
-var _serialisation = __webpack_require__(3);
+var _serialisation = __webpack_require__(2);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -24858,7 +25235,7 @@ var RenderBuffer = function () {
 exports.default = RenderBuffer;
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24870,17 +25247,17 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _serialisation = __webpack_require__(3);
+var _serialisation = __webpack_require__(2);
 
 var _Trace = __webpack_require__(1);
 
 var _consts = __webpack_require__(0);
 
-var _PPURenderBG = __webpack_require__(33);
+var _PPURenderBG = __webpack_require__(34);
 
 var _PPURenderBG2 = _interopRequireDefault(_PPURenderBG);
 
-var _PPURenderSprites = __webpack_require__(34);
+var _PPURenderSprites = __webpack_require__(35);
 
 var _PPURenderSprites2 = _interopRequireDefault(_PPURenderSprites);
 
@@ -25059,7 +25436,7 @@ var PPU = function () {
 		value: function isRendering(tickCount, includeHblank) {
 			if (this.isRenderingEnabled()) {
 				var pos = this.ticksToScreenCoordinates(tickCount);
-				return (includeHblank ? IS_INT_BETWEEN(pos.x, 0, 256) : true) && IS_INT_BETWEEN(pos.y, -1, 241);
+				return (includeHblank ? (0, _consts.IS_INT_BETWEEN)(pos.x, 0, 256) : true) && (0, _consts.IS_INT_BETWEEN)(pos.y, -1, 241);
 			} else return false;
 		}
 	}, {
@@ -25680,7 +26057,7 @@ PPU.screenPos = {
 exports.default = PPU;
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25692,7 +26069,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Event = __webpack_require__(2);
+var _Event = __webpack_require__(3);
 
 var _consts = __webpack_require__(0);
 
@@ -25952,7 +26329,7 @@ var Synchroniser = function () {
 exports.default = Synchroniser;
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25964,7 +26341,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Joypad = __webpack_require__(39);
+var _Joypad = __webpack_require__(40);
 
 var _Joypad2 = _interopRequireDefault(_Joypad);
 
@@ -26026,7 +26403,7 @@ var InputDeviceBus = function () {
 exports.default = InputDeviceBus;
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26134,7 +26511,7 @@ var Joypad = function () {
 exports.default = Joypad;
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26143,376 +26520,22 @@ exports.default = Joypad;
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-exports.Mapper0 = exports.BaseMapper = undefined;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /* Estimated number of games with mapper (other mappers had <10 games)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 004: 569
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 001: 481
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 000: 260
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 002: 200
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 003: 145
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 007: 56
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 011: 35
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 019: 32
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 016: 26
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 099: 25
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 005: 24
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 018: 16
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 066: 16
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 033: 15
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 079: 15
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 045: 14
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 071: 14
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 113: 12
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 245: 11
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 023: 11
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Mapper 069: 11
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     */
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-exports.mapperFactory = mapperFactory;
+var _BaseMapper2 = __webpack_require__(4);
 
-var _serialisation = __webpack_require__(3);
+var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var BaseMapper = exports.BaseMapper = function () {
-	function BaseMapper(mainboard, mirroringMethod) {
-		_classCallCheck(this, BaseMapper);
-
-		this.mainboard = mainboard;
-		this.mirroringMethod = mirroringMethod;
-		this.prgPagesMap = new Int32Array(4);
-		this._prgData = null;
-		this._prgPageCount = 0;
-
-		this.chrPages = [];
-		this.chrPagesMap = new Int32Array(8);
-		this._chrData = null;
-		this._chrPageCount = 0;
-		this._usingChrVram = false;
-
-		this._gameGenieActive = false;
-		this._gameGeniePokes = {};
-
-		this.sram = new Int32Array(0x2000);
-		this.expansionRam = new Int32Array(0x1FE0);
-	}
-
-	_createClass(BaseMapper, [{
-		key: 'onEndFrame',
-		value: function onEndFrame() {}
-	}, {
-		key: 'getNextEvent',
-		value: function getNextEvent() {
-			return -1;
-		}
-	}, {
-		key: 'synchronise',
-		value: function synchronise(startTicks, endTicks) {}
-
-		// MMC3 specific functions
-
-	}, {
-		key: 'spriteScreenEnabledUpdate',
-		value: function spriteScreenEnabledUpdate(spriteEnabled, screenEnabled) {}
-	}, {
-		key: 'renderingEnabledChanged',
-		value: function renderingEnabledChanged(enabled) {}
-	}, {
-		key: 'setPrgData',
-		value: function setPrgData(array, prg8kPageCount) {
-
-			this._prgData = array;
-			this._prgPageCount = prg8kPageCount;
-		}
-	}, {
-		key: 'setChrData',
-		value: function setChrData(array, chr1kPageCount) {
-
-			this._chrData = array;
-			this._chrPageCount = chr1kPageCount;
-		}
-
-		////// PRG switching
-
-
-	}, {
-		key: 'get1kChrBankCount',
-		value: function get1kChrBankCount() {
-			return this._chrPageCount;
-		}
-	}, {
-		key: 'get2kChrBankCount',
-		value: function get2kChrBankCount() {
-			return this._chrPageCount >> 1; // Math.floor( this.chrPages.length / 2 );
-		}
-	}, {
-		key: 'get4kChrBankCount',
-		value: function get4kChrBankCount() {
-			return this._chrPageCount >> 2; // Math.floor( this.chrPages.length / 4 );
-		}
-	}, {
-		key: 'get8kChrBankCount',
-		value: function get8kChrBankCount() {
-			return this._chrPageCount >> 3; // Math.floor( this.chrPages.length / 8 );
-		}
-	}, {
-		key: 'get8kPrgBankCount',
-		value: function get8kPrgBankCount() {
-			return this._prgPageCount;
-		}
-	}, {
-		key: 'get16kPrgBankCount',
-		value: function get16kPrgBankCount() {
-			return this._prgPageCount >> 1; // Math.floor( this.prgPages.length / 2 );
-		}
-	}, {
-		key: 'get32kPrgBankCount',
-		value: function get32kPrgBankCount() {
-			return this._prgPageCount >> 2; // Math.floor( this.prgPages.length / 4 );
-		}
-	}, {
-		key: 'switch8kPrgBank',
-		value: function switch8kPrgBank(id, pos) {
-			//Nes.Trace.writeLine( 'mapper', 'switch8kPrgBank:' + id );
-			this.setPrgPage(id % this._prgPageCount, pos);
-		}
-	}, {
-		key: 'switch16kPrgBank',
-		value: function switch16kPrgBank(id, low) {
-			if (this.get16kPrgBankCount() > 0) {
-				//Nes.Trace.writeLine( 'mapper', 'switch16kPrgBank:' + id );
-				var aid = id * 2 % this._prgPageCount;
-				for (var i = 0; i < 2; ++i) {
-					this.setPrgPage(aid + i, i + (low ? 0 : 2));
-				}
-			}
-		}
-	}, {
-		key: 'switch32kPrgBank',
-		value: function switch32kPrgBank(id) {
-			if (this.get32kPrgBankCount() > 0) {
-				//Nes.Trace.writeLine( 'mapper', 'switch32kPrgBank:' + id );
-				var aid = id * 4 % this._prgPageCount;
-				for (var i = 0; i < 4; ++i) {
-					this.setPrgPage(aid + i, i);
-				}
-			}
-		}
-	}, {
-		key: 'setPrgPage',
-		value: function setPrgPage(id, pos) {
-			if (this.prgPagesMap[pos] !== id) {
-				this.prgPagesMap[pos] = id * 0x2000;
-			}
-		}
-	}, {
-		key: 'setChrPage',
-		value: function setChrPage(id, pos) {
-			this.chrPagesMap[pos] = id * 0x400;
-		}
-	}, {
-		key: 'switch1kChrBank',
-		value: function switch1kChrBank(id, pos) {
-			this.setChrPage(id % this._chrPageCount, pos);
-		}
-	}, {
-		key: 'switch2kChrBank',
-		value: function switch2kChrBank(id, pos) {
-			if (this.get2kChrBankCount() > 0) {
-				var aid = id * 2 % this._chrPageCount;
-				for (var i = 0; i < 2; ++i) {
-					this.setChrPage(aid + i, pos * 2 + i);
-				}
-			}
-		}
-	}, {
-		key: 'switch4kChrBank',
-		value: function switch4kChrBank(id, low) {
-			if (this.get4kChrBankCount() > 0) {
-				var aid = id * 4 % this._chrPageCount;
-				for (var i = 0; i < 4; ++i) {
-					this.setChrPage(aid + i, i + (low ? 0 : 4));
-				}
-			}
-		}
-	}, {
-		key: 'switch8kChrBank',
-		value: function switch8kChrBank(id) {
-			if (this.get8kChrBankCount() > 0) {
-				var aid = id * 8 % this._chrPageCount;
-				for (var i = 0; i < 8; ++i) {
-					this.setChrPage(aid + i, i);
-				}
-			}
-		}
-	}, {
-		key: 'useVRAM',
-		value: function useVRAM(numBanks) {
-
-			numBanks = numBanks || 8;
-			this._usingChrVram = true;
-			this._chrData = new Int32Array(0x400 * numBanks);
-
-			this._chrPageCount = numBanks;
-			for (var i = 0; i < Math.min(8, numBanks); ++i) {
-				this.setChrPage(i, i);
-			}
-		}
-
-		// 0x8000 -> 0xFFFF
-
-	}, {
-		key: 'write8PrgRom',
-		value: function write8PrgRom(offset, data) {}
-	}, {
-		key: 'read8PrgRom',
-		value: function read8PrgRom(offset) {
-
-			var pageid = (offset & 0x6000) >> 13; // Math.floor( ( prgOffset ) / 0x2000 );
-			var pagepos = this.prgPagesMap[pageid];
-			var aid = offset & 0x1FFF;
-			var readValue = this._prgData[pagepos + aid];
-
-			if (this._gameGenieActive) {
-				if (this._gameGeniePokes.hasOwnProperty(offset)) {
-					return this._checkGameGenieCode(readValue, offset);
-				}
-			}
-			return readValue;
-		}
-	}, {
-		key: '_checkGameGenieCode',
-		value: function _checkGameGenieCode(readValue, offset) {
-			// Game genie override
-			var gg = this._gameGeniePokes[offset];
-			if (gg.compare === -1 || gg.compare === readValue) {
-				return gg.value;
-			}
-			return readValue | 0;
-		}
-
-		// VRAM 0x0000 -> 0x2000
-
-	}, {
-		key: 'write8ChrRom',
-		value: function write8ChrRom(offset, data) {
-			if (this._usingChrVram) {
-				var pageid = (offset & 0x1C00) >> 10; // Math.floor( offset / 0x400 );
-				var pagepos = this.chrPagesMap[pageid];
-				var writeOffset = pagepos + (offset & 0x3FF);
-				this._chrData[writeOffset] = data;
-			}
-		}
-	}, {
-		key: 'read8ChrRom',
-		value: function read8ChrRom(offset, renderingSprites, readType) {
-			var pageid = (offset & 0x1C00) >> 10; // Math.floor( offset / 0x400 );
-			var pagepos = this.chrPagesMap[pageid];
-			var readOffset = pagepos + (offset & 0x3FF);
-			return this._chrData[readOffset] | 0;
-		}
-	}, {
-		key: 'write8SRam',
-		value: function write8SRam(offset, data) {
-			this.sram[offset & 0x1FFF] = data;
-		}
-	}, {
-		key: 'read8SRam',
-		value: function read8SRam(offset) {
-			return this.sram[offset & 0x1FFF] | 0;
-		}
-	}, {
-		key: 'write8EXRam',
-		value: function write8EXRam(offset, data) {
-			this.expansionRam[offset - 0x4020] = data;
-		}
-	}, {
-		key: 'read8EXRam',
-		value: function read8EXRam(offset) {
-			return this.expansionRam[offset - 0x4020] | 0;
-		}
-	}, {
-		key: 'reset',
-		value: function reset() {}
-
-		// Called from gameGenie.js - modified the PRG at given value
-
-	}, {
-		key: 'gameGeniePoke',
-		value: function gameGeniePoke(codeName, address, value, compareValue) {
-
-			this._gameGenieActive = true;
-			this._gameGeniePokes[address] = { name: codeName, value: value, compare: compareValue };
-		}
-	}, {
-		key: 'removeGameGeniePoke',
-		value: function removeGameGeniePoke(codeName) {
-
-			var keyArray = Object.keys(this._gameGeniePokes);
-			for (var i = 0; i < keyArray.length; ++i) {
-				var prop = keyArray[i];
-				if (this._gameGeniePokes.hasOwnProperty(prop)) {
-					var gg = this._gameGeniePokes[prop];
-					if (gg && gg.name === codeName) {
-						delete this._gameGeniePokes[prop];
-					}
-				}
-			}
-
-			var codesActive = Object.keys(this._gameGeniePokes).length;
-			this._gameGenieActive = codesActive > 0;
-		}
-	}, {
-		key: 'saveState',
-		value: function saveState() {
-			var data = {};
-
-			data.mirroringMethod = this.mirroringMethod;
-			data._usingChrVram = this._usingChrVram;
-			//data.prgPagesMap = Object.assign( {}, this.prgPagesMap );
-			//data.chrPagesMap = Object.assign( {}, this.chrPagesMap ); // TODO: restore
-			data.sram = (0, _serialisation.uintArrayToString)(this.sram);
-			data.expansionRam = (0, _serialisation.uintArrayToString)(this.expansionRam);
-			data._gameGeniePokes = Object.assign({}, this._gameGeniePokes);
-			if (this._usingChrVram) {
-				//data.chrPages = this.chrPages.map( function( page ) { return uintArrayToString( page ); } );
-				data._chrData = (0, _serialisation.uintArrayToString)(this._chrData);
-			}
-			if (this.mapperSaveState) {
-				this.mapperSaveState(data);
-			}
-			return data;
-		}
-	}, {
-		key: 'loadState',
-		value: function loadState(state) {
-			this.mirroringMethod = state.mirroringMethod;
-			this._usingChrVram = state._usingChrVram;
-			//this.prgPagesMap = Object.assign( {}, state.prgPagesMap );
-			// this.chrPagesMap = Object.assign( {}, state.chrPagesMap ); // TODO: restore
-			this.sram = (0, _serialisation.stringToUintArray)(state.sram);
-			this.expansionRam = (0, _serialisation.stringToUintArray)(state.expansionRam);
-			this._gameGeniePokes = Object.assign({}, state._gameGeniePokes);
-			if (this._usingChrVram) {
-				this._chrData = (0, _serialisation.stringToUintArray)(state._chrData);
-			}
-			if (this.mapperLoadState) {
-				this.mapperLoadState(state);
-			}
-		}
-	}]);
-
-	return BaseMapper;
-}();
-
-;
-
-var Mapper0 = exports.Mapper0 = function (_BaseMapper) {
+var Mapper0 = function (_BaseMapper) {
 	_inherits(Mapper0, _BaseMapper);
 
 	function Mapper0() {
@@ -26542,19 +26565,757 @@ var Mapper0 = exports.Mapper0 = function (_BaseMapper) {
 	}]);
 
 	return Mapper0;
-}(BaseMapper);
+}(_BaseMapper3.default);
+
+exports.default = Mapper0;
+
+/***/ }),
+/* 42 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _BaseMapper2 = __webpack_require__(4);
+
+var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
+
+var _consts = __webpack_require__(0);
+
+var _serialisation = __webpack_require__(2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Mapper4 = function (_BaseMapper) {
+	_inherits(Mapper4, _BaseMapper);
+
+	function Mapper4() {
+		_classCallCheck(this, Mapper4);
+
+		return _possibleConstructorReturn(this, (Mapper4.__proto__ || Object.getPrototypeOf(Mapper4)).apply(this, arguments));
+	}
+
+	_createClass(Mapper4, [{
+		key: 'init',
+		value: function init() {
+			this.bankSwapByte = 0;
+			this.prgRamDisableWrite = false;
+			this.chipEnable = this.interruptsEnabled = true;
+			this.irqCounter = this.irqLatch = 0;
+			this.mReloadFlag = false;
+			this._isMMC6 = false;
+			this._mmc6PrgRamWriteByte = 0;
+
+			this.lastA12Raise = 0;
+			this.mSpriteAddress = this.mScreenAddress = false;
+			this.mRenderingEnabled = false;
+
+			this.banks = new Int32Array(8);
+			this.banks[0] = 0;
+			this.banks[1] = 2;
+			this.banks[2] = 4;
+			this.banks[3] = 5;
+			this.banks[4] = 6;
+			this.banks[5] = 7;
+
+			this.banks[6] = 0;
+			this.banks[7] = 1;
+		}
+	}, {
+		key: '_eventIrq',
+		value: function _eventIrq() {
+			// don't do anything - call to synchronise() will trigger the irq
+			this.mainboard.synchroniser.changeEventTime(this._irqEventId, -1);
+		}
+	}, {
+		key: 'mapperSaveState',
+		value: function mapperSaveState(state) {
+			state.bankSwapByte = this.bankSwapByte;
+			state.prgRamDisableWrite = this.prgRamDisableWrite;
+			state.chipEnable = this.chipEnable;
+			state.interruptsEnabled = this.interruptsEnabled;
+			state.irqCounter = this.irqCounter;
+			state.irqLatch = this.irqLatch;
+			state.mReloadFlag = this.mReloadFlag;
+			state._isMMC6 = this._isMMC6;
+			state._mmc6PrgRamWriteByte = this._mmc6PrgRamWriteByte;
+			state.lastA12Raise = this.lastA12Raise;
+			state.mSpriteAddress = this.mSpriteAddress;
+			state.mScreenAddress = this.mScreenAddress;
+			state.mRenderingEnabled = this.mRenderingEnabled;
+			state.banks = (0, _serialisation.uintArrayToString)(this.banks);
+			state._interruptInProgress = this._interruptInProgress;
+		}
+	}, {
+		key: 'mapperLoadState',
+		value: function mapperLoadState(state) {
+
+			this.bankSwapByte = state.bankSwapByte;
+			this.prgRamDisableWrite = state.prgRamDisableWrite;
+			this.chipEnable = state.chipEnable;
+			this.interruptsEnabled = state.interruptsEnabled;
+			this.irqCounter = state.irqCounter;
+			this.irqLatch = state.irqLatch;
+			this.mReloadFlag = state.mReloadFlag;
+			this._isMMC6 = state._isMMC6;
+			this._mmc6PrgRamWriteByte = state._mmc6PrgRamWriteByte;
+			this.lastA12Raise = state.lastA12Raise;
+			this.mSpriteAddress = state.mSpriteAddress;
+			this.mScreenAddress = state.mScreenAddress;
+			this.mRenderingEnabled = state.mRenderingEnabled;
+			this.banks = (0, _serialisation.stringToUintArray)(state.banks);
+			this._interruptInProgress = state._interruptInProgress;
+		}
+	}, {
+		key: 'syncBanks',
+		value: function syncBanks(doPrg, doChr) {
+
+			if (doPrg) {
+				this.switch8kPrgBank(this.banks[7], 1);
+				this.switch8kPrgBank(this.get8kPrgBankCount() - 1, 3);
+
+				if ((this.bankSwapByte & 0x40) > 0) {
+					this.switch8kPrgBank(this.get8kPrgBankCount() - 2, 0);
+					this.switch8kPrgBank(this.banks[6], 2);
+				} else {
+					this.switch8kPrgBank(this.banks[6], 0);
+					this.switch8kPrgBank(this.get8kPrgBankCount() - 2, 2);
+				}
+			}
+			/*
+   		   0: Select 2 KB CHR bank at PPU $0000-$07FF (or $1000-$17FF);
+   		   1: Select 2 KB CHR bank at PPU $0800-$0FFF (or $1800-$1FFF);
+   		   2: Select 1 KB CHR bank at PPU $1000-$13FF (or $0000-$03FF);
+   		   3: Select 1 KB CHR bank at PPU $1400-$17FF (or $0400-$07FF);
+   		   4: Select 1 KB CHR bank at PPU $1800-$1BFF (or $0800-$0BFF);
+   		   5: Select 1 KB CHR bank at PPU $1C00-$1FFF (or $0C00-$0FFF);
+   */
+			if (doChr) {
+				this.mainboard.synchroniser.synchronise();
+
+				var bank0 = this.banks[0] & 0xFE;
+				var bank1 = this.banks[1] & 0xFE;
+				if ((this.bankSwapByte & 0x80) > 0) {
+					this.switch1kChrBank(this.banks[2], 0);
+					this.switch1kChrBank(this.banks[3], 1);
+					this.switch1kChrBank(this.banks[4], 2);
+					this.switch1kChrBank(this.banks[5], 3);
+
+					this.switch1kChrBank(bank0, 4);
+					this.switch1kChrBank(bank0 + 1, 5);
+					this.switch1kChrBank(bank1, 6);
+					this.switch1kChrBank(bank1 + 1, 7);
+				} else {
+					this.switch1kChrBank(bank0, 0);
+					this.switch1kChrBank(bank0 + 1, 1);
+					this.switch1kChrBank(bank1, 2);
+					this.switch1kChrBank(bank1 + 1, 3);
+
+					this.switch1kChrBank(this.banks[2], 4);
+					this.switch1kChrBank(this.banks[3], 5);
+					this.switch1kChrBank(this.banks[4], 6);
+					this.switch1kChrBank(this.banks[5], 7);
+				}
+			}
+		}
+	}, {
+		key: '_lookInDbForMMC6',
+		value: function _lookInDbForMMC6() {
+
+			if (this.mainboard.cart && this.mainboard.cart._dbData) {
+				var db = this.mainboard.cart._dbData;
+				if (db['cartridge'] && db['cartridge'][0]['board'] && db['cartridge'][0]['board'][0]) {
+					var board = db['cartridge'][0]['board'][0];
+					if (board['chip'] && board['chip'][0]) {
+						var chip = board['chip'][0];
+						if (chip['$'] && chip['$']['type']) {
+							return chip['$']['type'] === "MMC6B";
+						}
+					}
+				}
+			}
+			return false;
+		}
+	}, {
+		key: 'reset',
+		value: function reset() {
+			this.prgRamDisableWrite = false;
+			this.chipEnable = this.interruptsEnabled = true;
+			this._interruptInProgress = false;
+
+			this._A12LowerLimit = _consts.COLOUR_ENCODING_VBLANK_SCANLINES * _consts.MASTER_CYCLES_PER_SCANLINE;
+			this._A12UpperLimit = (_consts.COLOUR_ENCODING_FRAME_SCANLINES - 1) * _consts.MASTER_CYCLES_PER_SCANLINE;
+
+			this.lastA12Raise = 0;
+
+			this.mSpriteAddress = this.mScreenAddress = false;
+			this.mRenderingEnabled = false;
+			this.irqCounter = 0xFF;
+			this.irqLatch = 0xFF;
+			this.mReloadFlag = false;
+			this.lastA12Raise = 0;
+			this._isMMC6 = this._lookInDbForMMC6();
+			this._mmc6PrgRamWriteByte = 0;
+			this.bankSwapByte = 0;
+			this.banks[0] = 0;
+			this.banks[1] = 2;
+			this.banks[2] = 4;
+			this.banks[3] = 5;
+			this.banks[4] = 6;
+			this.banks[5] = 7;
+
+			this.banks[6] = 0;
+			this.banks[7] = 1;
+
+			if (this.get1kChrBankCount() === 0) {
+				this.useVRAM(8);
+			}
+
+			var that = this;
+			// TODO: Need to remove this event on mapper unload
+			this._irqEventId = this.mainboard.synchroniser.addEvent('mmc3 irq', -1, function () {
+				that._eventIrq();
+			});
+
+			this.syncBanks(true, true);
+			this.mainboard.ppu.changeMirroringMethod(this.mirroringMethod);
+		}
+	}, {
+		key: 'write8PrgRom',
+		value: function write8PrgRom(offset, data) {
+
+			var top3Bits = offset & 0xE000;
+			switch (top3Bits) {
+				case 0x8000:
+					if ((offset & 0x1) === 0) {
+						// even
+						if (this.bankSwapByte !== data & 0xFF) {
+							this.bankSwapByte = data & 0xFF;
+
+							if (this._isMMC6) {
+								var prgRamEnabled = (this.bankSwapByte & 0x20) > 0;
+								if (!prgRamEnabled) {
+									this._mmc6PrgRamWriteByte = 0;
+								}
+							}
+
+							this.syncBanks(true, true);
+						}
+					} else {
+						// odd
+						var swapByte = this.bankSwapByte & 0x7;
+						if (this.banks[swapByte] !== data & 0xFF) {
+							this.banks[swapByte] = data & 0xFF;
+							this.syncBanks(swapByte >= 6, swapByte <= 5);
+						}
+					}
+					break;
+				case 0xA000:
+					if ((offset & 0x1) === 0) {
+						// even
+						var mirroringMethod = (data & 0x1) > 0 ? _consts.PPU_MIRRORING_HORIZONTAL : _consts.PPU_MIRRORING_VERTICAL;
+						if (mirroringMethod !== this.mainboard.ppu.getMirroringMethod()) {
+							this.mainboard.synchroniser.synchronise();
+							this.mainboard.ppu.changeMirroringMethod(mirroringMethod);
+						}
+					} else {
+						// odd
+						if (this._isMMC6) {
+							var prgRamEnabled = (this.bankSwapByte & 0x20) > 0;
+							if (prgRamEnabled) {
+								this._mmc6PrgRamWriteByte = data;
+							}
+						} else {
+							this.prgRamDisableWrite = (data & 0x40) > 0;
+							this.chipEnable = (data & 0x80) > 0;
+						}
+					}
+					break;
+				case 0xC000:
+					if ((offset & 0x1) === 0) {
+						// even
+						if (this.irqLatch !== data) {
+							this.mainboard.synchroniser.synchronise();
+						}
+						this.irqLatch = data;
+					} else {
+						// odd
+						if (!this.mReloadFlag) {
+							this.mainboard.synchroniser.synchronise();
+						}
+						this.mReloadFlag = true;
+					}
+					this.updateIRQTime(this.mainboard.synchroniser.getCpuMTC(), true);
+					break;
+				case 0xE000:
+					if ((offset & 0x1) === 0) {
+						// even - "Writing any value to this register will disable MMC3 interrupts AND acknowledge any pending interrupts."
+						this.interruptsEnabled = false;
+						if (this._interruptInProgress) {
+							this.mainboard.cpu.holdIrqLineLow(false);
+							this._interruptInProgress = false;
+						}
+						//				Log::Write( LOG_MAPPER, ( boost::format( "Interrupts disabled on mapper" ) ).str() );
+					} else {
+						// odd
+						if (!this.interruptsEnabled) {
+							this.mainboard.synchroniser.synchronise();
+						}
+						this.interruptsEnabled = true;
+						//				Log::Write( LOG_MAPPER, ( boost::format( "Interrupts enabled on mapper" ) ).str() );
+					}
+					this.updateIRQTime(this.mainboard.synchroniser.getCpuMTC(), true);
+					break;
+			}
+		}
+	}, {
+		key: 'decrementIrqCounter',
+		value: function decrementIrqCounter(tickCount) {
+
+			//var pos = this.mainboard.ppu.ticksToScreenCoordinates( tickCount );
+			//var cpupos = this.mainboard.ppu.ticksToScreenCoordinates( this.mainboard.synchroniser.getCpuMTC() );
+
+			this.lastA12Raise = tickCount;
+			var doIrq = false;
+
+			//console.log( "[" + this.mainboard.ppu.frameCounter + "] Doing decrement at " + pos.x + "x" + pos.y + " cpu: " + cpupos.x + "x" + cpupos.y + " : " + this.irqCounter );
+
+			if (this.mReloadFlag) {
+				doIrq = this.irqLatch === 0; // MMC3 revA behaviour
+				this.irqCounter = this.irqLatch;
+				this.mReloadFlag = false;
+			} else if (this.irqCounter === 0) {
+				this.irqCounter = this.irqLatch;
+				if (this._isMMC6) {
+					doIrq = false;
+				} else {
+					if (this.irqCounter === 0) doIrq = true;
+				}
+			} else {
+				if (this.irqCounter > 0) this.irqCounter--;
+				doIrq = this.irqCounter === 0;
+			}
+
+			if (doIrq && this.interruptsEnabled && !this._interruptInProgress) {
+				//	if ( this.mainboard.ppu.frameCounter === 43 && pos.x === 260 && pos.y === 0 ) {
+				//				debugger;
+				//		}
+				//console.log( "[" + this.mainboard.ppu.frameCounter + "]" + pos.x + "x" + pos.y + " IRQ cpu: " + cpupos.x + "x" + cpupos.y );
+				this._interruptInProgress = true;
+				this.mainboard.cpu.holdIrqLineLow(true);
+			}
+		}
+	}, {
+		key: 'ppuA12Latch',
+		value: function ppuA12Latch() {
+			this.mainboard.synchroniser.synchronise();
+			var cpuMtc = this.mainboard.synchroniser.getCpuMTC();
+			if (this.lastA12Raise > 0 && cpuMtc - this.lastA12Raise <= 16 * _consts.MASTER_CYCLES_PER_PPU) {
+				return; // Required for Bill & Ted to work: Ignore A12 raises that are too close together
+			}
+			this.decrementIrqCounter(cpuMtc);
+			this.updateIRQTime(cpuMtc, true);
+		}
+	}, {
+		key: 'calculateNextA12Raise',
+		value: function calculateNextA12Raise(cpuMTC) {
+
+			// TODO: refactor this - could be more efficient
+			var pixelEvent = -1;
+			var firstScanline = 0;
+			if (this.mRenderingEnabled) {
+				if (this.mSpriteAddress && !this.mScreenAddress) {
+					pixelEvent = 265; // 260
+					firstScanline = 0;
+				}
+				// else if ( this.mSpriteAddress && this.mScreenAddress )
+				// {
+				// pixelEvent = 340;//324;
+				// firstScanline = -1;
+				// }
+				else //if ( this.mScreenAddress && !this.mSpriteAddress )
+					{
+						pixelEvent = 9; // 324; // 9;
+						firstScanline = 0; // -1;
+					}
+			}
+
+			if (cpuMTC >= this._A12UpperLimit || pixelEvent < 0) {
+				return -1;
+			}
+
+			var modmtc = cpuMTC % _consts.MASTER_CYCLES_PER_SCANLINE; // ticks from the start of the current scanline
+			var scanlineEvent = _consts.MASTER_CYCLES_PER_PPU * pixelEvent; // ticks from the start of the scanline when IRQ is decremented
+
+			var startMtc = cpuMTC - modmtc + scanlineEvent; // ticks till next irq decrement event
+
+			if (startMtc <= cpuMTC) startMtc += _consts.MASTER_CYCLES_PER_SCANLINE; // if we have already passed the irq event, move onto next scanline
+			if (this._A12UpperLimit <= startMtc) return -1;
+
+			if (startMtc < this._A12LowerLimit) startMtc = this._A12LowerLimit + scanlineEvent;
+
+			return startMtc;
+		}
+	}, {
+		key: 'updateIRQTime',
+		value: function updateIRQTime(cpuTime, doSync) {
+
+			if (doSync) {
+				this.mainboard.synchroniser.synchronise();
+			}
+
+			// tickLimit is the start of the rendering frame - only started being clocked when rendering
+			var newEvent = -1;
+			var nextRaise = 0;
+			var scanlines = 0;
+			if (this.interruptsEnabled) {
+				nextRaise = this.calculateNextA12Raise(cpuTime);
+				if (nextRaise === -1) {
+					newEvent = -1;
+				} else {
+					scanlines = this.mReloadFlag ? 0 : Math.max(this.irqCounter - 1, 0);
+					newEvent = nextRaise + scanlines * _consts.MASTER_CYCLES_PER_SCANLINE;
+					if (newEvent > this._A12UpperLimit) {
+						newEvent = -1;
+					} else {
+						//var pos = this.mainboard.ppu.ticksToScreenCoordinates( newEvent );
+						//var cpupos = this.mainboard.ppu.ticksToScreenCoordinates( this.mainboard.synchroniser.getCpuMTC() );
+						// if ( this.mainboard.ppu.frameCounter === 43 && pos.x === 260 && pos.y === 0 ) {
+						// debugger;
+						// }
+						//console.log( "Predicting next IRQ at " + pos.x + "x" + pos.y + " cpu: " + cpupos.x + "x" + cpupos.y );
+					}
+				}
+			}
+			this.mainboard.synchroniser.changeEventTime(this._irqEventId, newEvent);
+		}
+	}, {
+		key: 'spriteScreenEnabledUpdate',
+		value: function spriteScreenEnabledUpdate(spriteAddress, screenAddress) {
+			this.mSpriteAddress = spriteAddress;
+			this.mScreenAddress = screenAddress;
+			this.updateIRQTime(this.mainboard.synchroniser.getCpuMTC(), true);
+		}
+	}, {
+		key: 'renderingEnabledChanged',
+		value: function renderingEnabledChanged(enabled) {
+			this.mRenderingEnabled = enabled;
+			this.updateIRQTime(this.mainboard.synchroniser.getCpuMTC(), true);
+		}
+	}, {
+		key: 'synchronise',
+		value: function synchronise(startTicks, endTicks) {
+			/*
+   The heart of the MMC3. The PPU will cause A12 to rise when it fetches CHR from the right pattern table ($1xxx).
+   In "normal" conditions (BG uses $0xxx, all sprites use $1xxx), this will occur 8 times per scanline (once for each sprite).
+   However the BG could also be the culprit (if BG uses $1xxx and all sprites use $0xxx -- ?as seen in Armadillo?), in which case A12 will rise 34 times.
+   These 42 times per scanline are key times which I call "rise points":
+   BG rise points: 4, 12, 20, ... , 244, 252
+   Sp rise points: 260, 268, ..., 308, 316
+   BG rise points: 324, 332
+   If sprites are set to $1000-1FFF and the background is set to $0000-0FFF, then A12 will change from 0 to 1 at cycle 260 of each scanline, then change from 1 to 0 at cycle 320 of each scanline.
+   If sprites are set to $0000-0FFF and the background is set to $1000-1FFF, then A12 will change from 1 to 0 at cycle 256 of each scanline, then change from 0 to 1 at cycle 324 of each scanline.
+   */
+			// tickLimit is the start of the rendering frame - only started being clocked when rendering
+			var startMtc = this.calculateNextA12Raise(startTicks + 1);
+			if (startMtc >= 0) {
+				for (var mtc = startMtc; mtc <= Math.min(this._A12UpperLimit, endTicks); mtc += _consts.MASTER_CYCLES_PER_SCANLINE) {
+					this.decrementIrqCounter(mtc);
+				}
+			}
+			this.updateIRQTime(endTicks, false);
+		}
+	}, {
+		key: 'onEndFrame',
+		value: function onEndFrame() {
+			this.lastA12Raise = 0;
+		}
+	}, {
+		key: 'write8SRam',
+		value: function write8SRam(offset, data) {
+
+			if (this._isMMC6) {
+				if (offset >= 0x7000) {
+					var mirroredOffset = offset & 0x3FF;
+					var lowHalf = (mirroredOffset & 0x200) === 0;
+					var offsetMask = lowHalf ? 0x30 : 0xC0; // writing requires both the write and read bits set
+					if ((this._mmc6PrgRamWriteByte & offsetMask) === offsetMask) {
+						_BaseMapper3.default.prototype.write8SRam.call(this, mirroredOffset, data);
+					}
+				}
+			} else {
+				if (this.chipEnable && !this.prgRamDisableWrite) {
+					_BaseMapper3.default.prototype.write8SRam.call(this, offset, data);
+				}
+			}
+		}
+	}, {
+		key: 'read8SRam',
+		value: function read8SRam(offset) {
+
+			if (this._isMMC6 && offset >= 0x7000) {
+				if (offset >= 0x7000) {
+					var mirroredOffset = offset & 0x3FF;
+					var lowHalf = (mirroredOffset & 0x200) === 0;
+					var offsetMask = lowHalf ? 0x20 : 0x80;
+					if ((this._mmc6PrgRamWriteByte & offsetMask) > 0) {
+						return _BaseMapper3.default.prototype.read8SRam.call(this, mirroredOffset);
+					}
+				}
+			} else {
+				if (this.chipEnable) {
+					return _BaseMapper3.default.prototype.read8SRam.call(this, offset);
+				}
+			}
+			return 0;
+		}
+	}]);
+
+	return Mapper4;
+}(_BaseMapper3.default);
+
+exports.default = Mapper4;
+
+/***/ }),
+/* 43 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _BaseMapper2 = __webpack_require__(4);
+
+var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
+
+var _consts = __webpack_require__(0);
+
+var _serialisation = __webpack_require__(2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Mapper9 = function (_BaseMapper) {
+	_inherits(Mapper9, _BaseMapper);
+
+	function Mapper9() {
+		_classCallCheck(this, Mapper9);
+
+		return _possibleConstructorReturn(this, (Mapper9.__proto__ || Object.getPrototypeOf(Mapper9)).apply(this, arguments));
+	}
+
+	_createClass(Mapper9, [{
+		key: 'init',
+		value: function init() {
+			this._banks = new Int32Array(4);
+		}
+	}, {
+		key: 'mapperSaveState',
+		value: function mapperSaveState(state) {
+
+			state._banks = Nes.uintArrayToString(this._banks);
+			state._latches = this._latches.slice(0);
+		}
+	}, {
+		key: 'mapperLoadState',
+		value: function mapperLoadState(state) {
+
+			this._banks = Nes.stringToUintArray(state._banks);
+			this._latches = state._latches.slice(0);
+		}
+	}, {
+		key: 'reset',
+		value: function reset() {
+
+			this._latches = [true, false];
+			for (var i = 0; i < this._banks.length; ++i) {
+				this._banks[i] = 0;
+			}
+
+			this.switch32kPrgBank(this.get32kPrgBankCount() - 1);
+			for (var i = 0; i < 8; ++i) {
+				this.switch1kChrBank(0, i);
+			}
+			//	this.switch8kChrBank( 0 );
+			this.mainboard.ppu.changeMirroringMethod(this.mirroringMethod);
+		}
+	}, {
+		key: '_syncChrBanks',
+		value: function _syncChrBanks(performSync) {
+
+			if (performSync === undefined ? true : performSync) {
+				this.mainboard.synchroniser.synchronise();
+			}
+			var lowerBankId = this._latches[0] ? 1 : 0;
+			this.switch4kChrBank(this._banks[lowerBankId], true);
+			var upperBankId = this._latches[1] ? 3 : 2;
+			this.switch4kChrBank(this._banks[upperBankId], false);
+		}
+	}, {
+		key: 'MMC2Latch',
+		value: function MMC2Latch(ppuReadAddress) {
+
+			// http://wiki.nesdev.com/w/index.php/MMC2
+			if (ppuReadAddress === 0xFD8) {
+				this._latches[0] = false;
+				this._syncChrBanks(false);
+			} else if (ppuReadAddress === 0xFE8) {
+				this._latches[0] = true;
+				this._syncChrBanks(false);
+			} else if (ppuReadAddress >= 0x1FD8 && ppuReadAddress <= 0x1FDF) {
+				this._latches[1] = false;
+				this._syncChrBanks(false);
+			} else if (ppuReadAddress >= 0x1FE8 && ppuReadAddress <= 0x1FEF) {
+				this._latches[1] = true;
+				this._syncChrBanks(false);
+			}
+			// var latchId = ( ppuReadAddress & 0x1000 ) > 0 ? 1 : 0;
+			// var tilenum = ( ppuReadAddress >> 4 ) & 0xFF;
+			// var isFE = tilenum === 0xFE;
+			// if ( tilenum === 0xFD || isFE ) {
+			// this._latches[ latchId ] = isFE;
+			// this._syncChrBanks();
+			// }
+		}
+	}, {
+		key: 'write8PrgRom',
+		value: function write8PrgRom(offset, data) {
+
+			var top4Bits = offset & 0xF000;
+			switch (top4Bits) {
+				case 0xA000:
+					this.mainboard.synchroniser.synchronise();
+					this.switch8kPrgBank(data & 0xf, 0);
+					break;
+				case 0xB000:
+					this._banks[0] = data & 0x1F;
+					this._syncChrBanks();
+					break;
+				case 0xC000:
+					this._banks[1] = data & 0x1F;
+					this._syncChrBanks();
+					break;
+				case 0xD000:
+					this._banks[2] = data & 0x1F;
+					this._syncChrBanks();
+					break;
+				case 0xE000:
+					this._banks[3] = data & 0x1F;
+					this._syncChrBanks();
+					break;
+				case 0xF000:
+					this.mainboard.synchroniser.synchronise();
+					this.mainboard.ppu.changeMirroringMethod((data & 0x1) > 0 ? _consts.PPU_MIRRORING_HORIZONTAL : _consts.PPU_MIRRORING_VERTICAL);
+					break;
+				default:
+					Nes.basemapper.prototype.write8PrgRom.call(this, offset, data);
+					break;
+			}
+		}
+	}]);
+
+	return Mapper9;
+}(_BaseMapper3.default);
+
+exports.default = Mapper9;
+
+/***/ }),
+/* 44 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+exports.default = mapperFactory;
+
+var _Mapper = __webpack_require__(41);
+
+var _Mapper2 = _interopRequireDefault(_Mapper);
+
+var _Mapper3 = __webpack_require__(83);
+
+var _Mapper4 = _interopRequireDefault(_Mapper3);
+
+var _Mapper5 = __webpack_require__(42);
+
+var _Mapper6 = _interopRequireDefault(_Mapper5);
+
+var _Mapper7 = __webpack_require__(43);
+
+var _Mapper8 = _interopRequireDefault(_Mapper7);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* Estimated number of games with mapper (other mappers had <10 games)
+Mapper 004: 569
+Mapper 001: 481
+Mapper 000: 260
+Mapper 002: 200
+Mapper 003: 145
+Mapper 007: 56
+Mapper 011: 35
+Mapper 019: 32
+Mapper 016: 26
+Mapper 099: 25
+Mapper 005: 24
+Mapper 018: 16
+Mapper 066: 16
+Mapper 033: 15
+Mapper 079: 15
+Mapper 045: 14
+Mapper 071: 14
+Mapper 113: 12
+Mapper 245: 11
+Mapper 023: 11
+Mapper 069: 11
+*/
+
+var mapperDict = {
+	0: _Mapper2.default,
+	2: _Mapper4.default,
+	4: _Mapper6.default,
+	9: _Mapper8.default
+};
 
 function mapperFactory(mapperId, mainboard, mirroringMethod) {
-	var MapperClass = Mapper0; // Nes.mappers[ mapperId ];
-	if (!!!MapperClass) {
+	var MapperClass = mapperDict[mapperId];
+	if (!mapperDict.hasOwnProperty(mapperId) || !MapperClass) {
 		throw new Error('Mapper id ' + mapperId + ' is not supported');
 	}
 	var mapper = new MapperClass(mainboard, mirroringMethod);
+	if (mapper.init) {
+		mapper.init();
+	}
 	return mapper;
 }
 
 /***/ }),
-/* 41 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26733,7 +27494,7 @@ function loadFromLocalStorage(name) {
 }
 
 /***/ }),
-/* 42 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26745,7 +27506,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _rusha = __webpack_require__(74);
+var _rusha = __webpack_require__(77);
 
 var _rusha2 = _interopRequireDefault(_rusha);
 
@@ -26788,7 +27549,7 @@ var TestRenderSurface = function () {
 exports.default = TestRenderSurface;
 
 /***/ }),
-/* 43 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26892,7 +27653,7 @@ function processGenieCode(mainboard, codeString, enable) {
 }
 
 /***/ }),
-/* 44 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26944,7 +27705,7 @@ function loadRomFromUrl(url, callback) {
 }
 
 /***/ }),
-/* 45 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27065,7 +27826,7 @@ function fromByteArray (uint8) {
 
 
 /***/ }),
-/* 46 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27079,9 +27840,9 @@ function fromByteArray (uint8) {
 
 
 
-var base64 = __webpack_require__(45)
-var ieee754 = __webpack_require__(71)
-var isArray = __webpack_require__(72)
+var base64 = __webpack_require__(49)
+var ieee754 = __webpack_require__(75)
+var isArray = __webpack_require__(76)
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
@@ -28859,10 +29620,10 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
 
 /***/ }),
-/* 47 */
+/* 51 */
 /***/ (function(module, exports) {
 
 (function() {
@@ -28964,7 +29725,7 @@ function isnan (val) {
 
 
 /***/ }),
-/* 48 */
+/* 52 */
 /***/ (function(module, exports) {
 
 module.exports = adjoint;
@@ -29002,7 +29763,7 @@ function adjoint(out, a) {
 };
 
 /***/ }),
-/* 49 */
+/* 53 */
 /***/ (function(module, exports) {
 
 module.exports = clone;
@@ -29035,7 +29796,7 @@ function clone(a) {
 };
 
 /***/ }),
-/* 50 */
+/* 54 */
 /***/ (function(module, exports) {
 
 module.exports = copy;
@@ -29068,7 +29829,7 @@ function copy(out, a) {
 };
 
 /***/ }),
-/* 51 */
+/* 55 */
 /***/ (function(module, exports) {
 
 module.exports = create;
@@ -29100,7 +29861,7 @@ function create() {
 };
 
 /***/ }),
-/* 52 */
+/* 56 */
 /***/ (function(module, exports) {
 
 module.exports = determinant;
@@ -29135,7 +29896,7 @@ function determinant(a) {
 };
 
 /***/ }),
-/* 53 */
+/* 57 */
 /***/ (function(module, exports) {
 
 module.exports = fromQuat;
@@ -29187,7 +29948,7 @@ function fromQuat(out, q) {
 };
 
 /***/ }),
-/* 54 */
+/* 58 */
 /***/ (function(module, exports) {
 
 module.exports = fromRotationTranslation;
@@ -29245,7 +30006,7 @@ function fromRotationTranslation(out, q, v) {
 };
 
 /***/ }),
-/* 55 */
+/* 59 */
 /***/ (function(module, exports) {
 
 module.exports = frustum;
@@ -29286,37 +30047,37 @@ function frustum(out, left, right, bottom, top, near, far) {
 };
 
 /***/ }),
-/* 56 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = {
-  create: __webpack_require__(51)
-  , clone: __webpack_require__(49)
-  , copy: __webpack_require__(50)
+  create: __webpack_require__(55)
+  , clone: __webpack_require__(53)
+  , copy: __webpack_require__(54)
   , identity: __webpack_require__(9)
-  , transpose: __webpack_require__(70)
-  , invert: __webpack_require__(57)
-  , adjoint: __webpack_require__(48)
-  , determinant: __webpack_require__(52)
-  , multiply: __webpack_require__(59)
-  , translate: __webpack_require__(69)
-  , scale: __webpack_require__(67)
-  , rotate: __webpack_require__(63)
-  , rotateX: __webpack_require__(64)
-  , rotateY: __webpack_require__(65)
-  , rotateZ: __webpack_require__(66)
-  , fromRotationTranslation: __webpack_require__(54)
-  , fromQuat: __webpack_require__(53)
-  , frustum: __webpack_require__(55)
-  , perspective: __webpack_require__(61)
-  , perspectiveFromFieldOfView: __webpack_require__(62)
-  , ortho: __webpack_require__(60)
-  , lookAt: __webpack_require__(58)
-  , str: __webpack_require__(68)
+  , transpose: __webpack_require__(74)
+  , invert: __webpack_require__(61)
+  , adjoint: __webpack_require__(52)
+  , determinant: __webpack_require__(56)
+  , multiply: __webpack_require__(63)
+  , translate: __webpack_require__(73)
+  , scale: __webpack_require__(71)
+  , rotate: __webpack_require__(67)
+  , rotateX: __webpack_require__(68)
+  , rotateY: __webpack_require__(69)
+  , rotateZ: __webpack_require__(70)
+  , fromRotationTranslation: __webpack_require__(58)
+  , fromQuat: __webpack_require__(57)
+  , frustum: __webpack_require__(59)
+  , perspective: __webpack_require__(65)
+  , perspectiveFromFieldOfView: __webpack_require__(66)
+  , ortho: __webpack_require__(64)
+  , lookAt: __webpack_require__(62)
+  , str: __webpack_require__(72)
 }
 
 /***/ }),
-/* 57 */
+/* 61 */
 /***/ (function(module, exports) {
 
 module.exports = invert;
@@ -29376,7 +30137,7 @@ function invert(out, a) {
 };
 
 /***/ }),
-/* 58 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var identity = __webpack_require__(9);
@@ -29471,7 +30232,7 @@ function lookAt(out, eye, center, up) {
 };
 
 /***/ }),
-/* 59 */
+/* 63 */
 /***/ (function(module, exports) {
 
 module.exports = multiply;
@@ -29518,7 +30279,7 @@ function multiply(out, a, b) {
 };
 
 /***/ }),
-/* 60 */
+/* 64 */
 /***/ (function(module, exports) {
 
 module.exports = ortho;
@@ -29559,7 +30320,7 @@ function ortho(out, left, right, bottom, top, near, far) {
 };
 
 /***/ }),
-/* 61 */
+/* 65 */
 /***/ (function(module, exports) {
 
 module.exports = perspective;
@@ -29597,7 +30358,7 @@ function perspective(out, fovy, aspect, near, far) {
 };
 
 /***/ }),
-/* 62 */
+/* 66 */
 /***/ (function(module, exports) {
 
 module.exports = perspectiveFromFieldOfView;
@@ -29643,7 +30404,7 @@ function perspectiveFromFieldOfView(out, fov, near, far) {
 
 
 /***/ }),
-/* 63 */
+/* 67 */
 /***/ (function(module, exports) {
 
 module.exports = rotate;
@@ -29712,7 +30473,7 @@ function rotate(out, a, rad, axis) {
 };
 
 /***/ }),
-/* 64 */
+/* 68 */
 /***/ (function(module, exports) {
 
 module.exports = rotateX;
@@ -29761,7 +30522,7 @@ function rotateX(out, a, rad) {
 };
 
 /***/ }),
-/* 65 */
+/* 69 */
 /***/ (function(module, exports) {
 
 module.exports = rotateY;
@@ -29810,7 +30571,7 @@ function rotateY(out, a, rad) {
 };
 
 /***/ }),
-/* 66 */
+/* 70 */
 /***/ (function(module, exports) {
 
 module.exports = rotateZ;
@@ -29859,7 +30620,7 @@ function rotateZ(out, a, rad) {
 };
 
 /***/ }),
-/* 67 */
+/* 71 */
 /***/ (function(module, exports) {
 
 module.exports = scale;
@@ -29895,7 +30656,7 @@ function scale(out, a, v) {
 };
 
 /***/ }),
-/* 68 */
+/* 72 */
 /***/ (function(module, exports) {
 
 module.exports = str;
@@ -29914,7 +30675,7 @@ function str(a) {
 };
 
 /***/ }),
-/* 69 */
+/* 73 */
 /***/ (function(module, exports) {
 
 module.exports = translate;
@@ -29957,7 +30718,7 @@ function translate(out, a, v) {
 };
 
 /***/ }),
-/* 70 */
+/* 74 */
 /***/ (function(module, exports) {
 
 module.exports = transpose;
@@ -30011,7 +30772,7 @@ function transpose(out, a) {
 };
 
 /***/ }),
-/* 71 */
+/* 75 */
 /***/ (function(module, exports) {
 
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -30101,7 +30862,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 
 /***/ }),
-/* 72 */
+/* 76 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -30112,8 +30873,7 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 73 */,
-/* 74 */
+/* 77 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {(function () {
@@ -30610,15 +31370,14 @@ module.exports = Array.isArray || function (arr) {
         };
     }
 }());
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
 
 /***/ }),
-/* 75 */,
-/* 76 */
+/* 78 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer) {(function() {
-  var crypt = __webpack_require__(47),
+  var crypt = __webpack_require__(51),
       utf8 = __webpack_require__(8).utf8,
       bin = __webpack_require__(8).bin,
 
@@ -30700,10 +31459,10 @@ module.exports = Array.isArray || function (arr) {
   module.exports = api;
 })();
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(46).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(50).Buffer))
 
 /***/ }),
-/* 77 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // stats.js - http://github.com/mrdoob/stats.js
@@ -30714,8 +31473,7 @@ b.fillRect(d,m,n,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d,m,n,p);return{do
 
 
 /***/ }),
-/* 78 */,
-/* 79 */
+/* 80 */
 /***/ (function(module, exports) {
 
 module.exports = function() {
@@ -30724,7 +31482,7 @@ module.exports = function() {
 
 
 /***/ }),
-/* 80 */
+/* 81 */
 /***/ (function(module, exports) {
 
 /* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
@@ -30733,13 +31491,13 @@ module.exports = __webpack_amd_options__;
 /* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ }),
-/* 81 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _NES = __webpack_require__(10);
+var _NES = __webpack_require__(11);
 
 var _NES2 = _interopRequireDefault(_NES);
 
@@ -30748,10 +31506,62 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var App = new _NES2.default();
 App.start();
 
-App.loadRomFromUrl('/SuperMarioBros.nes');
+App.loadRomFromUrl('/roms/MegaMan.nes'); //o
 
-// loadRomFromUrl
-// enterGameGenieCode
+/***/ }),
+/* 83 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _BaseMapper2 = __webpack_require__(4);
+
+var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Mapper2 = function (_BaseMapper) {
+	_inherits(Mapper2, _BaseMapper);
+
+	function Mapper2() {
+		_classCallCheck(this, Mapper2);
+
+		return _possibleConstructorReturn(this, (Mapper2.__proto__ || Object.getPrototypeOf(Mapper2)).apply(this, arguments));
+	}
+
+	_createClass(Mapper2, [{
+		key: 'reset',
+		value: function reset() {
+			this.switch16kPrgBank(0, true);
+			this.switch16kPrgBank(this.get16kPrgBankCount() - 1, false);
+			this.useVRAM();
+			this.mainboard.ppu.changeMirroringMethod(this.mirroringMethod);
+		}
+	}, {
+		key: 'write8PrgRom',
+		value: function write8PrgRom(offset, data) {
+			//	this.mainboard.synchroniser.synchronise();
+			this.switch16kPrgBank(data, true);
+		}
+	}]);
+
+	return Mapper2;
+}(_BaseMapper3.default);
+
+exports.default = Mapper2;
 
 /***/ })
 /******/ ]);

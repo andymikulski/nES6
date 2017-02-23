@@ -18,6 +18,7 @@ import formatCpuTraceString from './cpuTraceString.js';
 import {
 	CPU_RESET_ADDRESS,
 	CPU_NMI_ADDRESS,
+	CPU_IRQ_ADDRESS,
 } from '../../config/consts.js';
 
 const maximumTracesToStoreForLoopDetection = 32;

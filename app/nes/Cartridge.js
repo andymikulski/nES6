@@ -12,7 +12,9 @@ var _sha2 = _interopRequireDefault(_sha);
 
 var _consts = require('../config/consts');
 
-var _BaseMapper = require('./mappers/BaseMapper');
+var _mapperFactory = require('./mappers/mapperFactory');
+
+var _mapperFactory2 = _interopRequireDefault(_mapperFactory);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -186,7 +188,7 @@ var Cartridge = function () {
 				var fourScreenRamLayout = (controlByte1 & 0x08) > 0;
 
 				var mirroringMethod = 0;
-				if (fourScreenRamLayout) mirroringMethod = PPU_MIRRORING_FOURSCREEN;else if (!horizontalMirroring) mirroringMethod = _consts.PPU_MIRRORING_VERTICAL;else mirroringMethod = PPU_MIRRORING_HORIZONTAL;
+				if (fourScreenRamLayout) mirroringMethod = PPU_MIRRORING_FOURSCREEN;else if (!horizontalMirroring) mirroringMethod = _consts.PPU_MIRRORING_VERTICAL;else mirroringMethod = _consts.PPU_MIRRORING_HORIZONTAL;
 
 				var mapperId = (controlByte1 & 0xF0) >> 4 | controlByte2 & 0xF0;
 
@@ -219,7 +221,7 @@ var Cartridge = function () {
 							mapperId = mapperFromDb;
 						}
 
-						that.memoryMapper = (0, _BaseMapper.mapperFactory)(mapperId, that.mainboard, mirroringMethod);
+						that.memoryMapper = (0, _mapperFactory2.default)(mapperId, that.mainboard, mirroringMethod);
 
 						// read in program code
 						var prg8kChunkCount = prgPageCount * 2; // read in 8k chunks, prgPageCount is 16k chunks

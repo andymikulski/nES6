@@ -13,6 +13,7 @@ import {
 	COLOUR_ENCODING_MTC_PER_CPU,
 	PPU_TICKS_PER_SCANLINE,
 	COLOUR_ENCODING_NAME,
+	IS_INT_BETWEEN,
 } from '../../config/consts';
 
 import PPURenderBG from './PPURenderBG';
