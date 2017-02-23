@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 82);
+/******/ 	return __webpack_require__(__webpack_require__.s = 84);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -322,85 +322,6 @@ function blobToString(blob) {
 
 /***/ }),
 /* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Event = exports.Event = function () {
-  function Event() {
-    _classCallCheck(this, Event);
-
-    this._callbacks = [];
-  }
-
-  _createClass(Event, [{
-    key: "addCallback",
-    value: function addCallback(cb) {
-      this._callbacks.push(cb);
-    }
-  }, {
-    key: "invoke",
-    value: function invoke() {
-      var eventArgs = Array.prototype.slice.call(arguments, 0);
-      for (var i = 0; i < this._callbacks.length; ++i) {
-        this._callbacks[i].apply(this, eventArgs);
-      }
-    }
-  }]);
-
-  return Event;
-}();
-
-var EventBus = exports.EventBus = function () {
-  function EventBus() {
-    _classCallCheck(this, EventBus);
-
-    this._map = {};
-  }
-
-  _createClass(EventBus, [{
-    key: "getEvent",
-    value: function getEvent(name) {
-      if (!this._map[name]) {
-        this._map[name] = new Event();
-      }
-      return this._map[name];
-    }
-  }, {
-    key: "connect",
-    value: function connect(name, cb) {
-      this.getEvent(name).addCallback(cb);
-    }
-  }, {
-    key: "invoke",
-    value: function invoke(name) {
-      var event = this._map[name];
-      var eventArgs = [];
-
-      if (event) {
-        if (arguments.length > 1) {
-          eventArgs = Array.prototype.slice.call(arguments, 1);
-        }
-
-        event.invoke.apply(event, eventArgs);
-      }
-    }
-  }]);
-
-  return EventBus;
-}();
-
-/***/ }),
-/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -772,6 +693,85 @@ var BaseMapper = function () {
 exports.default = BaseMapper;
 
 /***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Event = exports.Event = function () {
+  function Event() {
+    _classCallCheck(this, Event);
+
+    this._callbacks = [];
+  }
+
+  _createClass(Event, [{
+    key: "addCallback",
+    value: function addCallback(cb) {
+      this._callbacks.push(cb);
+    }
+  }, {
+    key: "invoke",
+    value: function invoke() {
+      var eventArgs = Array.prototype.slice.call(arguments, 0);
+      for (var i = 0; i < this._callbacks.length; ++i) {
+        this._callbacks[i].apply(this, eventArgs);
+      }
+    }
+  }]);
+
+  return Event;
+}();
+
+var EventBus = exports.EventBus = function () {
+  function EventBus() {
+    _classCallCheck(this, EventBus);
+
+    this._map = {};
+  }
+
+  _createClass(EventBus, [{
+    key: "getEvent",
+    value: function getEvent(name) {
+      if (!this._map[name]) {
+        this._map[name] = new Event();
+      }
+      return this._map[name];
+    }
+  }, {
+    key: "connect",
+    value: function connect(name, cb) {
+      this.getEvent(name).addCallback(cb);
+    }
+  }, {
+    key: "invoke",
+    value: function invoke(name) {
+      var event = this._map[name];
+      var eventArgs = [];
+
+      if (event) {
+        if (arguments.length > 1) {
+          eventArgs = Array.prototype.slice.call(arguments, 1);
+        }
+
+        event.invoke.apply(event, eventArgs);
+      }
+    }
+  }]);
+
+  return EventBus;
+}();
+
+/***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -958,7 +958,7 @@ var saveAs = saveAs || (function(view) {
 
 if (typeof module !== "undefined" && module.exports) {
   module.exports.saveAs = saveAs;
-} else if (("function" !== "undefined" && __webpack_require__(80) !== null) && (__webpack_require__(81) !== null)) {
+} else if (("function" !== "undefined" && __webpack_require__(82) !== null) && (__webpack_require__(83) !== null)) {
   !(__WEBPACK_AMD_DEFINE_RESULT__ = function() {
     return saveAs;
   }.call(exports, __webpack_require__, exports, module),
@@ -983,7 +983,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 exports.getGlContext = getGlContext;
 exports.webGlSupported = webGlSupported;
 
-var _glMat = __webpack_require__(60);
+var _glMat = __webpack_require__(62);
 
 var _glMat2 = _interopRequireDefault(_glMat);
 
@@ -1593,13 +1593,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _stats = __webpack_require__(79);
+var _stats = __webpack_require__(81);
 
 var _stats2 = _interopRequireDefault(_stats);
 
-var _Event = __webpack_require__(3);
+var _Event = __webpack_require__(4);
 
-var _TestRenderSurface = __webpack_require__(46);
+var _TestRenderSurface = __webpack_require__(48);
 
 var _TestRenderSurface2 = _interopRequireDefault(_TestRenderSurface);
 
@@ -1615,9 +1615,9 @@ var _Trace = __webpack_require__(1);
 
 var _Trace2 = _interopRequireDefault(_Trace);
 
-var _loadRom = __webpack_require__(48);
+var _loadRom = __webpack_require__(50);
 
-var _gameGenie = __webpack_require__(47);
+var _gameGenie = __webpack_require__(49);
 
 var _CanvasParent = __webpack_require__(12);
 
@@ -1972,7 +1972,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _consts = __webpack_require__(0);
 
-var _Event = __webpack_require__(3);
+var _Event = __webpack_require__(4);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -2448,7 +2448,7 @@ var _GamePad = __webpack_require__(17);
 
 var _GamePad2 = _interopRequireDefault(_GamePad);
 
-var _utils = __webpack_require__(45);
+var _utils = __webpack_require__(47);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -23970,13 +23970,13 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _sha = __webpack_require__(78);
+var _sha = __webpack_require__(80);
 
 var _sha2 = _interopRequireDefault(_sha);
 
 var _consts = __webpack_require__(0);
 
-var _mapperFactory = __webpack_require__(44);
+var _mapperFactory = __webpack_require__(46);
 
 var _mapperFactory2 = _interopRequireDefault(_mapperFactory);
 
@@ -24240,7 +24240,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Event = __webpack_require__(3);
+var _Event = __webpack_require__(4);
 
 var _Memory = __webpack_require__(33);
 
@@ -26069,7 +26069,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Event = __webpack_require__(3);
+var _Event = __webpack_require__(4);
 
 var _consts = __webpack_require__(0);
 
@@ -26523,7 +26523,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _BaseMapper2 = __webpack_require__(4);
+var _BaseMapper2 = __webpack_require__(3);
 
 var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
 
@@ -26577,12 +26577,273 @@ exports.default = Mapper0;
 
 
 Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _BaseMapper2 = __webpack_require__(3);
+
+var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
+
+var _consts = __webpack_require__(0);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Mapper1 = function (_BaseMapper) {
+  _inherits(Mapper1, _BaseMapper);
+
+  function Mapper1(mainboard, mirroringMethod) {
+    _classCallCheck(this, Mapper1);
+
+    var _this = _possibleConstructorReturn(this, (Mapper1.__proto__ || Object.getPrototypeOf(Mapper1)).call(this, mainboard, mirroringMethod));
+
+    _this.registers = new Int32Array(4); // size 4
+    _this.registers[0] = 0x0C;
+    _this.registers[1] = _this.registers[2] = _this.registers[3] = 0;
+
+    // below might be needed here, not sure -prater
+    // this.val = 0;
+    // this.count = 0;
+    // this.lastWriteMTC = -1;
+    //
+    // this.wRamEnabled = true;
+    // this.soromlatch = false;
+    //
+    return _this;
+  }
+
+  _createClass(Mapper1, [{
+    key: 'mapperSaveState',
+    value: function mapperSaveState(state) {
+      state.val = this.val;
+      state.count = this.count;
+      state.lastWriteMTC = this.lastWriteMTC;
+      state.registers = Nes.uintArrayToString(this.registers);
+      state.wRamEnabled = this.wRamEnabled;
+      state.soromlatch = this.soromlatch;
+    }
+  }, {
+    key: 'mapperLoadState',
+    value: function mapperLoadState(state) {
+      this.val = state.val;
+      this.count = state.count;
+      this.lastWriteMTC = state.lastWriteMTC;
+      this.registers = Nes.stringToUintArray(state.registers);
+      this.wRamEnabled = state.wRamEnabled;
+      this.soromlatch = state.soromlatch;
+    }
+  }, {
+    key: 'onEndFrame',
+    value: function onEndFrame() {
+      this.lastWriteMTC = -1;
+    }
+  }, {
+    key: 'reset',
+    value: function reset() {
+      this.switch16kPrgBank(0, true);
+      this.switch16kPrgBank(this.get16kPrgBankCount() - 1, false);
+
+      if (this.get8kChrBankCount() === 0) {
+        this.useVRAM();
+      } else {
+        this.switch8kChrBank(0);
+      }
+
+      this.mainboard.ppu.changeMirroringMethod(this.mirroringMethod);
+    }
+  }, {
+    key: 'syncChrMirrors',
+    value: function syncChrMirrors() {
+      if ((this.registers[0] & 0x10) > 0) {
+        this.switch4kChrBank(this.registers[1] & 0x1F, true);
+        this.switch4kChrBank(this.registers[2] & 0x1F, false);
+      } else {
+        this.switch8kChrBank((this.registers[1] & 0x1F) >> 1);
+      }
+    }
+  }, {
+    key: 'syncPrgMirrors',
+    value: function syncPrgMirrors() {
+      var offset = this.soromlatch ? 16 : 0; //if more than 256k ROM AND SOROM latch is on
+      var reg = this.registers[3];
+      if ((this.registers[0] & 0x8) > 0) {
+        // 16k / 32k prg switch
+        if ((this.registers[0] & 0x4) > 0) {
+          // high/low prg switch
+          var last = Math.min(this.get16kPrgBankCount() - 1, 15); // this.get16kPrgBankCount() - 1;
+          this.switch16kPrgBank(reg + offset, true);
+          this.switch16kPrgBank(last + offset, false);
+        } else {
+          this.switch16kPrgBank(0 + offset, true);
+          this.switch16kPrgBank(reg + offset, false);
+        }
+      } else {
+        this.switch32kPrgBank((reg >> 1) + (this.soromlatch ? 8 : 0));
+      }
+    }
+  }, {
+    key: 'write8PrgRom',
+    value: function write8PrgRom(offset, data) {
+      // To get Bill&Ted to work, we need to ignore calls that are less than 2 cpu calls from each other.
+      // see http://wiki.nesdev.com/w/index.php/INES_Mapper_001
+      var currTime = this.mainboard.synchroniser.getCpuMTC();
+      var minTime = this.lastWriteMTC + _consts.COLOUR_ENCODING_MTC_PER_CPU * 2;
+      var valid = this.lastWriteMTC >= 0;
+      this.lastWriteMTC = currTime;
+      if (valid && minTime >= currTime) {
+        return;
+      }
+
+      if ((data & 0x80) > 0) {
+        this.val = 0;
+        this.count = 0;
+        this.registers[0] |= 0x0C;
+        //this.syncChrMirrors();
+        //this.syncPrgMirrors();
+        return;
+      }
+
+      this.val |= (data & 0x01) << this.count;
+      this.count = this.count + 1;
+
+      if (this.count >= 5) {
+        this.mainboard.synchroniser.synchronise();
+        var top3Bits = offset & 0xE000;
+        switch (top3Bits) {
+          case 0x8000:
+            // IS_INT_BETWEEN( offset, 0x8000, 0xA000 )
+            this.registers[0] = this.val & 0x1F;
+
+            // bit 0 - Horizontal / vertical mirror switch
+            var mirroringMethod;
+            switch (this.val & 0x3) {
+              case 0:
+                mirroringMethod = PPU_MIRRORING_SINGLESCREEN_NT0;
+                break;
+              case 1:
+                mirroringMethod = PPU_MIRRORING_SINGLESCREEN_NT1;
+                break;
+              case 2:
+                mirroringMethod = _consts.PPU_MIRRORING_VERTICAL;
+                break;
+              case 3:
+                mirroringMethod = PPU_MIRRORING_HORIZONTAL;
+                break;
+            }
+
+            this.mainboard.ppu.changeMirroringMethod(mirroringMethod);
+            break;
+          case 0xA000:
+            this.registers[1] = this.val & 0x1F;
+            //SOROM boards use the high bit of CHR to switch between 1st and last
+            //256k of the PRG ROM
+            if (this.get16kPrgBankCount() > 16) {
+              this.soromlatch = (this.val & 0x10) > 0;
+              this.syncPrgMirrors();
+            }
+            break;
+          case 0xC000:
+            this.registers[2] = this.val & 0x1F;
+            if (this.get16kPrgBankCount() > 16) {
+              this.registers[2] &= 0xF;
+            }
+            break;
+          case 0xE000:
+            this.registers[3] = this.val & 0xF;
+            this.wRamEnabled = (this.val & 0x10) === 0;
+            break;
+        }
+
+        this.syncChrMirrors();
+        this.syncPrgMirrors();
+
+        this.count = 0;
+        this.val = 0;
+      }
+    }
+  }]);
+
+  return Mapper1;
+}(_BaseMapper3.default);
+
+exports.default = Mapper1;
+
+/***/ }),
+/* 43 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _BaseMapper2 = __webpack_require__(4);
+var _BaseMapper2 = __webpack_require__(3);
+
+var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Mapper2 = function (_BaseMapper) {
+	_inherits(Mapper2, _BaseMapper);
+
+	function Mapper2() {
+		_classCallCheck(this, Mapper2);
+
+		return _possibleConstructorReturn(this, (Mapper2.__proto__ || Object.getPrototypeOf(Mapper2)).apply(this, arguments));
+	}
+
+	_createClass(Mapper2, [{
+		key: 'reset',
+		value: function reset() {
+			this.switch16kPrgBank(0, true);
+			this.switch16kPrgBank(this.get16kPrgBankCount() - 1, false);
+			this.useVRAM();
+			this.mainboard.ppu.changeMirroringMethod(this.mirroringMethod);
+		}
+	}, {
+		key: 'write8PrgRom',
+		value: function write8PrgRom(offset, data) {
+			//	this.mainboard.synchroniser.synchronise();
+			this.switch16kPrgBank(data, true);
+		}
+	}]);
+
+	return Mapper2;
+}(_BaseMapper3.default);
+
+exports.default = Mapper2;
+
+/***/ }),
+/* 44 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _BaseMapper2 = __webpack_require__(3);
 
 var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
 
@@ -27089,7 +27350,7 @@ var Mapper4 = function (_BaseMapper) {
 exports.default = Mapper4;
 
 /***/ }),
-/* 43 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27101,7 +27362,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _BaseMapper2 = __webpack_require__(4);
+var _BaseMapper2 = __webpack_require__(3);
 
 var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
 
@@ -27242,7 +27503,7 @@ var Mapper9 = function (_BaseMapper) {
 exports.default = Mapper9;
 
 /***/ }),
-/* 44 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27257,50 +27518,53 @@ var _Mapper = __webpack_require__(41);
 
 var _Mapper2 = _interopRequireDefault(_Mapper);
 
-var _Mapper3 = __webpack_require__(83);
+var _Mapper3 = __webpack_require__(42);
 
 var _Mapper4 = _interopRequireDefault(_Mapper3);
 
-var _Mapper5 = __webpack_require__(42);
+var _Mapper5 = __webpack_require__(43);
 
 var _Mapper6 = _interopRequireDefault(_Mapper5);
 
-var _Mapper7 = __webpack_require__(43);
+var _Mapper7 = __webpack_require__(44);
 
 var _Mapper8 = _interopRequireDefault(_Mapper7);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _Mapper9 = __webpack_require__(45);
 
-/* Estimated number of games with mapper (other mappers had <10 games)
-Mapper 004: 569
-Mapper 001: 481
-Mapper 000: 260
-Mapper 002: 200
-Mapper 003: 145
-Mapper 007: 56
-Mapper 011: 35
-Mapper 019: 32
-Mapper 016: 26
-Mapper 099: 25
-Mapper 005: 24
-Mapper 018: 16
-Mapper 066: 16
-Mapper 033: 15
-Mapper 079: 15
-Mapper 045: 14
-Mapper 071: 14
-Mapper 113: 12
-Mapper 245: 11
-Mapper 023: 11
-Mapper 069: 11
-*/
+var _Mapper10 = _interopRequireDefault(_Mapper9);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var mapperDict = {
 	0: _Mapper2.default,
-	2: _Mapper4.default,
-	4: _Mapper6.default,
-	9: _Mapper8.default
-};
+	1: _Mapper4.default,
+	2: _Mapper6.default,
+	4: _Mapper8.default,
+	9: _Mapper10.default
+}; /* Estimated number of games with mapper (other mappers had <10 games)
+   Mapper 004: 569
+   Mapper 001: 481
+   Mapper 000: 260
+   Mapper 002: 200
+   Mapper 003: 145
+   Mapper 007: 56
+   Mapper 011: 35
+   Mapper 019: 32
+   Mapper 016: 26
+   Mapper 099: 25
+   Mapper 005: 24
+   Mapper 018: 16
+   Mapper 066: 16
+   Mapper 033: 15
+   Mapper 079: 15
+   Mapper 045: 14
+   Mapper 071: 14
+   Mapper 113: 12
+   Mapper 245: 11
+   Mapper 023: 11
+   Mapper 069: 11
+   */
 
 function mapperFactory(mapperId, mainboard, mirroringMethod) {
 	var MapperClass = mapperDict[mapperId];
@@ -27315,7 +27579,7 @@ function mapperFactory(mapperId, mainboard, mirroringMethod) {
 }
 
 /***/ }),
-/* 45 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27494,7 +27758,7 @@ function loadFromLocalStorage(name) {
 }
 
 /***/ }),
-/* 46 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27506,7 +27770,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _rusha = __webpack_require__(77);
+var _rusha = __webpack_require__(79);
 
 var _rusha2 = _interopRequireDefault(_rusha);
 
@@ -27549,7 +27813,7 @@ var TestRenderSurface = function () {
 exports.default = TestRenderSurface;
 
 /***/ }),
-/* 47 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27653,7 +27917,7 @@ function processGenieCode(mainboard, codeString, enable) {
 }
 
 /***/ }),
-/* 48 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27705,7 +27969,7 @@ function loadRomFromUrl(url, callback) {
 }
 
 /***/ }),
-/* 49 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27826,7 +28090,7 @@ function fromByteArray (uint8) {
 
 
 /***/ }),
-/* 50 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27840,9 +28104,9 @@ function fromByteArray (uint8) {
 
 
 
-var base64 = __webpack_require__(49)
-var ieee754 = __webpack_require__(75)
-var isArray = __webpack_require__(76)
+var base64 = __webpack_require__(51)
+var ieee754 = __webpack_require__(77)
+var isArray = __webpack_require__(78)
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
@@ -29623,7 +29887,7 @@ function isnan (val) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
 
 /***/ }),
-/* 51 */
+/* 53 */
 /***/ (function(module, exports) {
 
 (function() {
@@ -29725,7 +29989,7 @@ function isnan (val) {
 
 
 /***/ }),
-/* 52 */
+/* 54 */
 /***/ (function(module, exports) {
 
 module.exports = adjoint;
@@ -29763,7 +30027,7 @@ function adjoint(out, a) {
 };
 
 /***/ }),
-/* 53 */
+/* 55 */
 /***/ (function(module, exports) {
 
 module.exports = clone;
@@ -29796,7 +30060,7 @@ function clone(a) {
 };
 
 /***/ }),
-/* 54 */
+/* 56 */
 /***/ (function(module, exports) {
 
 module.exports = copy;
@@ -29829,7 +30093,7 @@ function copy(out, a) {
 };
 
 /***/ }),
-/* 55 */
+/* 57 */
 /***/ (function(module, exports) {
 
 module.exports = create;
@@ -29861,7 +30125,7 @@ function create() {
 };
 
 /***/ }),
-/* 56 */
+/* 58 */
 /***/ (function(module, exports) {
 
 module.exports = determinant;
@@ -29896,7 +30160,7 @@ function determinant(a) {
 };
 
 /***/ }),
-/* 57 */
+/* 59 */
 /***/ (function(module, exports) {
 
 module.exports = fromQuat;
@@ -29948,7 +30212,7 @@ function fromQuat(out, q) {
 };
 
 /***/ }),
-/* 58 */
+/* 60 */
 /***/ (function(module, exports) {
 
 module.exports = fromRotationTranslation;
@@ -30006,7 +30270,7 @@ function fromRotationTranslation(out, q, v) {
 };
 
 /***/ }),
-/* 59 */
+/* 61 */
 /***/ (function(module, exports) {
 
 module.exports = frustum;
@@ -30047,37 +30311,37 @@ function frustum(out, left, right, bottom, top, near, far) {
 };
 
 /***/ }),
-/* 60 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = {
-  create: __webpack_require__(55)
-  , clone: __webpack_require__(53)
-  , copy: __webpack_require__(54)
+  create: __webpack_require__(57)
+  , clone: __webpack_require__(55)
+  , copy: __webpack_require__(56)
   , identity: __webpack_require__(9)
-  , transpose: __webpack_require__(74)
-  , invert: __webpack_require__(61)
-  , adjoint: __webpack_require__(52)
-  , determinant: __webpack_require__(56)
-  , multiply: __webpack_require__(63)
-  , translate: __webpack_require__(73)
-  , scale: __webpack_require__(71)
-  , rotate: __webpack_require__(67)
-  , rotateX: __webpack_require__(68)
-  , rotateY: __webpack_require__(69)
-  , rotateZ: __webpack_require__(70)
-  , fromRotationTranslation: __webpack_require__(58)
-  , fromQuat: __webpack_require__(57)
-  , frustum: __webpack_require__(59)
-  , perspective: __webpack_require__(65)
-  , perspectiveFromFieldOfView: __webpack_require__(66)
-  , ortho: __webpack_require__(64)
-  , lookAt: __webpack_require__(62)
-  , str: __webpack_require__(72)
+  , transpose: __webpack_require__(76)
+  , invert: __webpack_require__(63)
+  , adjoint: __webpack_require__(54)
+  , determinant: __webpack_require__(58)
+  , multiply: __webpack_require__(65)
+  , translate: __webpack_require__(75)
+  , scale: __webpack_require__(73)
+  , rotate: __webpack_require__(69)
+  , rotateX: __webpack_require__(70)
+  , rotateY: __webpack_require__(71)
+  , rotateZ: __webpack_require__(72)
+  , fromRotationTranslation: __webpack_require__(60)
+  , fromQuat: __webpack_require__(59)
+  , frustum: __webpack_require__(61)
+  , perspective: __webpack_require__(67)
+  , perspectiveFromFieldOfView: __webpack_require__(68)
+  , ortho: __webpack_require__(66)
+  , lookAt: __webpack_require__(64)
+  , str: __webpack_require__(74)
 }
 
 /***/ }),
-/* 61 */
+/* 63 */
 /***/ (function(module, exports) {
 
 module.exports = invert;
@@ -30137,7 +30401,7 @@ function invert(out, a) {
 };
 
 /***/ }),
-/* 62 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var identity = __webpack_require__(9);
@@ -30232,7 +30496,7 @@ function lookAt(out, eye, center, up) {
 };
 
 /***/ }),
-/* 63 */
+/* 65 */
 /***/ (function(module, exports) {
 
 module.exports = multiply;
@@ -30279,7 +30543,7 @@ function multiply(out, a, b) {
 };
 
 /***/ }),
-/* 64 */
+/* 66 */
 /***/ (function(module, exports) {
 
 module.exports = ortho;
@@ -30320,7 +30584,7 @@ function ortho(out, left, right, bottom, top, near, far) {
 };
 
 /***/ }),
-/* 65 */
+/* 67 */
 /***/ (function(module, exports) {
 
 module.exports = perspective;
@@ -30358,7 +30622,7 @@ function perspective(out, fovy, aspect, near, far) {
 };
 
 /***/ }),
-/* 66 */
+/* 68 */
 /***/ (function(module, exports) {
 
 module.exports = perspectiveFromFieldOfView;
@@ -30404,7 +30668,7 @@ function perspectiveFromFieldOfView(out, fov, near, far) {
 
 
 /***/ }),
-/* 67 */
+/* 69 */
 /***/ (function(module, exports) {
 
 module.exports = rotate;
@@ -30473,7 +30737,7 @@ function rotate(out, a, rad, axis) {
 };
 
 /***/ }),
-/* 68 */
+/* 70 */
 /***/ (function(module, exports) {
 
 module.exports = rotateX;
@@ -30522,7 +30786,7 @@ function rotateX(out, a, rad) {
 };
 
 /***/ }),
-/* 69 */
+/* 71 */
 /***/ (function(module, exports) {
 
 module.exports = rotateY;
@@ -30571,7 +30835,7 @@ function rotateY(out, a, rad) {
 };
 
 /***/ }),
-/* 70 */
+/* 72 */
 /***/ (function(module, exports) {
 
 module.exports = rotateZ;
@@ -30620,7 +30884,7 @@ function rotateZ(out, a, rad) {
 };
 
 /***/ }),
-/* 71 */
+/* 73 */
 /***/ (function(module, exports) {
 
 module.exports = scale;
@@ -30656,7 +30920,7 @@ function scale(out, a, v) {
 };
 
 /***/ }),
-/* 72 */
+/* 74 */
 /***/ (function(module, exports) {
 
 module.exports = str;
@@ -30675,7 +30939,7 @@ function str(a) {
 };
 
 /***/ }),
-/* 73 */
+/* 75 */
 /***/ (function(module, exports) {
 
 module.exports = translate;
@@ -30718,7 +30982,7 @@ function translate(out, a, v) {
 };
 
 /***/ }),
-/* 74 */
+/* 76 */
 /***/ (function(module, exports) {
 
 module.exports = transpose;
@@ -30772,7 +31036,7 @@ function transpose(out, a) {
 };
 
 /***/ }),
-/* 75 */
+/* 77 */
 /***/ (function(module, exports) {
 
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -30862,7 +31126,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 
 /***/ }),
-/* 76 */
+/* 78 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -30873,7 +31137,7 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 77 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {(function () {
@@ -31373,11 +31637,11 @@ module.exports = Array.isArray || function (arr) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
 
 /***/ }),
-/* 78 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer) {(function() {
-  var crypt = __webpack_require__(51),
+  var crypt = __webpack_require__(53),
       utf8 = __webpack_require__(8).utf8,
       bin = __webpack_require__(8).bin,
 
@@ -31459,10 +31723,10 @@ module.exports = Array.isArray || function (arr) {
   module.exports = api;
 })();
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(50).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(52).Buffer))
 
 /***/ }),
-/* 79 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // stats.js - http://github.com/mrdoob/stats.js
@@ -31473,7 +31737,7 @@ b.fillRect(d,m,n,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d,m,n,p);return{do
 
 
 /***/ }),
-/* 80 */
+/* 82 */
 /***/ (function(module, exports) {
 
 module.exports = function() {
@@ -31482,7 +31746,7 @@ module.exports = function() {
 
 
 /***/ }),
-/* 81 */
+/* 83 */
 /***/ (function(module, exports) {
 
 /* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
@@ -31491,7 +31755,7 @@ module.exports = __webpack_amd_options__;
 /* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ }),
-/* 82 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31507,61 +31771,6 @@ var App = new _NES2.default();
 App.start();
 
 App.loadRomFromUrl('/roms/MegaMan.nes'); //o
-
-/***/ }),
-/* 83 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _BaseMapper2 = __webpack_require__(4);
-
-var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Mapper2 = function (_BaseMapper) {
-	_inherits(Mapper2, _BaseMapper);
-
-	function Mapper2() {
-		_classCallCheck(this, Mapper2);
-
-		return _possibleConstructorReturn(this, (Mapper2.__proto__ || Object.getPrototypeOf(Mapper2)).apply(this, arguments));
-	}
-
-	_createClass(Mapper2, [{
-		key: 'reset',
-		value: function reset() {
-			this.switch16kPrgBank(0, true);
-			this.switch16kPrgBank(this.get16kPrgBankCount() - 1, false);
-			this.useVRAM();
-			this.mainboard.ppu.changeMirroringMethod(this.mirroringMethod);
-		}
-	}, {
-		key: 'write8PrgRom',
-		value: function write8PrgRom(offset, data) {
-			//	this.mainboard.synchroniser.synchronise();
-			this.switch16kPrgBank(data, true);
-		}
-	}]);
-
-	return Mapper2;
-}(_BaseMapper3.default);
-
-exports.default = Mapper2;
 
 /***/ })
 /******/ ]);
