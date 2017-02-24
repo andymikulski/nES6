@@ -67,13 +67,20 @@ export default class RenderBuffer {
 	}
 
 	pickColour(paletteIndex) {
+		this.colorHash = this.colorHash || {};
+		if (this.colorHash[paletteIndex]) {
+			return this.colorHash[paletteIndex];
+		}
+
 		var pindex = 0;
 		if (paletteIndex < 64) {
 			pindex = paletteIndex;
 		} else {
 			pindex = 64;
 		}
-		return (new Uint32Array(this.defaultPalette32BitVals))[pindex];
+		this.colorHash[paletteIndex] = (new Uint32Array(this.defaultPalette32BitVals))[pindex];
+
+		return this.colorHash[paletteIndex];
 	}
 
 	_renderPixel(bufferIndex, insertIndex, y, paletteIndex) {
