@@ -395,14 +395,14 @@ export default class Cpu6502 {
 
 		var opcode = this.mainboard.memory.read8(this.programCounter);
 		var cyclesTaken = 0;
-		if (!this._useSwitchStatement) {
+		// if (!this._useSwitchStatement) {
 			cyclesTaken = this._instructionSet[opcode](this, this.mainboard.memory);
-		} else {
-			cyclesTaken = this._instructionSwitch(opcode, this, this.mainboard.memory);
-		}
-		if (this._traceEnabled) {
-			this._doTrace();
-		}
+		// } else {
+		// 	cyclesTaken = this._instructionSwitch(opcode, this, this.mainboard.memory);
+		// }
+		// if (this._traceEnabled) {
+		// 	this._doTrace();
+		// }
 		this.subcycle = 0;
 		return cyclesTaken;
 	}

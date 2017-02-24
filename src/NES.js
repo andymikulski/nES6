@@ -13,7 +13,7 @@ import WebGlRenderSurface from './gui/webgl/WebGlRenderSurface';
 import { webGlSupported } from './gui/webgl/utils';
 import CanvasRenderSurface from './gui/canvas/CanvasRenderSurface';
 
-import StateManager from './gui/StateManager';
+import StateManager from './nes/state/StateManager';
 
 import Input from './gui/input/Input';
 

@@ -14,18 +14,21 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "babel src -d app --watch & webpack app/main.js app/webnes.js --config ./webpack.config.js --watch",
+    "watch": "webpack --progress --config ./webpack.config.js --watch",
     "server": "cd app && python -m SimpleHTTPServer 8000 & cd ..",
     "dev": "npm run watch & npm run server",
-    "build": "babel src -d app && webpack app/main.js app/webnes.js --config ./webpack.build.config.js"
+    "build": "webpack -p --progress --config ./webpack.config.js"
   },
   "devDependencies": {
     "babel-cli": "6.23.0",
+    "babel-core": "^6.23.1",
+    "babel-loader": "^6.3.2",
     "babel-plugin-transform-class-properties": "6.23.0",
     "babel-plugin-transform-es2015-classes": "6.23.0",
     "babel-preset-es2015": "6.22.0",
     "babel-preset-stage-0": "6.22.0",
-    "webpack": "2.2.1"
+    "webpack": "2.2.1",
+    "webpack-closure-compiler": "^2.1.4"
   },
   "repository": {
     "type": "git",

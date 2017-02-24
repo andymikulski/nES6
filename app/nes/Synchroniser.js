@@ -124,48 +124,48 @@ var Synchroniser = function () {
 			// Then move onto the next one.
 			var objIndex = 0;
 			var keepRunning = true;
-			while (keepRunning) {
-				var nextEventTime = this.getNextEventTime();
-				if (nextEventTime <= syncTo && nextEventTime < frameEnd) {
-					syncTo = nextEventTime;
-				} else {
-					keepRunning = false; // no more events until requested syncTo value: we can finish the sync loop
-					syncTo = Math.min(syncTo, frameEnd);
-				}
+			// while ( keepRunning ) {
+			var nextEventTime = this.getNextEventTime();
+			if (nextEventTime <= syncTo && nextEventTime < frameEnd) {
+				syncTo = nextEventTime;
+			} else {
+				keepRunning = false; // no more events until requested syncTo value: we can finish the sync loop
+				syncTo = Math.min(syncTo, frameEnd);
+			}
 
-				if (this._lastSynchronisedMtc >= syncTo) {
-					return;
-				}
+			if (this._lastSynchronisedMtc >= syncTo) {
+				return;
+			}
 
-				this._isSynchronising = true;
-				this._currentSyncValue = syncTo;
+			this._isSynchronising = true;
+			this._currentSyncValue = syncTo;
 
-				for (objIndex = 0; objIndex < this._objects.length; ++objIndex) {
-					// TODO: Objects should be forbidden from calling synchroniser.synchronise() whilst in the synchronise phase - if they
-					// want to force a synchronise they should do so using an event
-					var obj = this._objects[objIndex];
-					if (obj.lastSynchronisedTickCount < syncTo) {
-						obj.object.synchronise(obj.lastSynchronisedTickCount, syncTo);
-						obj.lastSynchronisedTickCount = syncTo;
-					}
-				}
-				this._isSynchronising = false;
-
-				this._executeEvents(this._lastSynchronisedMtc, syncTo);
-				this._lastSynchronisedMtc = syncTo;
-
-				// TODO: this should be an event: do end frame stuff if that time has come
-				if (syncTo >= frameEnd) {
-					for (objIndex = 0; objIndex < this._objects.length; ++objIndex) {
-						this._objects[objIndex].object.onEndFrame(syncTo);
-						this._objects[objIndex].lastSynchronisedTickCount = 0;
-					}
-
-					this.cpuMtc -= frameEnd;
-					this._lastSynchronisedMtc = 0;
-					this._eventBus.invoke('frameEnd');
+			for (objIndex = 0; objIndex < this._objects.length; ++objIndex) {
+				// TODO: Objects should be forbidden from calling synchroniser.synchronise() whilst in the synchronise phase - if they
+				// want to force a synchronise they should do so using an event
+				var obj = this._objects[objIndex];
+				if (obj.lastSynchronisedTickCount < syncTo) {
+					obj.object.synchronise(obj.lastSynchronisedTickCount, syncTo);
+					obj.lastSynchronisedTickCount = syncTo;
 				}
 			}
+			this._isSynchronising = false;
+
+			this._executeEvents(this._lastSynchronisedMtc, syncTo);
+			this._lastSynchronisedMtc = syncTo;
+
+			// TODO: this should be an event: do end frame stuff if that time has come
+			if (syncTo >= frameEnd) {
+				for (objIndex = 0; objIndex < this._objects.length; ++objIndex) {
+					this._objects[objIndex].object.onEndFrame(syncTo);
+					this._objects[objIndex].lastSynchronisedTickCount = 0;
+				}
+
+				this.cpuMtc -= frameEnd;
+				this._lastSynchronisedMtc = 0;
+				this._eventBus.invoke('frameEnd');
+			}
+			// }
 		}
 	}, {
 		key: 'getNextEventTime',

@@ -9,4 +9,4 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var App = new _NES2.default();
 App.start();
 
-App.loadRomFromUrl('/roms/MegaMan.nes'); //o
+App.loadRomFromUrl('/roms/Earthbound.nes');

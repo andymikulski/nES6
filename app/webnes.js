@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 84);
+/******/ 	return __webpack_require__(__webpack_require__.s = 85);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -958,7 +958,7 @@ var saveAs = saveAs || (function(view) {
 
 if (typeof module !== "undefined" && module.exports) {
   module.exports.saveAs = saveAs;
-} else if (("function" !== "undefined" && __webpack_require__(82) !== null) && (__webpack_require__(83) !== null)) {
+} else if (("function" !== "undefined" && __webpack_require__(83) !== null) && (__webpack_require__(84) !== null)) {
   !(__WEBPACK_AMD_DEFINE_RESULT__ = function() {
     return saveAs;
   }.call(exports, __webpack_require__, exports, module),
@@ -983,7 +983,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 exports.getGlContext = getGlContext;
 exports.webGlSupported = webGlSupported;
 
-var _glMat = __webpack_require__(62);
+var _glMat = __webpack_require__(63);
 
 var _glMat2 = _interopRequireDefault(_glMat);
 
@@ -1294,7 +1294,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _BlipImpulse = __webpack_require__(24);
+var _BlipImpulse = __webpack_require__(25);
 
 var _BlipImpulse2 = _interopRequireDefault(_BlipImpulse);
 
@@ -1482,6 +1482,185 @@ exports.default = BlipSynth;
 
 /***/ }),
 /* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+exports.getCartName = getCartName;
+exports.getMetaName = getMetaName;
+exports.getMetaObject = getMetaObject;
+exports.setMetaObject = setMetaObject;
+exports.saveState = saveState;
+exports.loadState = loadState;
+exports.getStateMetaData = getStateMetaData;
+exports.renameState = renameState;
+exports.renameQuickSaveStates = renameQuickSaveStates;
+exports.saveStateSupported = saveStateSupported;
+exports.saveToLocalStorage = saveToLocalStorage;
+exports.loadFromLocalStorage = loadFromLocalStorage;
+function compress(rawString) {
+
+	var compressed;
+	// LZString is way too slow and gives pretty much the same result, use jz.algos instead
+	//compressed = LZString.compress( raw );
+	var int32Array = Nes.stringToUintArray(rawString);
+	compressed = Nes.uintArrayToString(new Int32Array(jz.algos.deflate(new Uint8Array(int32Array))));
+	return compressed;
+}
+
+function decompress(rawString) {
+	var decompressed;
+	//decompressed = LZString.decompress( compressed );
+	var int32Array = Nes.stringToUintArray(rawString);
+	decompressed = Nes.uintArrayToString(new Int32Array(jz.algos.inflate(new Uint8Array(int32Array))));
+	return decompressed;
+}
+
+function getCartName(slotName, cartName) {
+	return slotName + ":" + cartName;
+}
+
+function getMetaName(cartName) {
+	return "meta:" + cartName;
+}
+
+function getMetaObject(cartName) {
+	var obj = loadFromLocalStorage(getMetaName(cartName));
+	if (!obj) {
+		obj = {
+			slots: {}
+		};
+	}
+	return obj;
+}
+
+function setMetaObject(cartName, obj) {
+	saveToLocalStorage(getMetaName(cartName), obj);
+}
+
+function saveState(slotName, cartName, data, screenData) {
+
+	if (localStorage) {
+		// save state data as it's own local storage object
+		saveToLocalStorage(getCartName(slotName, cartName), data);
+
+		// add to meta data object
+		var meta = getMetaObject(cartName);
+		var slotMeta = {};
+		if (screenData) {
+			slotMeta.screen = compress(screenData);
+			console.log("Saved screenshot size: " + slotMeta.screen.length + " (uncompressed: " + screenData.length + ")");
+		}
+		slotMeta.date = Date.now();
+		meta.slots[slotName] = slotMeta;
+		setMetaObject(cartName, meta);
+	}
+}
+
+function loadState(slotName, cartName) {
+
+	if (localStorage) {
+		var compressed = localStorage.getItem(getCartName(slotName, cartName));
+		if (compressed) {
+			var compressedLength = compressed.length;
+			var decompressed = decompress(compressed);
+			var obj = JSON.parse(decompressed);
+			console.log("Loaded data size: " + compressedLength + " (uncompressed: " + decompressed.length + ")");
+			return obj;
+		}
+	} else {
+		//( 'Browser does not support local storage' );
+	}
+	return null;
+}
+
+function getStateMetaData(cartName, decompressScreenData) {
+	var meta = getMetaObject(cartName);
+	// decompress all image data before passing it back
+	if (decompressScreenData) {
+		var keyNames = Object.keys(meta.slots);
+		for (var keyIndex = 0; keyIndex < keyNames.length; ++keyIndex) {
+			var slotName = keyNames[keyIndex];
+			var slot = meta.slots[slotName];
+			if (slot.screen) {
+				slot.screen = decompress(slot.screen);
+			}
+		}
+	}
+	return meta;
+}
+
+function renameState(meta, slotName, newSlotName, cartName) {
+
+	// rename data object
+	var itemName = getCartName(slotName, cartName);
+	var data = localStorage.getItem(itemName);
+	if (data) {
+		localStorage.removeItem(itemName);
+
+		if (newSlotName) {
+			var newItemName = getCartName(newSlotName, cartName);
+			localStorage.setItem(newItemName, data);
+		}
+
+		// rename it in meta object
+		if (newSlotName) {
+			meta.slots[newSlotName] = meta.slots[slotName];
+		}
+		delete meta.slots[slotName];
+	}
+}
+
+function renameQuickSaveStates(slotName, cartName, limitCount) {
+
+	var meta = getMetaObject(cartName);
+
+	// remove last quicksave.
+	renameState(meta, slotName + ZERO_PAD(limitCount - 1, 2, 0), null, cartName);
+
+	// rename any others, moving each one down. We go backwards so we don't overwrite
+	for (var i = limitCount - 2; i > 0; --i) {
+		renameState(meta, slotName + ZERO_PAD(i, 2, 0), slotName + ZERO_PAD(i + 1, 2, 0), cartName);
+	}
+
+	// rename main 'quicksave' slot
+	renameState(meta, slotName, slotName + ZERO_PAD(1, 2, 0), cartName);
+
+	setMetaObject(cartName, meta);
+}
+
+function saveStateSupported() {
+
+	return !!localStorage;
+}
+
+function saveToLocalStorage(name, data) {
+	if (localStorage) {
+		var raw = JSON.stringify(data);
+		var compressed = compress(raw);
+		localStorage.setItem(name, compressed);
+	}
+}
+
+function loadFromLocalStorage(name) {
+	if (localStorage) {
+		var compressed = localStorage.getItem(name);
+		if (compressed) {
+			var compressedLength = compressed.length;
+			var decompressed = decompress(compressed);
+			var obj = JSON.parse(decompressed);
+			return obj;
+		}
+	}
+	return null;
+}
+
+/***/ }),
+/* 9 */
 /***/ (function(module, exports) {
 
 var charenc = {
@@ -1520,7 +1699,7 @@ module.exports = charenc;
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports) {
 
 module.exports = identity;
@@ -1552,7 +1731,7 @@ function identity(out) {
 };
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports) {
 
 var g;
@@ -1579,7 +1758,25 @@ module.exports = g;
 
 
 /***/ }),
-/* 11 */
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _NES = __webpack_require__(13);
+
+var _NES2 = _interopRequireDefault(_NES);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var App = new _NES2.default();
+App.start();
+
+App.loadRomFromUrl('/roms/Earthbound.nes');
+
+/***/ }),
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1593,21 +1790,21 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _stats = __webpack_require__(81);
+var _stats = __webpack_require__(82);
 
 var _stats2 = _interopRequireDefault(_stats);
 
 var _Event = __webpack_require__(4);
 
-var _TestRenderSurface = __webpack_require__(48);
+var _TestRenderSurface = __webpack_require__(49);
 
 var _TestRenderSurface2 = _interopRequireDefault(_TestRenderSurface);
 
-var _Mainboard = __webpack_require__(32);
+var _Mainboard = __webpack_require__(33);
 
 var _Mainboard2 = _interopRequireDefault(_Mainboard);
 
-var _Cartridge = __webpack_require__(31);
+var _Cartridge = __webpack_require__(32);
 
 var _Cartridge2 = _interopRequireDefault(_Cartridge);
 
@@ -1615,29 +1812,29 @@ var _Trace = __webpack_require__(1);
 
 var _Trace2 = _interopRequireDefault(_Trace);
 
-var _loadRom = __webpack_require__(50);
+var _loadRom = __webpack_require__(51);
 
-var _gameGenie = __webpack_require__(49);
+var _gameGenie = __webpack_require__(50);
 
-var _CanvasParent = __webpack_require__(12);
+var _CanvasParent = __webpack_require__(14);
 
 var _CanvasParent2 = _interopRequireDefault(_CanvasParent);
 
-var _WebGlRenderSurface = __webpack_require__(19);
+var _WebGlRenderSurface = __webpack_require__(20);
 
 var _WebGlRenderSurface2 = _interopRequireDefault(_WebGlRenderSurface);
 
 var _utils = __webpack_require__(6);
 
-var _CanvasRenderSurface = __webpack_require__(16);
+var _CanvasRenderSurface = __webpack_require__(17);
 
 var _CanvasRenderSurface2 = _interopRequireDefault(_CanvasRenderSurface);
 
-var _StateManager = __webpack_require__(13);
+var _StateManager = __webpack_require__(48);
 
 var _StateManager2 = _interopRequireDefault(_StateManager);
 
-var _Input = __webpack_require__(18);
+var _Input = __webpack_require__(19);
 
 var _Input2 = _interopRequireDefault(_Input);
 
@@ -1958,7 +2155,7 @@ var NES = function () {
 exports.default = NES;
 
 /***/ }),
-/* 12 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2049,91 +2246,7 @@ var CanvasParent = function () {
 exports.default = CanvasParent;
 
 /***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var SaveStateManager = function () {
-	function SaveStateManager(app, createGuiComponents) {
-		_classCallCheck(this, SaveStateManager);
-
-		this._app = app;
-		this._mainboard = this._app._mainboard;
-		this._renderSurface = this._app._renderSurface;
-
-		this._loadPending = '';
-		this._loadStatePending = false;
-		this._saveStatePending = false;
-	}
-
-	_createClass(SaveStateManager, [{
-		key: 'quickSaveState',
-		value: function quickSaveState() {
-			this._saveStatePending = true;
-		}
-	}, {
-		key: 'quickLoadState',
-		value: function quickLoadState() {
-			this.loadState('quicksave');
-		}
-	}, {
-		key: 'loadState',
-		value: function loadState(slotName) {
-			this._loadPending = slotName;
-			this._loadStatePending = true;
-		}
-	}, {
-		key: '_doQuickSave',
-		value: function _doQuickSave() {
-			// push back previous quicksaves by renaming them, pushing them back in the queue
-			var hash = this._mainboard.cart.getHash();
-			Gui.renameQuickSaveStates("quicksave", hash, 3);
-			var screen = this._renderSurface.screenshotToString();
-			var state = this._mainboard.saveState();
-			Gui.saveState("quicksave", hash, state, screen);
-		}
-	}, {
-		key: '_doQuickLoad',
-		value: function _doQuickLoad() {
-			var state = Gui.loadState(this._loadPending, this._mainboard.cart.getHash());
-			if (state) {
-				this._mainboard.loadState(state);
-			}
-		}
-	}, {
-		key: 'onFrame',
-		value: function onFrame() {
-
-			var that = this;
-			if (this._mainboard.cart) {
-				if (this._saveStatePending) {
-					this._saveStatePending = false;
-					this._doQuickSave();
-				} else if (this._loadStatePending) {
-					this._loadStatePending = false;
-					this._doQuickLoad();
-				}
-			}
-		}
-	}]);
-
-	return SaveStateManager;
-}();
-
-exports.default = SaveStateManager;
-
-/***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2191,7 +2304,7 @@ var WebAudioBuffer = function () {
 exports.default = WebAudioBuffer;
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2203,7 +2316,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _WebAudioBuffer = __webpack_require__(14);
+var _WebAudioBuffer = __webpack_require__(15);
 
 var _WebAudioBuffer2 = _interopRequireDefault(_WebAudioBuffer);
 
@@ -2249,7 +2362,7 @@ var WebAudioRenderer = function () {
 exports.default = WebAudioRenderer;
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2362,7 +2475,7 @@ var CanvasRenderSurface = function () {
 exports.default = CanvasRenderSurface;
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2432,7 +2545,7 @@ var GamePad = function () {
 exports.default = GamePad;
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2444,11 +2557,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _GamePad = __webpack_require__(17);
+var _GamePad = __webpack_require__(18);
 
 var _GamePad2 = _interopRequireDefault(_GamePad);
 
-var _utils = __webpack_require__(47);
+var _utils = __webpack_require__(8);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2691,7 +2804,7 @@ var Input = function () {
 exports.default = Input;
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2889,7 +3002,7 @@ var WebGlRenderSurface = function () {
 exports.default = WebGlRenderSurface;
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2915,7 +3028,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 // Nes_Snd_Emu 0.1.7. Copyright (C) 2003-2005 Shay Green. GNU LGPL license.
 
-var _Tones = __webpack_require__(25);
+var _Tones = __webpack_require__(26);
 
 var _BlipSynth = __webpack_require__(7);
 
@@ -3331,7 +3444,7 @@ var APU = function () {
 exports.default = APU;
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3345,15 +3458,15 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _Trace = __webpack_require__(1);
 
-var _APU = __webpack_require__(20);
+var _APU = __webpack_require__(21);
 
 var _APU2 = _interopRequireDefault(_APU);
 
-var _BlipBuffer = __webpack_require__(22);
+var _BlipBuffer = __webpack_require__(23);
 
 var _BlipBuffer2 = _interopRequireDefault(_BlipBuffer);
 
-var _WebAudioRenderer = __webpack_require__(15);
+var _WebAudioRenderer = __webpack_require__(16);
 
 var _WebAudioRenderer2 = _interopRequireDefault(_WebAudioRenderer);
 
@@ -3551,7 +3664,7 @@ var APULegacy = function () {
 exports.default = APULegacy;
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3888,7 +4001,7 @@ var BlipBuffer = function () {
 exports.default = BlipBuffer;
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3928,7 +4041,7 @@ var BlipEqT = function BlipEqT(treble, cutoff, samplerate) {
 exports.default = BlipEqT;
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3940,7 +4053,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _BlipEqT = __webpack_require__(23);
+var _BlipEqT = __webpack_require__(24);
 
 var _BlipEqT2 = _interopRequireDefault(_BlipEqT);
 
@@ -4186,7 +4299,7 @@ var BlipImpulse = function () {
 exports.default = BlipImpulse;
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4788,7 +4901,7 @@ var Dmc = exports.Dmc = function (_Osc3) {
 }(Osc);
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4803,17 +4916,17 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _Trace = __webpack_require__(1);
 
-var _fastInstructions = __webpack_require__(28);
+var _fastInstructions = __webpack_require__(29);
 
 var _fastInstructions2 = _interopRequireDefault(_fastInstructions);
 
-var _switchFastInstructions = __webpack_require__(29);
+var _switchFastInstructions = __webpack_require__(30);
 
 var _switchFastInstructions2 = _interopRequireDefault(_switchFastInstructions);
 
-var _traceInstructions = __webpack_require__(30);
+var _traceInstructions = __webpack_require__(31);
 
-var _cpuTraceString = __webpack_require__(27);
+var _cpuTraceString = __webpack_require__(28);
 
 var _cpuTraceString2 = _interopRequireDefault(_cpuTraceString);
 
@@ -5212,14 +5325,14 @@ var Cpu6502 = function () {
 
 			var opcode = this.mainboard.memory.read8(this.programCounter);
 			var cyclesTaken = 0;
-			if (!this._useSwitchStatement) {
-				cyclesTaken = this._instructionSet[opcode](this, this.mainboard.memory);
-			} else {
-				cyclesTaken = this._instructionSwitch(opcode, this, this.mainboard.memory);
-			}
-			if (this._traceEnabled) {
-				this._doTrace();
-			}
+			// if (!this._useSwitchStatement) {
+			cyclesTaken = this._instructionSet[opcode](this, this.mainboard.memory);
+			// } else {
+			// 	cyclesTaken = this._instructionSwitch(opcode, this, this.mainboard.memory);
+			// }
+			// if (this._traceEnabled) {
+			// 	this._doTrace();
+			// }
 			this.subcycle = 0;
 			return cyclesTaken;
 		}
@@ -5326,7 +5439,7 @@ var Cpu6502 = function () {
 exports.default = Cpu6502;
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8883,7 +8996,7 @@ formatCpuTraceString[255] = function (formatData) {
 var traceFunctions = exports.traceFunctions = formatCpuTraceString;
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13017,7 +13130,7 @@ instructions[255] = INS_ABSOLUTEX_255;
 exports.default = instructions;
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17662,7 +17775,7 @@ function executeCpuInstructionSwitch(opcode, cpu, memory) {
 }
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23958,7 +24071,7 @@ var cpuInstructionsTrace = exports.cpuInstructionsTrace = instructions_TRACE;
 var cpuTrace = exports.cpuTrace = formatData;
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23970,13 +24083,13 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _sha = __webpack_require__(80);
+var _sha = __webpack_require__(81);
 
 var _sha2 = _interopRequireDefault(_sha);
 
 var _consts = __webpack_require__(0);
 
-var _mapperFactory = __webpack_require__(46);
+var _mapperFactory = __webpack_require__(47);
 
 var _mapperFactory2 = _interopRequireDefault(_mapperFactory);
 
@@ -24228,7 +24341,7 @@ var Cartridge = function () {
 exports.default = Cartridge;
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24242,31 +24355,31 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _Event = __webpack_require__(4);
 
-var _Memory = __webpack_require__(33);
+var _Memory = __webpack_require__(34);
 
 var _Memory2 = _interopRequireDefault(_Memory);
 
-var _PPU = __webpack_require__(37);
+var _PPU = __webpack_require__(38);
 
 var _PPU2 = _interopRequireDefault(_PPU);
 
-var _RenderBuffer = __webpack_require__(36);
+var _RenderBuffer = __webpack_require__(37);
 
 var _RenderBuffer2 = _interopRequireDefault(_RenderBuffer);
 
-var _APULegacy = __webpack_require__(21);
+var _APULegacy = __webpack_require__(22);
 
 var _APULegacy2 = _interopRequireDefault(_APULegacy);
 
-var _InputDeviceBus = __webpack_require__(39);
+var _InputDeviceBus = __webpack_require__(40);
 
 var _InputDeviceBus2 = _interopRequireDefault(_InputDeviceBus);
 
-var _Synchroniser = __webpack_require__(38);
+var _Synchroniser = __webpack_require__(39);
 
 var _Synchroniser2 = _interopRequireDefault(_Synchroniser);
 
-var _Cpu = __webpack_require__(26);
+var _Cpu = __webpack_require__(27);
 
 var _Cpu2 = _interopRequireDefault(_Cpu);
 
@@ -24409,7 +24522,7 @@ var Mainboard = function () {
 exports.default = Mainboard;
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24575,7 +24688,7 @@ var Memory = function () {
 exports.default = Memory;
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24885,7 +24998,7 @@ var PPURenderBG = function () {
 exports.default = PPURenderBG;
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25110,7 +25223,7 @@ var PPURenderSprites = function () {
 exports.default = PPURenderSprites;
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25167,13 +25280,20 @@ var RenderBuffer = function () {
 	}, {
 		key: 'pickColour',
 		value: function pickColour(paletteIndex) {
+			this.colorHash = this.colorHash || {};
+			if (this.colorHash[paletteIndex]) {
+				return this.colorHash[paletteIndex];
+			}
+
 			var pindex = 0;
 			if (paletteIndex < 64) {
 				pindex = paletteIndex;
 			} else {
 				pindex = 64;
 			}
-			return new Uint32Array(this.defaultPalette32BitVals)[pindex];
+			this.colorHash[paletteIndex] = new Uint32Array(this.defaultPalette32BitVals)[pindex];
+
+			return this.colorHash[paletteIndex];
 		}
 	}, {
 		key: '_renderPixel',
@@ -25235,7 +25355,7 @@ var RenderBuffer = function () {
 exports.default = RenderBuffer;
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25253,11 +25373,11 @@ var _Trace = __webpack_require__(1);
 
 var _consts = __webpack_require__(0);
 
-var _PPURenderBG = __webpack_require__(34);
+var _PPURenderBG = __webpack_require__(35);
 
 var _PPURenderBG2 = _interopRequireDefault(_PPURenderBG);
 
-var _PPURenderSprites = __webpack_require__(35);
+var _PPURenderSprites = __webpack_require__(36);
 
 var _PPURenderSprites2 = _interopRequireDefault(_PPURenderSprites);
 
@@ -26057,7 +26177,7 @@ PPU.screenPos = {
 exports.default = PPU;
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26187,48 +26307,48 @@ var Synchroniser = function () {
 			// Then move onto the next one.
 			var objIndex = 0;
 			var keepRunning = true;
-			while (keepRunning) {
-				var nextEventTime = this.getNextEventTime();
-				if (nextEventTime <= syncTo && nextEventTime < frameEnd) {
-					syncTo = nextEventTime;
-				} else {
-					keepRunning = false; // no more events until requested syncTo value: we can finish the sync loop
-					syncTo = Math.min(syncTo, frameEnd);
-				}
+			// while ( keepRunning ) {
+			var nextEventTime = this.getNextEventTime();
+			if (nextEventTime <= syncTo && nextEventTime < frameEnd) {
+				syncTo = nextEventTime;
+			} else {
+				keepRunning = false; // no more events until requested syncTo value: we can finish the sync loop
+				syncTo = Math.min(syncTo, frameEnd);
+			}
 
-				if (this._lastSynchronisedMtc >= syncTo) {
-					return;
-				}
+			if (this._lastSynchronisedMtc >= syncTo) {
+				return;
+			}
 
-				this._isSynchronising = true;
-				this._currentSyncValue = syncTo;
+			this._isSynchronising = true;
+			this._currentSyncValue = syncTo;
 
-				for (objIndex = 0; objIndex < this._objects.length; ++objIndex) {
-					// TODO: Objects should be forbidden from calling synchroniser.synchronise() whilst in the synchronise phase - if they
-					// want to force a synchronise they should do so using an event
-					var obj = this._objects[objIndex];
-					if (obj.lastSynchronisedTickCount < syncTo) {
-						obj.object.synchronise(obj.lastSynchronisedTickCount, syncTo);
-						obj.lastSynchronisedTickCount = syncTo;
-					}
-				}
-				this._isSynchronising = false;
-
-				this._executeEvents(this._lastSynchronisedMtc, syncTo);
-				this._lastSynchronisedMtc = syncTo;
-
-				// TODO: this should be an event: do end frame stuff if that time has come
-				if (syncTo >= frameEnd) {
-					for (objIndex = 0; objIndex < this._objects.length; ++objIndex) {
-						this._objects[objIndex].object.onEndFrame(syncTo);
-						this._objects[objIndex].lastSynchronisedTickCount = 0;
-					}
-
-					this.cpuMtc -= frameEnd;
-					this._lastSynchronisedMtc = 0;
-					this._eventBus.invoke('frameEnd');
+			for (objIndex = 0; objIndex < this._objects.length; ++objIndex) {
+				// TODO: Objects should be forbidden from calling synchroniser.synchronise() whilst in the synchronise phase - if they
+				// want to force a synchronise they should do so using an event
+				var obj = this._objects[objIndex];
+				if (obj.lastSynchronisedTickCount < syncTo) {
+					obj.object.synchronise(obj.lastSynchronisedTickCount, syncTo);
+					obj.lastSynchronisedTickCount = syncTo;
 				}
 			}
+			this._isSynchronising = false;
+
+			this._executeEvents(this._lastSynchronisedMtc, syncTo);
+			this._lastSynchronisedMtc = syncTo;
+
+			// TODO: this should be an event: do end frame stuff if that time has come
+			if (syncTo >= frameEnd) {
+				for (objIndex = 0; objIndex < this._objects.length; ++objIndex) {
+					this._objects[objIndex].object.onEndFrame(syncTo);
+					this._objects[objIndex].lastSynchronisedTickCount = 0;
+				}
+
+				this.cpuMtc -= frameEnd;
+				this._lastSynchronisedMtc = 0;
+				this._eventBus.invoke('frameEnd');
+			}
+			// }
 		}
 	}, {
 		key: 'getNextEventTime',
@@ -26329,7 +26449,7 @@ var Synchroniser = function () {
 exports.default = Synchroniser;
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26341,7 +26461,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Joypad = __webpack_require__(40);
+var _Joypad = __webpack_require__(41);
 
 var _Joypad2 = _interopRequireDefault(_Joypad);
 
@@ -26403,7 +26523,7 @@ var InputDeviceBus = function () {
 exports.default = InputDeviceBus;
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26511,7 +26631,7 @@ var Joypad = function () {
 exports.default = Joypad;
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26570,7 +26690,7 @@ var Mapper0 = function (_BaseMapper) {
 exports.default = Mapper0;
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26776,7 +26896,7 @@ var Mapper1 = function (_BaseMapper) {
 exports.default = Mapper1;
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26831,7 +26951,7 @@ var Mapper2 = function (_BaseMapper) {
 exports.default = Mapper2;
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27350,7 +27470,7 @@ var Mapper4 = function (_BaseMapper) {
 exports.default = Mapper4;
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27503,7 +27623,7 @@ var Mapper9 = function (_BaseMapper) {
 exports.default = Mapper9;
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27514,23 +27634,23 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = mapperFactory;
 
-var _Mapper = __webpack_require__(41);
+var _Mapper = __webpack_require__(42);
 
 var _Mapper2 = _interopRequireDefault(_Mapper);
 
-var _Mapper3 = __webpack_require__(42);
+var _Mapper3 = __webpack_require__(43);
 
 var _Mapper4 = _interopRequireDefault(_Mapper3);
 
-var _Mapper5 = __webpack_require__(43);
+var _Mapper5 = __webpack_require__(44);
 
 var _Mapper6 = _interopRequireDefault(_Mapper5);
 
-var _Mapper7 = __webpack_require__(44);
+var _Mapper7 = __webpack_require__(45);
 
 var _Mapper8 = _interopRequireDefault(_Mapper7);
 
-var _Mapper9 = __webpack_require__(45);
+var _Mapper9 = __webpack_require__(46);
 
 var _Mapper10 = _interopRequireDefault(_Mapper9);
 
@@ -27579,185 +27699,6 @@ function mapperFactory(mapperId, mainboard, mirroringMethod) {
 }
 
 /***/ }),
-/* 47 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-exports.getCartName = getCartName;
-exports.getMetaName = getMetaName;
-exports.getMetaObject = getMetaObject;
-exports.setMetaObject = setMetaObject;
-exports.saveState = saveState;
-exports.loadState = loadState;
-exports.getStateMetaData = getStateMetaData;
-exports.renameState = renameState;
-exports.renameQuickSaveStates = renameQuickSaveStates;
-exports.saveStateSupported = saveStateSupported;
-exports.saveToLocalStorage = saveToLocalStorage;
-exports.loadFromLocalStorage = loadFromLocalStorage;
-function compress(rawString) {
-
-	var compressed;
-	// LZString is way too slow and gives pretty much the same result, use jz.algos instead
-	//compressed = LZString.compress( raw );
-	var int32Array = Nes.stringToUintArray(rawString);
-	compressed = Nes.uintArrayToString(new Int32Array(jz.algos.deflate(new Uint8Array(int32Array))));
-	return compressed;
-}
-
-function decompress(rawString) {
-	var decompressed;
-	//decompressed = LZString.decompress( compressed );
-	var int32Array = Nes.stringToUintArray(rawString);
-	decompressed = Nes.uintArrayToString(new Int32Array(jz.algos.inflate(new Uint8Array(int32Array))));
-	return decompressed;
-}
-
-function getCartName(slotName, cartName) {
-	return slotName + ":" + cartName;
-}
-
-function getMetaName(cartName) {
-	return "meta:" + cartName;
-}
-
-function getMetaObject(cartName) {
-	var obj = loadFromLocalStorage(getMetaName(cartName));
-	if (!obj) {
-		obj = {
-			slots: {}
-		};
-	}
-	return obj;
-}
-
-function setMetaObject(cartName, obj) {
-	saveToLocalStorage(getMetaName(cartName), obj);
-}
-
-function saveState(slotName, cartName, data, screenData) {
-
-	if (localStorage) {
-		// save state data as it's own local storage object
-		saveToLocalStorage(getCartName(slotName, cartName), data);
-
-		// add to meta data object
-		var meta = getMetaObject(cartName);
-		var slotMeta = {};
-		if (screenData) {
-			slotMeta.screen = compress(screenData);
-			console.log("Saved screenshot size: " + slotMeta.screen.length + " (uncompressed: " + screenData.length + ")");
-		}
-		slotMeta.date = Date.now();
-		meta.slots[slotName] = slotMeta;
-		setMetaObject(cartName, meta);
-	}
-}
-
-function loadState(slotName, cartName) {
-
-	if (localStorage) {
-		var compressed = localStorage.getItem(getCartName(slotName, cartName));
-		if (compressed) {
-			var compressedLength = compressed.length;
-			var decompressed = decompress(compressed);
-			var obj = JSON.parse(decompressed);
-			console.log("Loaded data size: " + compressedLength + " (uncompressed: " + decompressed.length + ")");
-			return obj;
-		}
-	} else {
-		//( 'Browser does not support local storage' );
-	}
-	return null;
-}
-
-function getStateMetaData(cartName, decompressScreenData) {
-	var meta = getMetaObject(cartName);
-	// decompress all image data before passing it back
-	if (decompressScreenData) {
-		var keyNames = Object.keys(meta.slots);
-		for (var keyIndex = 0; keyIndex < keyNames.length; ++keyIndex) {
-			var slotName = keyNames[keyIndex];
-			var slot = meta.slots[slotName];
-			if (slot.screen) {
-				slot.screen = decompress(slot.screen);
-			}
-		}
-	}
-	return meta;
-}
-
-function renameState(meta, slotName, newSlotName, cartName) {
-
-	// rename data object
-	var itemName = getCartName(slotName, cartName);
-	var data = localStorage.getItem(itemName);
-	if (data) {
-		localStorage.removeItem(itemName);
-
-		if (newSlotName) {
-			var newItemName = getCartName(newSlotName, cartName);
-			localStorage.setItem(newItemName, data);
-		}
-
-		// rename it in meta object
-		if (newSlotName) {
-			meta.slots[newSlotName] = meta.slots[slotName];
-		}
-		delete meta.slots[slotName];
-	}
-}
-
-function renameQuickSaveStates(slotName, cartName, limitCount) {
-
-	var meta = getMetaObject(cartName);
-
-	// remove last quicksave.
-	renameState(meta, slotName + ZERO_PAD(limitCount - 1, 2, 0), null, cartName);
-
-	// rename any others, moving each one down. We go backwards so we don't overwrite
-	for (var i = limitCount - 2; i > 0; --i) {
-		renameState(meta, slotName + ZERO_PAD(i, 2, 0), slotName + ZERO_PAD(i + 1, 2, 0), cartName);
-	}
-
-	// rename main 'quicksave' slot
-	renameState(meta, slotName, slotName + ZERO_PAD(1, 2, 0), cartName);
-
-	setMetaObject(cartName, meta);
-}
-
-function saveStateSupported() {
-
-	return !!localStorage;
-}
-
-function saveToLocalStorage(name, data) {
-	if (localStorage) {
-		var raw = JSON.stringify(data);
-		var compressed = compress(raw);
-		localStorage.setItem(name, compressed);
-	}
-}
-
-function loadFromLocalStorage(name) {
-	if (localStorage) {
-		var compressed = localStorage.getItem(name);
-		if (compressed) {
-			var compressedLength = compressed.length;
-			var decompressed = decompress(compressed);
-			var obj = JSON.parse(decompressed);
-			return obj;
-		}
-	}
-	return null;
-}
-
-/***/ }),
 /* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -27770,7 +27711,91 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _rusha = __webpack_require__(79);
+var _utils = __webpack_require__(8);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var StateManager = function () {
+	function StateManager(app, createGuiComponents) {
+		_classCallCheck(this, StateManager);
+
+		this._app = app;
+		this._mainboard = this._app._mainboard;
+		this._renderSurface = this._app._renderSurface;
+
+		this._loadPending = '';
+		this._loadStatePending = false;
+		this._saveStatePending = false;
+	}
+
+	_createClass(StateManager, [{
+		key: 'quickSaveState',
+		value: function quickSaveState() {
+			this._saveStatePending = true;
+		}
+	}, {
+		key: 'quickLoadState',
+		value: function quickLoadState() {
+			this.loadState('quicksave');
+		}
+	}, {
+		key: 'loadState',
+		value: function loadState(slotName) {
+			this._loadPending = slotName;
+			this._loadStatePending = true;
+		}
+	}, {
+		key: '_doQuickSave',
+		value: function _doQuickSave() {
+			// push back previous quicksaves by renaming them, pushing them back in the queue
+			var hash = this._mainboard.cart.getHash();
+			(0, _utils.renameQuickSaveStates)("quicksave", hash, 3);
+			var screen = this._renderSurface.screenshotToString();
+			var state = this._mainboard.saveState();
+			(0, _utils.saveState)("quicksave", hash, state, screen);
+		}
+	}, {
+		key: '_doQuickLoad',
+		value: function _doQuickLoad() {
+			var state = (0, _utils.loadState)(this._loadPending, this._mainboard.cart.getHash());
+			if (state) {
+				this._mainboard.loadState(state);
+			}
+		}
+	}, {
+		key: 'onFrame',
+		value: function onFrame() {
+			if (this._mainboard.cart) {
+				if (this._saveStatePending) {
+					this._saveStatePending = false;
+					this._doQuickSave();
+				} else if (this._loadStatePending) {
+					this._loadStatePending = false;
+					this._doQuickLoad();
+				}
+			}
+		}
+	}]);
+
+	return StateManager;
+}();
+
+exports.default = StateManager;
+
+/***/ }),
+/* 49 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _rusha = __webpack_require__(80);
 
 var _rusha2 = _interopRequireDefault(_rusha);
 
@@ -27813,7 +27838,7 @@ var TestRenderSurface = function () {
 exports.default = TestRenderSurface;
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27917,7 +27942,7 @@ function processGenieCode(mainboard, codeString, enable) {
 }
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27969,7 +27994,7 @@ function loadRomFromUrl(url, callback) {
 }
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28090,7 +28115,7 @@ function fromByteArray (uint8) {
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28104,9 +28129,9 @@ function fromByteArray (uint8) {
 
 
 
-var base64 = __webpack_require__(51)
-var ieee754 = __webpack_require__(77)
-var isArray = __webpack_require__(78)
+var base64 = __webpack_require__(52)
+var ieee754 = __webpack_require__(78)
+var isArray = __webpack_require__(79)
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
@@ -29884,10 +29909,10 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports) {
 
 (function() {
@@ -29989,7 +30014,7 @@ function isnan (val) {
 
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, exports) {
 
 module.exports = adjoint;
@@ -30027,7 +30052,7 @@ function adjoint(out, a) {
 };
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, exports) {
 
 module.exports = clone;
@@ -30060,7 +30085,7 @@ function clone(a) {
 };
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports) {
 
 module.exports = copy;
@@ -30093,7 +30118,7 @@ function copy(out, a) {
 };
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, exports) {
 
 module.exports = create;
@@ -30125,7 +30150,7 @@ function create() {
 };
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ (function(module, exports) {
 
 module.exports = determinant;
@@ -30160,7 +30185,7 @@ function determinant(a) {
 };
 
 /***/ }),
-/* 59 */
+/* 60 */
 /***/ (function(module, exports) {
 
 module.exports = fromQuat;
@@ -30212,7 +30237,7 @@ function fromQuat(out, q) {
 };
 
 /***/ }),
-/* 60 */
+/* 61 */
 /***/ (function(module, exports) {
 
 module.exports = fromRotationTranslation;
@@ -30270,7 +30295,7 @@ function fromRotationTranslation(out, q, v) {
 };
 
 /***/ }),
-/* 61 */
+/* 62 */
 /***/ (function(module, exports) {
 
 module.exports = frustum;
@@ -30311,37 +30336,37 @@ function frustum(out, left, right, bottom, top, near, far) {
 };
 
 /***/ }),
-/* 62 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = {
-  create: __webpack_require__(57)
-  , clone: __webpack_require__(55)
-  , copy: __webpack_require__(56)
-  , identity: __webpack_require__(9)
-  , transpose: __webpack_require__(76)
-  , invert: __webpack_require__(63)
-  , adjoint: __webpack_require__(54)
-  , determinant: __webpack_require__(58)
-  , multiply: __webpack_require__(65)
-  , translate: __webpack_require__(75)
-  , scale: __webpack_require__(73)
-  , rotate: __webpack_require__(69)
-  , rotateX: __webpack_require__(70)
-  , rotateY: __webpack_require__(71)
-  , rotateZ: __webpack_require__(72)
-  , fromRotationTranslation: __webpack_require__(60)
-  , fromQuat: __webpack_require__(59)
-  , frustum: __webpack_require__(61)
-  , perspective: __webpack_require__(67)
-  , perspectiveFromFieldOfView: __webpack_require__(68)
-  , ortho: __webpack_require__(66)
-  , lookAt: __webpack_require__(64)
-  , str: __webpack_require__(74)
+  create: __webpack_require__(58)
+  , clone: __webpack_require__(56)
+  , copy: __webpack_require__(57)
+  , identity: __webpack_require__(10)
+  , transpose: __webpack_require__(77)
+  , invert: __webpack_require__(64)
+  , adjoint: __webpack_require__(55)
+  , determinant: __webpack_require__(59)
+  , multiply: __webpack_require__(66)
+  , translate: __webpack_require__(76)
+  , scale: __webpack_require__(74)
+  , rotate: __webpack_require__(70)
+  , rotateX: __webpack_require__(71)
+  , rotateY: __webpack_require__(72)
+  , rotateZ: __webpack_require__(73)
+  , fromRotationTranslation: __webpack_require__(61)
+  , fromQuat: __webpack_require__(60)
+  , frustum: __webpack_require__(62)
+  , perspective: __webpack_require__(68)
+  , perspectiveFromFieldOfView: __webpack_require__(69)
+  , ortho: __webpack_require__(67)
+  , lookAt: __webpack_require__(65)
+  , str: __webpack_require__(75)
 }
 
 /***/ }),
-/* 63 */
+/* 64 */
 /***/ (function(module, exports) {
 
 module.exports = invert;
@@ -30401,10 +30426,10 @@ function invert(out, a) {
 };
 
 /***/ }),
-/* 64 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var identity = __webpack_require__(9);
+var identity = __webpack_require__(10);
 
 module.exports = lookAt;
 
@@ -30496,7 +30521,7 @@ function lookAt(out, eye, center, up) {
 };
 
 /***/ }),
-/* 65 */
+/* 66 */
 /***/ (function(module, exports) {
 
 module.exports = multiply;
@@ -30543,7 +30568,7 @@ function multiply(out, a, b) {
 };
 
 /***/ }),
-/* 66 */
+/* 67 */
 /***/ (function(module, exports) {
 
 module.exports = ortho;
@@ -30584,7 +30609,7 @@ function ortho(out, left, right, bottom, top, near, far) {
 };
 
 /***/ }),
-/* 67 */
+/* 68 */
 /***/ (function(module, exports) {
 
 module.exports = perspective;
@@ -30622,7 +30647,7 @@ function perspective(out, fovy, aspect, near, far) {
 };
 
 /***/ }),
-/* 68 */
+/* 69 */
 /***/ (function(module, exports) {
 
 module.exports = perspectiveFromFieldOfView;
@@ -30668,7 +30693,7 @@ function perspectiveFromFieldOfView(out, fov, near, far) {
 
 
 /***/ }),
-/* 69 */
+/* 70 */
 /***/ (function(module, exports) {
 
 module.exports = rotate;
@@ -30737,7 +30762,7 @@ function rotate(out, a, rad, axis) {
 };
 
 /***/ }),
-/* 70 */
+/* 71 */
 /***/ (function(module, exports) {
 
 module.exports = rotateX;
@@ -30786,7 +30811,7 @@ function rotateX(out, a, rad) {
 };
 
 /***/ }),
-/* 71 */
+/* 72 */
 /***/ (function(module, exports) {
 
 module.exports = rotateY;
@@ -30835,7 +30860,7 @@ function rotateY(out, a, rad) {
 };
 
 /***/ }),
-/* 72 */
+/* 73 */
 /***/ (function(module, exports) {
 
 module.exports = rotateZ;
@@ -30884,7 +30909,7 @@ function rotateZ(out, a, rad) {
 };
 
 /***/ }),
-/* 73 */
+/* 74 */
 /***/ (function(module, exports) {
 
 module.exports = scale;
@@ -30920,7 +30945,7 @@ function scale(out, a, v) {
 };
 
 /***/ }),
-/* 74 */
+/* 75 */
 /***/ (function(module, exports) {
 
 module.exports = str;
@@ -30939,7 +30964,7 @@ function str(a) {
 };
 
 /***/ }),
-/* 75 */
+/* 76 */
 /***/ (function(module, exports) {
 
 module.exports = translate;
@@ -30982,7 +31007,7 @@ function translate(out, a, v) {
 };
 
 /***/ }),
-/* 76 */
+/* 77 */
 /***/ (function(module, exports) {
 
 module.exports = transpose;
@@ -31036,7 +31061,7 @@ function transpose(out, a) {
 };
 
 /***/ }),
-/* 77 */
+/* 78 */
 /***/ (function(module, exports) {
 
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -31126,7 +31151,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 
 /***/ }),
-/* 78 */
+/* 79 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -31137,7 +31162,7 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 79 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {(function () {
@@ -31634,16 +31659,16 @@ module.exports = Array.isArray || function (arr) {
         };
     }
 }());
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ }),
-/* 80 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer) {(function() {
-  var crypt = __webpack_require__(53),
-      utf8 = __webpack_require__(8).utf8,
-      bin = __webpack_require__(8).bin,
+  var crypt = __webpack_require__(54),
+      utf8 = __webpack_require__(9).utf8,
+      bin = __webpack_require__(9).bin,
 
   // The core
   sha1 = function (message) {
@@ -31723,10 +31748,10 @@ module.exports = Array.isArray || function (arr) {
   module.exports = api;
 })();
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(52).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(53).Buffer))
 
 /***/ }),
-/* 81 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // stats.js - http://github.com/mrdoob/stats.js
@@ -31737,7 +31762,7 @@ b.fillRect(d,m,n,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d,m,n,p);return{do
 
 
 /***/ }),
-/* 82 */
+/* 83 */
 /***/ (function(module, exports) {
 
 module.exports = function() {
@@ -31746,7 +31771,7 @@ module.exports = function() {
 
 
 /***/ }),
-/* 83 */
+/* 84 */
 /***/ (function(module, exports) {
 
 /* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
@@ -31755,22 +31780,11 @@ module.exports = __webpack_amd_options__;
 /* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ }),
-/* 84 */
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
+module.exports = __webpack_require__(12);
 
-
-var _NES = __webpack_require__(11);
-
-var _NES2 = _interopRequireDefault(_NES);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var App = new _NES2.default();
-App.start();
-
-App.loadRomFromUrl('/roms/MegaMan.nes'); //o
 
 /***/ })
 /******/ ]);

@@ -7,7 +7,7 @@ import {
 } from '../../utils/Trace';
 import APU from './APU';
 import BlipBuffer from './BlipBuffer';
-import WebAudioRenderer from '../../gui/WebAudioRenderer';
+import WebAudioRenderer from '../../gui/audio/WebAudioRenderer';
 import {
 	COLOUR_ENCODING_NAME,
 	COLOUR_ENCODING_MTC_PER_CPU,
