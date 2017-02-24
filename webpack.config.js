@@ -16,6 +16,8 @@ if (prod) {
         compilation_level: 'SIMPLE'
       },
       concurrency: 4,
+      // use JS compiler - slower but doesn't require any java
+      jsCompiler: true,
     })
     // new webpack.optimize.UglifyJsPlugin({
     //   sourceMap: false,

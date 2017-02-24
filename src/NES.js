@@ -117,7 +117,7 @@ export default class NES {
   }
 
   _calculateFrameTimeTarget() {
-    if (this._gameSpeed > 0) {
+    if (this._gameSpeed) {
       const base = (100000 / this._gameSpeed); // 100000 = 1000 * 100 ( 1000 milliseconds, multiplied by 100 as gameSpeed is a %)
       this._frameTimeTarget = (base / COLOUR_ENCODING_REFRESHRATE);
     }
@@ -177,7 +177,7 @@ export default class NES {
       return true;
     }
     var now = performance ? performance.now() : Date.now(); // Date.now() in unsupported browsers
-    var diff = now - this._lastFrameTime;
+    var diff = now - (this._lastFrameTime || 0);
     if (diff >= this._frameTimeTarget) {
       this._lastFrameTime = now;
       return true;
@@ -217,6 +217,11 @@ export default class NES {
   }
 
   _animate() {
+    if (this._gameSpeed !== 100 && !this._readyToRender()) {
+      requestAnimationFrame(this.animate);
+      return;
+    }
+
     if (this._fpsMeter) {
       this._fpsMeter.begin();
     }

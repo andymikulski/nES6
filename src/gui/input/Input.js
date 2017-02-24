@@ -4,6 +4,10 @@ import {
 	saveToLocalStorage,
 } from '../../nes/state/utils';
 
+import {
+	JOYPAD_NAME_TO_ID
+} from '../../config/consts.js';
+
 const gamepad_consts = {
 	top1:	0, // Top button 1 ("A" on the Xbox 360 controller; cross on the PS3 controller)
 	top2:	1, // Top button 2 ("B" on the Xbox 360 controller; circle on the PS3 controller)
