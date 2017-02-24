@@ -1773,7 +1773,25 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var App = new _NES2.default();
 App.start();
 
-App.loadRomFromUrl('/roms/Earthbound.nes');
+var roms = ['PunchOut', 'SuperMarioBros', 'SuperMarioBros3', 'Earthbound', 'MegaMan'];
+
+var romToLoad = void 0;
+var getIndex = function getIndex() {
+	var numRands = 20;
+	var randIndex = 0;
+	for (var i = 0; i < numRands; i++) {
+		randIndex += Math.random() * 10;
+	}
+	randIndex = Math.floor(randIndex / numRands);
+
+	romToLoad = roms[randIndex];
+};
+
+while (!romToLoad) {
+	getIndex();
+}
+
+App.loadRomFromUrl('/roms/' + romToLoad + '.nes');
 
 /***/ }),
 /* 13 */
@@ -1948,7 +1966,7 @@ var NES = function () {
   }, {
     key: '_calculateFrameTimeTarget',
     value: function _calculateFrameTimeTarget() {
-      if (this._gameSpeed > 0) {
+      if (this._gameSpeed) {
         var base = 100000 / this._gameSpeed; // 100000 = 1000 * 100 ( 1000 milliseconds, multiplied by 100 as gameSpeed is a %)
         this._frameTimeTarget = base / _consts.COLOUR_ENCODING_REFRESHRATE;
       }
@@ -2008,7 +2026,7 @@ var NES = function () {
         return true;
       }
       var now = performance ? performance.now() : Date.now(); // Date.now() in unsupported browsers
-      var diff = now - this._lastFrameTime;
+      var diff = now - (this._lastFrameTime || 0);
       if (diff >= this._frameTimeTarget) {
         this._lastFrameTime = now;
         return true;
@@ -2049,6 +2067,11 @@ var NES = function () {
   }, {
     key: '_animate',
     value: function _animate() {
+      if (this._gameSpeed !== 100 && !this._readyToRender()) {
+        requestAnimationFrame(this.animate);
+        return;
+      }
+
       if (this._fpsMeter) {
         this._fpsMeter.begin();
       }
@@ -2563,6 +2586,8 @@ var _GamePad2 = _interopRequireDefault(_GamePad);
 
 var _utils = __webpack_require__(8);
 
+var _consts = __webpack_require__(0);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2707,7 +2732,7 @@ var Input = function () {
 
 							var but = buttonArray[i];
 							if (but.axis === axisIndex && but.type === axisType) {
-								joypad.pressButton(Number(JOYPAD_NAME_TO_ID(buttonName)), isPressed);
+								joypad.pressButton(Number((0, _consts.JOYPAD_NAME_TO_ID)(buttonName)), isPressed);
 							}
 						}
 					}
@@ -2725,7 +2750,7 @@ var Input = function () {
 						var buttonArray = this._gamepadButtonMap[buttonName];
 						for (var i = 0; i < buttonArray.length; ++i) {
 							if (buttonIndex === buttonArray[i]) {
-								joypad.pressButton(Number(JOYPAD_NAME_TO_ID(buttonName)), isPressed);
+								joypad.pressButton(Number((0, _consts.JOYPAD_NAME_TO_ID)(buttonName)), isPressed);
 							}
 						}
 					}
@@ -24097,18 +24122,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var dbLookup = function dbLookup(shaString, callback) {
-	if (shaString.length !== 40) {
-		throw new Error("dbLookup : SHA1 must be 40 characters long! [" + shaString + "]");
-	}
-
-	var path = 'js/db/' + shaString + '.js';
-	var data;
-	// $.getScript( path ).always(function() {
-	callback(null, window['NesDb'] ? window['NesDb'][shaString] : null);
-	// } );
-};
-
 var Cartridge = function () {
 	function Cartridge(mainboard) {
 		_classCallCheck(this, Cartridge);
@@ -24117,7 +24130,6 @@ var Cartridge = function () {
 		this.memoryMapper = null;
 		this._sha1 = '';
 		this._name = '';
-		this._dbData = null;
 		this._colourEncodingType = _consts.g_DefaultColourEncoding;
 	}
 
@@ -24137,83 +24149,17 @@ var Cartridge = function () {
 			return mostFrequent;
 		}
 	}, {
-		key: '_getMapperFromDatabase',
-		value: function _getMapperFromDatabase(mapperIdFromInes) {
-
-			var mapperIdFrequency = {};
-			if (this._dbData && this._dbData['cartridge']) {
-				var foundInesMapper = false;
-				this._dbData['cartridge'].forEach(function (cart) {
-					if (cart['board']) {
-						cart['board'].forEach(function (board) {
-							if (board['$']['mapper'] === mapperIdFromInes) {
-								// Mapper ID in iNes file has been found in database - use that
-								foundInesMapper = true;
-							} else {
-								mapperIdFrequency[board['$']['mapper']] = mapperIdFrequency[board['$']['mapper']] + 1 || 1;
-							}
-						});
-					}
-				});
-				if (foundInesMapper) {
-					return mapperIdFromInes;
-				}
-
-				// iNes mapper was not found in DB - use the most likely mapper ID found
-				var mostFrequentMapperId = getHighestFrequencyElement(mapperIdFrequency);
-				if (mostFrequentMapperId !== null) {
-					return parseInt(mostFrequentMapperId);
-				} else {
-					return null;
-				}
-			}
-			return null;
-		}
-	}, {
-		key: '_workOutColourEncodingFromFilename',
-		value: function _workOutColourEncodingFromFilename(filename) {
-
-			if (filename.match(/[\[\(][E][\]\)]/i)) {
-				return 'PAL';
-			} else if (filename.match(/[\[\(][JU][\]\)]/i)) {
-				return 'NTSC';
-			} else {
-				return _consts.g_DefaultColourEncoding;
-			}
-		}
-	}, {
 		key: '_determineColourEncodingType',
 		value: function _determineColourEncodingType(filename) {
+			var value = _consts.g_DefaultColourEncoding;
 
-			// look in database
-			var stringStartsWith = function stringStartsWith(str, test) {
-				return str.slice(0, test.length) === test;
-			};
-
-			var systemFrequency = {};
-			if (this._dbData && this._dbData['cartridge']) {
-				this._dbData['cartridge'].forEach(function (cart) {
-					if (cart['$']['system']) {
-						var lower = cart['$']['system'].toLowerCase();
-
-						if (stringStartsWith(lower, 'nes-pal')) {
-							systemFrequency['PAL'] = systemFrequency['PAL'] || 0;
-							systemFrequency['PAL']++;
-						} else {
-							systemFrequency['NTSC'] = systemFrequency['NTSC'] || 0;
-							systemFrequency['NTSC']++;
-						}
-					}
-				});
-
-				var mostFrequentType = getHighestFrequencyElement(systemFrequency);
-				if (mostFrequentType !== null) {
-					this._colourEncodingType = mostFrequentType;
-					return;
-				}
+			if (filename.match(/[\[\(][E][\]\)]/i)) {
+				value = 'PAL';
+			} else if (filename.match(/[\[\(][JU][\]\)]/i)) {
+				value = 'NTSC';
 			}
 
-			this._colourEncodingType = this._workOutColourEncodingFromFilename(filename);
+			this._colourEncodingType = value;
 		}
 	}, {
 		key: 'getName',
@@ -24237,96 +24183,66 @@ var Cartridge = function () {
 	}, {
 		key: 'loadRom',
 		value: function loadRom(name, binaryString, completeCallback) {
-			var _this = this;
+			this._name = name;
 
-			var that = this;
-			try {
-				this._name = name;
+			var stringIndex = 0;
+			var correctHeader = [78, 69, 83, 26];
 
-				var stringIndex = 0;
-				var correctHeader = [78, 69, 83, 26];
-
-				for (var i = 0; i < correctHeader.length; ++i) {
-					if (correctHeader[i] !== binaryString[stringIndex++]) throw new Error('Invalid NES header for file!');
+			for (var i = 0; i < correctHeader.length; ++i) {
+				if (correctHeader[i] !== binaryString[stringIndex++]) {
+					throw new Error('Invalid NES header for file!');
 				}
-
-				var prgPageCount = binaryString[stringIndex++];
-				var chrPageCount = binaryString[stringIndex++];
-				var controlByte1 = binaryString[stringIndex++];
-				var controlByte2 = binaryString[stringIndex++];
-
-				if (prgPageCount === 0) {
-					prgPageCount = 1; // 0 means 1
-				}
-
-				var horizontalMirroring = (controlByte1 & 0x01) === 0;
-				var sramEnabled = (controlByte1 & 0x02) > 0;
-				var hasTrainer = (controlByte1 & 0x04) > 0;
-				var fourScreenRamLayout = (controlByte1 & 0x08) > 0;
-
-				var mirroringMethod = 0;
-				if (fourScreenRamLayout) mirroringMethod = PPU_MIRRORING_FOURSCREEN;else if (!horizontalMirroring) mirroringMethod = _consts.PPU_MIRRORING_VERTICAL;else mirroringMethod = _consts.PPU_MIRRORING_HORIZONTAL;
-
-				var mapperId = (controlByte1 & 0xF0) >> 4 | controlByte2 & 0xF0;
-
-				stringIndex = 16;
-				if (hasTrainer) stringIndex += 512;
-
-				// calculate SHA1 on PRG and CHR data, look it up in the db, then load it
-				this._sha1 = (0, _sha2.default)(binaryString, stringIndex);
-				console.log("SHA1: " + this._sha1);
-
-				dbLookup(this._sha1, function (err, data) {
-					if (err) {
-						completeCallback(err);
-						return;
-					}
-					try {
-						that._dbData = data;
-
-						if (that._dbData) {
-							that._name = that._dbData['$']['name'];
-							console.log("Game found in database: " + that._name);
-						} else {
-							console.log("Game not found in database");
-						}
-
-						var mapperFromDb = that._getMapperFromDatabase(mapperId);
-
-						if (mapperFromDb !== null && mapperFromDb !== mapperId) {
-							console.log("Game has different mapper in database [" + mapperFromDb + "] from the iNes file [" + mapperId + "]. Using value from database...");
-							mapperId = mapperFromDb;
-						}
-
-						that.memoryMapper = (0, _mapperFactory2.default)(mapperId, that.mainboard, mirroringMethod);
-
-						// read in program code
-						var prg8kChunkCount = prgPageCount * 2; // read in 8k chunks, prgPageCount is 16k chunks
-						var prgSize = 0x2000 * prg8kChunkCount;
-						that.memoryMapper.setPrgData(_this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + prgSize), prgSize), prg8kChunkCount);
-						stringIndex += prgSize;
-
-						// read in character maps
-						var chr1kChunkCount = chrPageCount * 8; // 1kb per pattern table, chrPageCount is the 8kb count
-						var chrSize = 0x400 * chr1kChunkCount;
-						that.memoryMapper.setChrData(_this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + chrSize), chrSize), chr1kChunkCount);
-						stringIndex += chrSize;
-
-						// determine NTSC or PAL
-						that._determineColourEncodingType(name);
-						(0, _consts.setColourEncodingType)(that._colourEncodingType);
-						var prgKb = prg8kChunkCount * 8;
-						console.log('Cartridge \'' + name + '\' loaded. Mapper ' + mapperId + ', ' + (0, _consts.mirroringMethodToString)(mirroringMethod) + ' mirroring, ' + prgKb + 'kb PRG, ' + chr1kChunkCount + 'kb CHR');
-						console.log('Encoding: ' + that._colourEncodingType);
-
-						completeCallback();
-					} catch (err2) {
-						completeCallback(err2);
-					}
-				});
-			} catch (err) {
-				completeCallback(err);
 			}
+
+			var prgPageCount = binaryString[stringIndex++] || 1;
+			var chrPageCount = binaryString[stringIndex++];
+			var controlByte1 = binaryString[stringIndex++];
+			var controlByte2 = binaryString[stringIndex++];
+
+			var horizontalMirroring = (controlByte1 & 0x01) === 0;
+			var sramEnabled = (controlByte1 & 0x02) > 0;
+			var hasTrainer = (controlByte1 & 0x04) > 0;
+			var fourScreenRamLayout = (controlByte1 & 0x08) > 0;
+
+			var mirroringMethod = 0;
+			if (fourScreenRamLayout) {
+				mirroringMethod = PPU_MIRRORING_FOURSCREEN;
+			} else if (!horizontalMirroring) {
+				mirroringMethod = _consts.PPU_MIRRORING_VERTICAL;
+			} else {
+				mirroringMethod = _consts.PPU_MIRRORING_HORIZONTAL;
+			}
+
+			var mapperId = (controlByte1 & 0xF0) >> 4 | controlByte2 & 0xF0;
+
+			stringIndex = 16;
+			if (hasTrainer) stringIndex += 512;
+
+			// calculate SHA1 on PRG and CHR data, look it up in the db, then load it
+			this._sha1 = (0, _sha2.default)(binaryString, stringIndex);
+			console.log("SHA1: " + this._sha1);
+
+			this.memoryMapper = (0, _mapperFactory2.default)(mapperId, this.mainboard, mirroringMethod);
+
+			// read in program code
+			var prg8kChunkCount = prgPageCount * 2; // read in 8k chunks, prgPageCount is 16k chunks
+			var prgSize = 0x2000 * prg8kChunkCount;
+			this.memoryMapper.setPrgData(this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + prgSize), prgSize), prg8kChunkCount);
+			stringIndex += prgSize;
+
+			// read in character maps
+			var chr1kChunkCount = chrPageCount * 8; // 1kb per pattern table, chrPageCount is the 8kb count
+			var chrSize = 0x400 * chr1kChunkCount;
+			this.memoryMapper.setChrData(this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + chrSize), chrSize), chr1kChunkCount);
+			stringIndex += chrSize;
+
+			// determine NTSC or PAL
+			this._determineColourEncodingType(name);
+			(0, _consts.setColourEncodingType)(this._colourEncodingType);
+			var prgKb = prg8kChunkCount * 8;
+			console.log('Cartridge \'' + name + '\' loaded. \nMapper:\t\t' + mapperId + ' \nMirroring:\t' + (0, _consts.mirroringMethodToString)(mirroringMethod) + ' \nPRG:\t\t' + prgKb + 'kb \nCHR:\t\t' + chr1kChunkCount + 'kb \nEncoding:\t' + this._colourEncodingType);
+
+			completeCallback();
 		}
 	}, {
 		key: 'reset',
@@ -26307,48 +26223,48 @@ var Synchroniser = function () {
 			// Then move onto the next one.
 			var objIndex = 0;
 			var keepRunning = true;
-			// while ( keepRunning ) {
-			var nextEventTime = this.getNextEventTime();
-			if (nextEventTime <= syncTo && nextEventTime < frameEnd) {
-				syncTo = nextEventTime;
-			} else {
-				keepRunning = false; // no more events until requested syncTo value: we can finish the sync loop
-				syncTo = Math.min(syncTo, frameEnd);
-			}
-
-			if (this._lastSynchronisedMtc >= syncTo) {
-				return;
-			}
-
-			this._isSynchronising = true;
-			this._currentSyncValue = syncTo;
-
-			for (objIndex = 0; objIndex < this._objects.length; ++objIndex) {
-				// TODO: Objects should be forbidden from calling synchroniser.synchronise() whilst in the synchronise phase - if they
-				// want to force a synchronise they should do so using an event
-				var obj = this._objects[objIndex];
-				if (obj.lastSynchronisedTickCount < syncTo) {
-					obj.object.synchronise(obj.lastSynchronisedTickCount, syncTo);
-					obj.lastSynchronisedTickCount = syncTo;
+			while (keepRunning) {
+				var nextEventTime = this.getNextEventTime();
+				if (nextEventTime <= syncTo && nextEventTime < frameEnd) {
+					syncTo = nextEventTime;
+				} else {
+					keepRunning = false; // no more events until requested syncTo value: we can finish the sync loop
+					syncTo = Math.min(syncTo, frameEnd);
 				}
-			}
-			this._isSynchronising = false;
 
-			this._executeEvents(this._lastSynchronisedMtc, syncTo);
-			this._lastSynchronisedMtc = syncTo;
+				if (this._lastSynchronisedMtc >= syncTo) {
+					return;
+				}
 
-			// TODO: this should be an event: do end frame stuff if that time has come
-			if (syncTo >= frameEnd) {
+				this._isSynchronising = true;
+				this._currentSyncValue = syncTo;
+
 				for (objIndex = 0; objIndex < this._objects.length; ++objIndex) {
-					this._objects[objIndex].object.onEndFrame(syncTo);
-					this._objects[objIndex].lastSynchronisedTickCount = 0;
+					// TODO: Objects should be forbidden from calling synchroniser.synchronise() whilst in the synchronise phase - if they
+					// want to force a synchronise they should do so using an event
+					var obj = this._objects[objIndex];
+					if (obj.lastSynchronisedTickCount < syncTo) {
+						obj.object.synchronise(obj.lastSynchronisedTickCount, syncTo);
+						obj.lastSynchronisedTickCount = syncTo;
+					}
 				}
+				this._isSynchronising = false;
 
-				this.cpuMtc -= frameEnd;
-				this._lastSynchronisedMtc = 0;
-				this._eventBus.invoke('frameEnd');
+				this._executeEvents(this._lastSynchronisedMtc, syncTo);
+				this._lastSynchronisedMtc = syncTo;
+
+				// TODO: this should be an event: do end frame stuff if that time has come
+				if (syncTo >= frameEnd) {
+					for (objIndex = 0; objIndex < this._objects.length; ++objIndex) {
+						this._objects[objIndex].object.onEndFrame(syncTo);
+						this._objects[objIndex].lastSynchronisedTickCount = 0;
+					}
+
+					this.cpuMtc -= frameEnd;
+					this._lastSynchronisedMtc = 0;
+					this._eventBus.invoke('frameEnd');
+				}
 			}
-			// }
 		}
 	}, {
 		key: 'getNextEventTime',
