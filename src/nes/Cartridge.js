@@ -11,8 +11,7 @@ import {
 import mapperFactory from './mappers/mapperFactory';
 
 export default class Cartridge {
-	constructor(mainboard) {
-		this.mainboard = mainboard;
+	constructor() {
 		this.memoryMapper = null;
 		this._sha1 = '';
 		this._name = '';
@@ -103,7 +102,7 @@ export default class Cartridge {
 		this._sha1 = sha1(binaryString, stringIndex);
 		console.log("SHA1: " + this._sha1);
 
-		this.memoryMapper = mapperFactory(mapperId, this.mainboard, mirroringMethod);
+		this.memoryMapper = mapperFactory(mapperId, mirroringMethod);
 
 		// read in program code
 		var prg8kChunkCount = prgPageCount * 2; // read in 8k chunks, prgPageCount is 16k chunks

@@ -29,8 +29,7 @@ import {
 } from '../../utils/serialisation';
 
 export default class BaseMapper {
-	constructor( mainboard, mirroringMethod ) {
-		this.mainboard = mainboard;
+	constructor( mirroringMethod ) {
 		this.mirroringMethod = mirroringMethod;
 		this.prgPagesMap = new Int32Array( 4 );
 		this._prgData = null;
