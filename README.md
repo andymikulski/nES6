@@ -48,4 +48,5 @@ This will compile the nES6 library using Google's Closure Compiler and output to
 MIT
 
 WebNES Copyright (c) 2015 peteward44
+
 nES6 Copyright (c) 2017 andymikulski
