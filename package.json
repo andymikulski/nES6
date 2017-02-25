@@ -1,6 +1,6 @@
 {
-  "name": "WebNES",
-  "version": "2.0.0-alpha",
+  "name": "nES6",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "dependencies": {
@@ -32,9 +32,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:peteward44/WebNES.git"
+    "url": "git@github.com:andymikulski/nES6.git"
   },
   "author": "",
-  "license": "MIT/GNU",
-  "private": true
+  "license": "GPL-3.0"
 }

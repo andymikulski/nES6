@@ -1,6 +1,5 @@
 var webpack = require('webpack');
 var path = require('path');
-var ClosureCompilerPlugin = require('webpack-closure-compiler');
 var prod = process.argv.indexOf('-p') !== -1;
 
 var plugins = [
@@ -8,6 +7,7 @@ var plugins = [
 ];
 
 if (prod) {
+  var ClosureCompilerPlugin = require('webpack-closure-compiler');
   plugins = plugins.concat([
     new ClosureCompilerPlugin({
       compiler: {
@@ -19,12 +19,6 @@ if (prod) {
       // use JS compiler - slower but doesn't require any java
       jsCompiler: true,
     })
-    // new webpack.optimize.UglifyJsPlugin({
-    //   sourceMap: false,
-    //   compress: {
-    //     warnings: false,
-    //   },
-    // })
   ]);
 }
 
@@ -33,7 +27,10 @@ module.exports = [
     plugins,
     context: __dirname,
     entry: {
-      webnes: [
+      nes6: [
+        './src/NES.js'
+      ],
+      'nes6-demo': [
         './src/main.js'
       ]
     },
@@ -50,8 +47,8 @@ module.exports = [
           exclude: /(node_modules|bower_components)/,
           loader: 'babel-loader',
           query: {
-            presets: ["stage-0", "es2015"],
-            plugins: ["transform-class-properties", "transform-es2015-classes"]
+            presets: ['stage-0', 'es2015'],
+            plugins: ['transform-class-properties', 'transform-es2015-classes']
           }
         }
       ]

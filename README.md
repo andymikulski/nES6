@@ -1,61 +1,51 @@
-WebNES
+nES6
 ======
 
-NES emulator in Javascript using HTML5 canvas. Optimised for Chrome's V8 engine. Due to various performance issues and the lack of real typed arrays in IE, it is entirely not supported.
+NES emulator in ES6, rendered via WebGL or Canvas.
 
-WebNES supports the following features:
+Unlike other emulators, nES6 does _not_ implement everything for you. Instead, it exposes an API to directly manipulate the emulator. Implement controllers, ROM loading, volume control, and more, all as you see fit in your application.
 
+#Credit
+
+nES6 was initially forked from Pete Ward's [WebNES](https://github.com/peteward44/WebNES) project. This project wouldn't be possible without Pete's incredible emulator work - go give him some stars!
+
+##Features
+- Exposes API for manipulating inputs, ROMs, system settings, etc.
 - Supports all common NES mapper formats, approximately 98% of games should work
-- Audio support using the HTML5 WebAudio API
-- WebGL support with canvas fallback on platforms which do not support it
-- Supports a selection of WebGL shaders used in the higan SNES emulator, such as CRT monitor emulation
-- Remappable keyboard keys
-- Save state support through quick save / quick load
-- Game genie database - If a game is loaded which has known game genie codes, the player can click the star on the toolbar to be able to activate / deactivate GG codes
+- HTML5 WebAudio
+- WebGL, Canvas renderers
+  - Supports WebGL shaders
+- Save/load state
 - Screenshots
 - Game pad support
+- Remappable keyboard keys
 - NTSC / PAL support
-- Zip file support to load ROMs
-- Game speed can be slowed down / sped up
-- Debugging for ROM authors or other emulator authors - Trace logs can be generated for CPU instructions and PPU events
 
 
-#Just play
-
-A release build can be played here [http://peteward44.github.io/WebNES](http://peteward44.github.io/WebNES)
-
-
-#Building
-
-WebNES can run without building, however various optimisations are performed by the closure compiler and the grunt build script.
-You will need npm and bower installed.
-
-##Windows
-
-```
-Run setup.cmd
-Run build_release.cmd
-```
-
-##Linux
-
+##Getting Started
 ```
 npm install
-bower install
-grunt
 ```
+Installs webpack, babel, and other dependencies.
 
-# License
+```
+npm run dev
+```
+Runs a server at `http://localhost:8000` and begins webpack compilation.
 
-WebNES is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+```
+./src/NES.js
+```
+Entry point - work in the `/src/` folder!
 
-WebNES is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+##Build
+```
+npm run build
+```
+This will compile the nES6 library using Google's Closure Compiler and output to `app/nes6.js`
 
-You should have received a copy of the GNU General Public License
-along with WebNES.  If not, see <http://www.gnu.org/licenses/>.
+###License
+MIT
+
+WebNES Copyright (c) 2015 peteward44
+nES6 Copyright (c) 2017 andymikulski

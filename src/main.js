@@ -3,8 +3,14 @@ import NES from './NES.js';
 const App = new NES();
 App.start();
 
-
-const roms = ['PunchOut', 'SuperMarioBros', 'SuperMarioBros3', 'Earthbound', 'MegaMan'];
+const roms = [
+	'Contra',
+	'PunchOut',
+	'SuperMarioBros',
+	'SuperMarioBros3',
+	'Earthbound',
+	'MegaMan'
+];
 
 let romToLoad;
 const getIndex = ()=>{
