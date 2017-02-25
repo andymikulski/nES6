@@ -208,8 +208,7 @@ export default class BaseMapper {
 
 
 	// 0x8000 -> 0xFFFF
-	write8PrgRom( offset, data ) {
-	}
+	write8PrgRom( offset, data ) {}
 
 
 	read8PrgRom( offset ) {
