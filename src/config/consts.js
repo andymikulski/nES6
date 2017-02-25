@@ -16,10 +16,15 @@ export const IS_INT_BETWEEN = function( offset, min, max ) {
 };
 
 
+const zeroPadCache = {};
 export const ZERO_PAD = function(n, width, z) {
-	z = z || '0';
-	n = n + '';
-	return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+	const cacheKey = `${n} ${width} ${z}`;
+	if (!zeroPadCache[cacheKey]) {
+		z = z || '0';
+		n = n + '';
+		zeroPadCache[cacheKey] = n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+	}
+	return zeroPadCache[cacheKey];
 };
 
 

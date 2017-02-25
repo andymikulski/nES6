@@ -218,11 +218,11 @@ export default class BaseMapper {
 		var aid = offset & 0x1FFF;
 		var readValue = this._prgData[pagepos + aid];
 
-		if ( this._gameGenieActive ) {
-			if ( this._gameGeniePokes.hasOwnProperty( offset ) ) {
-				return this._checkGameGenieCode( readValue, offset );
-			}
-		}
+		// if ( this._gameGenieActive ) {
+		// 	if ( this._gameGeniePokes.hasOwnProperty( offset ) ) {
+		// 		return this._checkGameGenieCode( readValue, offset );
+		// 	}
+		// }
 		return readValue;
 	}
 

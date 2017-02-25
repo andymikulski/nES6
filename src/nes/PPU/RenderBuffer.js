@@ -71,6 +71,7 @@ export default class RenderBuffer {
 		if (this.colorHash[paletteIndex]) {
 			return this.colorHash[paletteIndex];
 		}
+		this.uintPalette = this.uintPalette || new Uint32Array(this.defaultPalette32BitVals);
 
 		var pindex = 0;
 		if (paletteIndex < 64) {
@@ -78,7 +79,7 @@ export default class RenderBuffer {
 		} else {
 			pindex = 64;
 		}
-		this.colorHash[paletteIndex] = (new Uint32Array(this.defaultPalette32BitVals))[pindex];
+		this.colorHash[paletteIndex] = this.uintPalette[pindex];
 
 		return this.colorHash[paletteIndex];
 	}

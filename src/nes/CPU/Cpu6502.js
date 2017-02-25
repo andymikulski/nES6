@@ -6,7 +6,6 @@ import {
 } from '../../utils/Trace';
 
 import fastInstructions from './fastInstructions';
-import cpuInstructionsSwitch from './switchFastInstructions';
 
 import {
 	cpuInstructionsTrace as traceInstructions,
@@ -40,7 +39,6 @@ export default class Cpu6502 {
 
 		this._useSwitchStatement = false; // isFirefox;
 		this._instructionSet = fastInstructions; // Default to 'fast' versions
-		this._instructionSwitch = cpuInstructionsSwitch;
 		this.resetVariables();
 	}
 
@@ -362,7 +360,6 @@ export default class Cpu6502 {
 
 
 	read16FromMemWithWrap(offsetAddress) {
-
 		this.incrementSubcycle();
 		var ret = this.mainboard.memory.read8(offsetAddress);
 		var newoffset;
@@ -394,15 +391,7 @@ export default class Cpu6502 {
 			this.waitOneInstructionAfterCli = false;
 
 		var opcode = this.mainboard.memory.read8(this.programCounter);
-		var cyclesTaken = 0;
-		// if (!this._useSwitchStatement) {
-			cyclesTaken = this._instructionSet[opcode](this, this.mainboard.memory);
-		// } else {
-		// 	cyclesTaken = this._instructionSwitch(opcode, this, this.mainboard.memory);
-		// }
-		// if (this._traceEnabled) {
-		// 	this._doTrace();
-		// }
+		var cyclesTaken = this._instructionSet[opcode](this, this.mainboard.memory);
 		this.subcycle = 0;
 		return cyclesTaken;
 	}
