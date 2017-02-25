@@ -211,8 +211,8 @@ export default class Input {
 			this._playerKeyboardMaps = [
 				[
 					// defaults for player 1
-					[ 90 ], // Z // var JOYPAD_A = 0;
-					[ 88 ], // X // var JOYPAD_B = 1;
+					[ 88 ], // X // var JOYPAD_A = 0;
+					[ 90 ], // Z // var JOYPAD_B = 1;
 					[ 16, 160, 161, 67 ], // shift, left shift, right shift, C // var JOYPAD_SELECT = 2;
 					[ 13, 32, 86 ], // enter, space, V // var JOYPAD_START = 3;
 					[ 38, 87, 104 ], // up, W, numpad 8 // var JOYPAD_UP = 4;
