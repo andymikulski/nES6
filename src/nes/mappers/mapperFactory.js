@@ -36,12 +36,12 @@ const mapperDict = {
 	9: Mapper9,
 };
 
-export default function mapperFactory( mapperId, mirroringMethod ) {
+export default function mapperFactory( mapperId, mainboard, mirroringMethod ) {
 	var MapperClass = mapperDict[mapperId];
 	if ( !mapperDict.hasOwnProperty(mapperId) || !MapperClass ) {
 		throw new Error( 'Mapper id ' + mapperId + ' is not supported' );
 	}
-	var mapper = new MapperClass(mirroringMethod);
+	var mapper = new MapperClass(mainboard, mirroringMethod);
 	if (mapper.init) {
 		mapper.init();
 	}

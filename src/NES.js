@@ -267,7 +267,7 @@ export default class NES {
 
   _doRomLoad(name, binaryString) {
     var that = this;
-    this._cart = new Cartridge();
+    this._cart = new Cartridge(this._mainboard);
     this._cart.loadRom(name, binaryString, function(err) {
       if (!err) {
         that._romLoaded = true;
