@@ -3,8 +3,8 @@ import bindKeyboardPlugin from './plugins/bindKeyboard';
 
 const App = new nES6({
 	render: 'auto',
-	audio: true,
-	plugins: [bindKeyboardPlugin]
+	audio: false,
+	plugins: [bindKeyboardPlugin()]
 });
 App.start();
 

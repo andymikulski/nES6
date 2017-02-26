@@ -61,10 +61,6 @@ export default class nES6 {
 
     // Apply plugins
     if (this._options.plugins) {
-      if (!(this._options.plugins instanceof Array)){
-        throw new Error('nES6 plugins must be an array!');
-      }
-
       // Pass this nES6 instance to each plugin
       this._options.plugins.map(plugin=>plugin(this));
     }
