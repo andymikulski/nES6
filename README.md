@@ -20,6 +20,7 @@ nES6 was initially forked from Pete Ward's [WebNES](https://github.com/peteward4
 - Game pad support
 - Remappable keyboard keys
 - NTSC / PAL support
+- Plugin support. Easily apply features that others have built for nES6!
 
 
 ##Getting Started
