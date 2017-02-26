@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 86);
+/******/ 	return __webpack_require__(__webpack_require__.s = 85);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -229,74 +229,19 @@ var g_ClearScreenArray = exports.g_ClearScreenArray = new Int32Array(SCREEN_WIDT
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.trace_all = exports.trace_apu = exports.trace_mapper = exports.trace_ppu = exports.trace_cpuInstructions = exports.trace_cpu = undefined;
-exports.enabled = enabled;
-exports.enableType = enableType;
-exports.writeLine = writeLine;
-exports.start = start;
-exports.stop = stop;
-
-var _fileSaver = __webpack_require__(5);
-
-var trace_cpu = exports.trace_cpu = 0;
-var trace_cpuInstructions = exports.trace_cpuInstructions = 1;
-var trace_ppu = exports.trace_ppu = 2;
-var trace_mapper = exports.trace_mapper = 3;
-var trace_apu = exports.trace_apu = 4;
-var trace_all = exports.trace_all = 5;
-
-var tracer = {
-  lines: [],
-  running: false,
-  enabledTypes: new Array(trace_all + 1).fill(0)
-};
-
-function enabled() {
-  return tracer.running;
-}
-
-function enableType(traceType, checked) {
-  tracer.enabledTypes[traceType] = checked ? 1 : 0;
-}
-
-function writeLine(traceType, line) {
-  if (tracer.running) {
-    if (tracer.enabledTypes[traceType] === 1) {
-      tracer.lines.push(line + '\r\n');
-    }
-  }
-}
-
-function start() {
-  tracer.running = true;
-}
-
-function stop() {
-  tracer.running = false;
-
-  // save to file
-  if (tracer.lines.length > 0) {
-    var blob = new Blob(tracer.lines, {
-      type: "text/plain;charset=utf-8"
-    });
-    (0, _fileSaver.saveAs)(blob, "trace.txt");
-    tracer.lines.length = 0;
-  }
-}
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+exports.rusha = undefined;
 exports.uintArrayToString = uintArrayToString;
 exports.stringToUintArray = stringToUintArray;
 exports.blobToString = blobToString;
+
+var _rusha = __webpack_require__(79);
+
+var _rusha2 = _interopRequireDefault(_rusha);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var rusha = exports.rusha = new _rusha2.default();
+
 var uintArrayCache = {};
 function uintArrayToString(uintArray) {
   if (!(uintArray instanceof Int32Array)) {
@@ -339,7 +284,7 @@ function blobToString(blob) {
 };
 
 /***/ }),
-/* 3 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -373,7 +318,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      Mapper 069: 11
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
 
-var _serialisation = __webpack_require__(2);
+var _serialisation = __webpack_require__(1);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -709,6 +654,71 @@ var BaseMapper = function () {
 }();
 
 exports.default = BaseMapper;
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.trace_all = exports.trace_apu = exports.trace_mapper = exports.trace_ppu = exports.trace_cpuInstructions = exports.trace_cpu = undefined;
+exports.enabled = enabled;
+exports.enableType = enableType;
+exports.writeLine = writeLine;
+exports.start = start;
+exports.stop = stop;
+
+var _fileSaver = __webpack_require__(5);
+
+var trace_cpu = exports.trace_cpu = 0;
+var trace_cpuInstructions = exports.trace_cpuInstructions = 1;
+var trace_ppu = exports.trace_ppu = 2;
+var trace_mapper = exports.trace_mapper = 3;
+var trace_apu = exports.trace_apu = 4;
+var trace_all = exports.trace_all = 5;
+
+var tracer = {
+  lines: [],
+  running: false,
+  enabledTypes: new Array(trace_all + 1).fill(0)
+};
+
+function enabled() {
+  return tracer.running;
+}
+
+function enableType(traceType, checked) {
+  tracer.enabledTypes[traceType] = checked ? 1 : 0;
+}
+
+function writeLine(traceType, line) {
+  if (tracer.running) {
+    if (tracer.enabledTypes[traceType] === 1) {
+      tracer.lines.push(line + '\r\n');
+    }
+  }
+}
+
+function start() {
+  tracer.running = true;
+}
+
+function stop() {
+  tracer.running = false;
+
+  // save to file
+  if (tracer.lines.length > 0) {
+    var blob = new Blob(tracer.lines, {
+      type: "text/plain;charset=utf-8"
+    });
+    (0, _fileSaver.saveAs)(blob, "trace.txt");
+    tracer.lines.length = 0;
+  }
+}
 
 /***/ }),
 /* 4 */
@@ -1520,22 +1530,31 @@ exports.renameQuickSaveStates = renameQuickSaveStates;
 exports.saveStateSupported = saveStateSupported;
 exports.saveToLocalStorage = saveToLocalStorage;
 exports.loadFromLocalStorage = loadFromLocalStorage;
-function compress(rawString) {
 
-	var compressed;
-	// LZString is way too slow and gives pretty much the same result, use jz.algos instead
-	//compressed = LZString.compress( raw );
-	var int32Array = Nes.stringToUintArray(rawString);
-	compressed = Nes.uintArrayToString(new Int32Array(jz.algos.deflate(new Uint8Array(int32Array))));
-	return compressed;
+var _lzString = __webpack_require__(89);
+
+var _lzString2 = _interopRequireDefault(_lzString);
+
+var _consts = __webpack_require__(0);
+
+var _serialisation = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var compressCache = {};
+function compress(rawString) {
+	if (!compressCache[rawString]) {
+		compressCache[rawString] = _lzString2.default.compress(rawString);
+	}
+	return compressCache[rawString];
 }
 
+var decompressCache = {};
 function decompress(rawString) {
-	var decompressed;
-	//decompressed = LZString.decompress( compressed );
-	var int32Array = Nes.stringToUintArray(rawString);
-	decompressed = Nes.uintArrayToString(new Int32Array(jz.algos.inflate(new Uint8Array(int32Array))));
-	return decompressed;
+	if (!decompressCache[rawString]) {
+		compressCache[rawString] = _lzString2.default.decompress(rawString);
+	}
+	return compressCache[rawString];
 }
 
 function getCartName(slotName, cartName) {
@@ -1557,26 +1576,19 @@ function getMetaObject(cartName) {
 }
 
 function setMetaObject(cartName, obj) {
-	saveToLocalStorage(getMetaName(cartName), obj);
+	return saveToLocalStorage(getMetaName(cartName), obj);
 }
 
 function saveState(slotName, cartName, data, screenData) {
-
-	if (localStorage) {
-		// save state data as it's own local storage object
-		saveToLocalStorage(getCartName(slotName, cartName), data);
-
-		// add to meta data object
-		var meta = getMetaObject(cartName);
-		var slotMeta = {};
-		if (screenData) {
-			slotMeta.screen = compress(screenData);
-			console.log("Saved screenshot size: " + slotMeta.screen.length + " (uncompressed: " + screenData.length + ")");
-		}
-		slotMeta.date = Date.now();
-		meta.slots[slotName] = slotMeta;
-		setMetaObject(cartName, meta);
+	// add to meta data object
+	var meta = getMetaObject(cartName);
+	var slotMeta = {};
+	if (screenData) {
+		slotMeta.screen = compress(screenData);
 	}
+	slotMeta.date = Date.now();
+	meta.slots[slotName] = slotMeta;
+	return setMetaObject(cartName, meta);
 }
 
 function loadState(slotName, cartName) {
@@ -1638,15 +1650,15 @@ function renameQuickSaveStates(slotName, cartName, limitCount) {
 	var meta = getMetaObject(cartName);
 
 	// remove last quicksave.
-	renameState(meta, slotName + ZERO_PAD(limitCount - 1, 2, 0), null, cartName);
+	renameState(meta, slotName + (0, _consts.ZERO_PAD)(limitCount - 1, 2, 0), null, cartName);
 
 	// rename any others, moving each one down. We go backwards so we don't overwrite
 	for (var i = limitCount - 2; i > 0; --i) {
-		renameState(meta, slotName + ZERO_PAD(i, 2, 0), slotName + ZERO_PAD(i + 1, 2, 0), cartName);
+		renameState(meta, slotName + (0, _consts.ZERO_PAD)(i, 2, 0), slotName + (0, _consts.ZERO_PAD)(i + 1, 2, 0), cartName);
 	}
 
 	// rename main 'quicksave' slot
-	renameState(meta, slotName, slotName + ZERO_PAD(1, 2, 0), cartName);
+	renameState(meta, slotName, slotName + (0, _consts.ZERO_PAD)(1, 2, 0), cartName);
 
 	setMetaObject(cartName, meta);
 }
@@ -1657,11 +1669,11 @@ function saveStateSupported() {
 }
 
 function saveToLocalStorage(name, data) {
-	if (localStorage) {
-		var raw = JSON.stringify(data);
-		var compressed = compress(raw);
-		localStorage.setItem(name, compressed);
-	}
+	var raw = JSON.stringify(data);
+	var compressed = compress(raw);
+	localStorage.setItem(name, compressed);
+
+	return compressed;
 }
 
 function loadFromLocalStorage(name) {
@@ -1796,19 +1808,15 @@ var _stats2 = _interopRequireDefault(_stats);
 
 var _Event = __webpack_require__(4);
 
-var _TestRenderSurface = __webpack_require__(48);
-
-var _TestRenderSurface2 = _interopRequireDefault(_TestRenderSurface);
-
-var _Mainboard = __webpack_require__(32);
+var _Mainboard = __webpack_require__(31);
 
 var _Mainboard2 = _interopRequireDefault(_Mainboard);
 
-var _Cartridge = __webpack_require__(31);
+var _Cartridge = __webpack_require__(30);
 
 var _Cartridge2 = _interopRequireDefault(_Cartridge);
 
-var _Trace = __webpack_require__(1);
+var _Trace = __webpack_require__(3);
 
 var _Trace2 = _interopRequireDefault(_Trace);
 
@@ -1820,6 +1828,10 @@ var _CanvasParent = __webpack_require__(13);
 
 var _CanvasParent2 = _interopRequireDefault(_CanvasParent);
 
+var _HeadlessRenderSurface = __webpack_require__(88);
+
+var _HeadlessRenderSurface2 = _interopRequireDefault(_HeadlessRenderSurface);
+
 var _WebGlRenderSurface = __webpack_require__(19);
 
 var _WebGlRenderSurface2 = _interopRequireDefault(_WebGlRenderSurface);
@@ -1829,10 +1841,6 @@ var _utils = __webpack_require__(6);
 var _CanvasRenderSurface = __webpack_require__(16);
 
 var _CanvasRenderSurface2 = _interopRequireDefault(_CanvasRenderSurface);
-
-var _StateManager = __webpack_require__(47);
-
-var _StateManager2 = _interopRequireDefault(_StateManager);
 
 var _Input = __webpack_require__(18);
 
@@ -1844,9 +1852,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var NES = function () {
-  function NES() {
-    _classCallCheck(this, NES);
+var nES6 = function () {
+  function nES6(options) {
+    _classCallCheck(this, nES6);
+
+    this._options = options || {};
 
     this._cart = null;
     this._romLoaded = false;
@@ -1873,14 +1883,12 @@ var NES = function () {
     this._pauseNextFrame = false;
     this._pauseOnFrame = -1;
 
-    this._options = {};
-
     this.animate = this._animate.bind(this);
 
     window.onerror = this._showError.bind(this);
   }
 
-  _createClass(NES, [{
+  _createClass(nES6, [{
     key: 'connect',
     value: function connect(name, cb) {
       this._eventBus.connect(name, cb);
@@ -1896,32 +1904,38 @@ var NES = function () {
       this._newRomWaiting = true;
       this._newRomLoaded = {
         name: name,
-        binaryString: binaryString
+        binaryString: binaryString,
+        fileSize: binaryString.length / 1000 // in KB
       };
     }
   }, {
     key: 'start',
-    value: function start(options) {
-      this._options = options || {};
-      this._options.triggerFrameRenderedEvent = this._options.triggerFrameRenderedEvent === undefined ? false : this._options.triggerFrameRenderedEvent;
-      this._options.createGuiComponents = !!this._options.createGuiComponents;
-
+    value: function start() {
       this._fpsMeter = new _stats2.default();
       this._fpsMeter.showPanel(1);
       document.body.appendChild(this._fpsMeter.dom);
 
       this._canvasParent = new _CanvasParent2.default();
       this._renderSurface = null;
-      if ((0, _utils.webGlSupported)()) {
-        this._renderSurface = new _WebGlRenderSurface2.default(this._canvasParent);
+
+      if (this._options['headless'] === true) {
+        this._renderSurface = new _HeadlessRenderSurface2.default();
       } else {
-        this._renderSurface = new _CanvasRenderSurface2.default(this._canvasParent);
+        if ((0, _utils.webGlSupported)()) {
+          this._renderSurface = new _WebGlRenderSurface2.default(this._canvasParent);
+        } else {
+          this._renderSurface = new _CanvasRenderSurface2.default(this._canvasParent);
+        }
       }
 
       this._mainboard = new _Mainboard2.default(this._renderSurface);
       this._mainboard.connect('reset', this._onReset.bind(this));
       this._input = new _Input2.default(this._mainboard);
-      this._stateManager = new _StateManager2.default(this, this._options.createGuiComponents);
+
+      // disable audio for headless rendering
+      if (this._options['headless'] === true) {
+        this._mainboard.enableSound(false);
+      }
 
       this.animate();
     }
@@ -2059,7 +2073,7 @@ var NES = function () {
       }
 
       if (this._newRomWaiting) {
-        this._doRomLoad(this._newRomLoaded.name, this._newRomLoaded.binaryString);
+        this._doRomLoad(this._newRomLoaded);
         this._newRomWaiting = false;
       }
 
@@ -2088,8 +2102,6 @@ var NES = function () {
       this._mainboard.doFrame();
       this._renderSurface.render(this._mainboard);
 
-      this._stateManager.onFrame();
-
       if (this._fpsMeter) {
         this._fpsMeter.end();
       }
@@ -2097,16 +2109,31 @@ var NES = function () {
       requestAnimationFrame(this.animate);
     }
   }, {
+    key: 'exportState',
+    value: function exportState() {
+      return this._mainboard.exportState();
+    }
+  }, {
+    key: 'importState',
+    value: function importState(loadedData) {
+      return this._mainboard.importState(loadedData);
+    }
+  }, {
     key: '_doRomLoad',
-    value: function _doRomLoad(name, binaryString) {
-      var that = this;
+    value: function _doRomLoad(_ref) {
+      var _this = this;
+
+      var name = _ref.name,
+          binaryString = _ref.binaryString,
+          fileSize = _ref.fileSize;
+
       this._cart = new _Cartridge2.default(this._mainboard);
-      this._cart.loadRom(name, binaryString, function (err) {
-        if (!err) {
-          that._romLoaded = true;
-        } else {
-          that._showError(err);
-        }
+      this._cart.loadRom({
+        name: name,
+        binaryString: binaryString,
+        fileSize: fileSize
+      }).catch(this._showError.bind(this)).then(function () {
+        _this._romLoaded = true;
       });
     }
   }, {
@@ -2154,10 +2181,10 @@ var NES = function () {
     }
   }]);
 
-  return NES;
+  return nES6;
 }();
 
-exports.default = NES;
+exports.default = nES6;
 
 /***/ }),
 /* 13 */
@@ -2381,6 +2408,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _fileSaver = __webpack_require__(5);
 
+var _serialisation = __webpack_require__(1);
+
 var _consts = __webpack_require__(0);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2427,9 +2456,7 @@ var CanvasRenderSurface = function () {
 	}, {
 		key: 'getRenderBufferHash',
 		value: function getRenderBufferHash() {
-
-			var rusha = new Rusha();
-			return rusha.digestFromArrayBuffer(this._offscreen32BitView).toUpperCase();
+			return _serialisation.rusha.digestFromArrayBuffer(this._offscreen32BitView).toUpperCase();
 		}
 	}, {
 		key: 'clearBuffers',
@@ -2827,6 +2854,8 @@ var _consts = __webpack_require__(0);
 
 var _fileSaver = __webpack_require__(5);
 
+var _serialisation = __webpack_require__(1);
+
 var _utils = __webpack_require__(6);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2935,8 +2964,7 @@ var WebGlRenderSurface = function () {
 	}, {
 		key: 'getRenderBufferHash',
 		value: function getRenderBufferHash() {
-			var rusha = new Rusha();
-			return rusha.digestFromArrayBuffer(this._offscreen32BitView).toUpperCase();
+			return _serialisation.rusha.digestFromArrayBuffer(this._offscreen32BitView).toUpperCase();
 		}
 	}, {
 		key: 'clearBuffers',
@@ -3463,7 +3491,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Trace = __webpack_require__(1);
+var _Trace = __webpack_require__(3);
 
 var _APU = __webpack_require__(20);
 
@@ -4921,13 +4949,13 @@ Object.defineProperty(exports, "__esModule", {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); // CPU 6502
 
 
-var _Trace = __webpack_require__(1);
+var _Trace = __webpack_require__(3);
 
 var _fastInstructions = __webpack_require__(28);
 
 var _fastInstructions2 = _interopRequireDefault(_fastInstructions);
 
-var _traceInstructions = __webpack_require__(30);
+var _traceInstructions = __webpack_require__(29);
 
 var _cpuTraceString = __webpack_require__(27);
 
@@ -13123,8 +13151,7 @@ instructions[255] = INS_ABSOLUTEX_255;
 exports.default = instructions;
 
 /***/ }),
-/* 29 */,
-/* 30 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19420,7 +19447,7 @@ var cpuInstructionsTrace = exports.cpuInstructionsTrace = instructions_TRACE;
 var cpuTrace = exports.cpuTrace = formatData;
 
 /***/ }),
-/* 31 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19506,67 +19533,74 @@ var Cartridge = function () {
 		}
 	}, {
 		key: 'loadRom',
-		value: function loadRom(name, binaryString, completeCallback) {
-			this._name = name;
+		value: function loadRom(_ref) {
+			var _this = this;
 
-			var stringIndex = 0;
-			var correctHeader = [78, 69, 83, 26];
+			var name = _ref.name,
+			    binaryString = _ref.binaryString,
+			    fileSize = _ref.fileSize;
 
-			for (var i = 0; i < correctHeader.length; ++i) {
-				if (correctHeader[i] !== binaryString[stringIndex++]) {
-					throw new Error('Invalid NES header for file!');
+			return new Promise(function (resolve, reject) {
+				_this._name = name;
+				var stringIndex = 0;
+				var correctHeader = [78, 69, 83, 26];
+
+				for (var i = 0; i < correctHeader.length; ++i) {
+					if (correctHeader[i] !== binaryString[stringIndex++]) {
+						throw new Error('Invalid NES header for file!');
+					}
 				}
-			}
 
-			var prgPageCount = binaryString[stringIndex++] || 1;
-			var chrPageCount = binaryString[stringIndex++];
-			var controlByte1 = binaryString[stringIndex++];
-			var controlByte2 = binaryString[stringIndex++];
+				var prgPageCount = binaryString[stringIndex++] || 1;
+				var chrPageCount = binaryString[stringIndex++];
+				var controlByte1 = binaryString[stringIndex++];
+				var controlByte2 = binaryString[stringIndex++];
 
-			var horizontalMirroring = (controlByte1 & 0x01) === 0;
-			var sramEnabled = (controlByte1 & 0x02) > 0;
-			var hasTrainer = (controlByte1 & 0x04) > 0;
-			var fourScreenRamLayout = (controlByte1 & 0x08) > 0;
+				var horizontalMirroring = (controlByte1 & 0x01) === 0;
+				var sramEnabled = (controlByte1 & 0x02) > 0;
+				var hasTrainer = (controlByte1 & 0x04) > 0;
+				var fourScreenRamLayout = (controlByte1 & 0x08) > 0;
 
-			var mirroringMethod = 0;
-			if (fourScreenRamLayout) {
-				mirroringMethod = PPU_MIRRORING_FOURSCREEN;
-			} else if (!horizontalMirroring) {
-				mirroringMethod = _consts.PPU_MIRRORING_VERTICAL;
-			} else {
-				mirroringMethod = _consts.PPU_MIRRORING_HORIZONTAL;
-			}
+				var mirroringMethod = 0;
+				if (fourScreenRamLayout) {
+					mirroringMethod = PPU_MIRRORING_FOURSCREEN;
+				} else if (!horizontalMirroring) {
+					mirroringMethod = _consts.PPU_MIRRORING_VERTICAL;
+				} else {
+					mirroringMethod = _consts.PPU_MIRRORING_HORIZONTAL;
+				}
 
-			var mapperId = (controlByte1 & 0xF0) >> 4 | controlByte2 & 0xF0;
+				var mapperId = (controlByte1 & 0xF0) >> 4 | controlByte2 & 0xF0;
 
-			stringIndex = 16;
-			if (hasTrainer) stringIndex += 512;
+				stringIndex = 16;
+				if (hasTrainer) stringIndex += 512;
 
-			// calculate SHA1 on PRG and CHR data, look it up in the db, then load it
-			this._sha1 = (0, _sha2.default)(binaryString, stringIndex);
-			console.log("SHA1: " + this._sha1);
+				// calculate SHA1 on PRG and CHR data, look it up in the db, then load it
+				_this._sha1 = (0, _sha2.default)(binaryString, stringIndex);
+				console.log("SHA1: " + _this._sha1);
 
-			this.memoryMapper = (0, _mapperFactory2.default)(mapperId, this.mainboard, mirroringMethod);
+				_this.memoryMapper = (0, _mapperFactory2.default)(mapperId, _this.mainboard, mirroringMethod);
 
-			// read in program code
-			var prg8kChunkCount = prgPageCount * 2; // read in 8k chunks, prgPageCount is 16k chunks
-			var prgSize = 0x2000 * prg8kChunkCount;
-			this.memoryMapper.setPrgData(this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + prgSize), prgSize), prg8kChunkCount);
-			stringIndex += prgSize;
+				// read in program code
+				var prg8kChunkCount = prgPageCount * 2; // read in 8k chunks, prgPageCount is 16k chunks
+				var prgSize = 0x2000 * prg8kChunkCount;
+				_this.memoryMapper.setPrgData(_this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + prgSize), prgSize), prg8kChunkCount);
+				stringIndex += prgSize;
 
-			// read in character maps
-			var chr1kChunkCount = chrPageCount * 8; // 1kb per pattern table, chrPageCount is the 8kb count
-			var chrSize = 0x400 * chr1kChunkCount;
-			this.memoryMapper.setChrData(this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + chrSize), chrSize), chr1kChunkCount);
-			stringIndex += chrSize;
+				// read in character maps
+				var chr1kChunkCount = chrPageCount * 8; // 1kb per pattern table, chrPageCount is the 8kb count
+				var chrSize = 0x400 * chr1kChunkCount;
+				_this.memoryMapper.setChrData(_this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + chrSize), chrSize), chr1kChunkCount);
+				stringIndex += chrSize;
 
-			// determine NTSC or PAL
-			this._determineColourEncodingType(name);
-			(0, _consts.setColourEncodingType)(this._colourEncodingType);
-			var prgKb = prg8kChunkCount * 8;
-			console.log('Cartridge \'' + name + '\' loaded. \nMapper:\t\t' + mapperId + ' \nMirroring:\t' + (0, _consts.mirroringMethodToString)(mirroringMethod) + ' \nPRG:\t\t' + prgKb + 'kb \nCHR:\t\t' + chr1kChunkCount + 'kb \nEncoding:\t' + this._colourEncodingType);
+				// determine NTSC or PAL
+				_this._determineColourEncodingType(name);
+				(0, _consts.setColourEncodingType)(_this._colourEncodingType);
+				var prgKb = prg8kChunkCount * 8;
+				console.log('Cartridge \'' + name + '\' loaded. \nFile Size: \t' + fileSize + ' KB \nMapper:\t\t' + mapperId + ' \nMirroring:\t' + (0, _consts.mirroringMethodToString)(mirroringMethod) + ' \nPRG:\t\t' + prgKb + 'kb \nCHR:\t\t' + chr1kChunkCount + 'kb \nEncoding:\t' + _this._colourEncodingType);
 
-			completeCallback();
+				resolve();
+			});
 		}
 	}, {
 		key: 'reset',
@@ -19581,7 +19615,7 @@ var Cartridge = function () {
 exports.default = Cartridge;
 
 /***/ }),
-/* 32 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19595,15 +19629,15 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _Event = __webpack_require__(4);
 
-var _Memory = __webpack_require__(33);
+var _Memory = __webpack_require__(32);
 
 var _Memory2 = _interopRequireDefault(_Memory);
 
-var _PPU = __webpack_require__(37);
+var _PPU = __webpack_require__(36);
 
 var _PPU2 = _interopRequireDefault(_PPU);
 
-var _RenderBuffer = __webpack_require__(36);
+var _RenderBuffer = __webpack_require__(35);
 
 var _RenderBuffer2 = _interopRequireDefault(_RenderBuffer);
 
@@ -19611,11 +19645,11 @@ var _APULegacy = __webpack_require__(21);
 
 var _APULegacy2 = _interopRequireDefault(_APULegacy);
 
-var _InputDeviceBus = __webpack_require__(39);
+var _InputDeviceBus = __webpack_require__(38);
 
 var _InputDeviceBus2 = _interopRequireDefault(_InputDeviceBus);
 
-var _Synchroniser = __webpack_require__(38);
+var _Synchroniser = __webpack_require__(37);
 
 var _Synchroniser2 = _interopRequireDefault(_Synchroniser);
 
@@ -19623,7 +19657,7 @@ var _Cpu = __webpack_require__(26);
 
 var _Cpu2 = _interopRequireDefault(_Cpu);
 
-var _Trace = __webpack_require__(1);
+var _Trace = __webpack_require__(3);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -19762,7 +19796,7 @@ var Mainboard = function () {
 exports.default = Mainboard;
 
 /***/ }),
-/* 33 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19774,7 +19808,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _serialisation = __webpack_require__(2);
+var _serialisation = __webpack_require__(1);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -19928,7 +19962,7 @@ var Memory = function () {
 exports.default = Memory;
 
 /***/ }),
-/* 34 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19940,7 +19974,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Trace = __webpack_require__(1);
+var _Trace = __webpack_require__(3);
 
 var _consts = __webpack_require__(0);
 
@@ -20238,7 +20272,7 @@ var PPURenderBG = function () {
 exports.default = PPURenderBG;
 
 /***/ }),
-/* 35 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20463,7 +20497,7 @@ var PPURenderSprites = function () {
 exports.default = PPURenderSprites;
 
 /***/ }),
-/* 36 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20477,7 +20511,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _consts = __webpack_require__(0);
 
-var _serialisation = __webpack_require__(2);
+var _serialisation = __webpack_require__(1);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -20577,7 +20611,6 @@ var RenderBuffer = function () {
 	}, {
 		key: 'saveState',
 		value: function saveState() {
-
 			return {
 				priorityBuffer: (0, _serialisation.uintArrayToString)(this.priorityBuffer)
 			};
@@ -20596,7 +20629,7 @@ var RenderBuffer = function () {
 exports.default = RenderBuffer;
 
 /***/ }),
-/* 37 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20608,17 +20641,17 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _serialisation = __webpack_require__(2);
+var _serialisation = __webpack_require__(1);
 
-var _Trace = __webpack_require__(1);
+var _Trace = __webpack_require__(3);
 
 var _consts = __webpack_require__(0);
 
-var _PPURenderBG = __webpack_require__(34);
+var _PPURenderBG = __webpack_require__(33);
 
 var _PPURenderBG2 = _interopRequireDefault(_PPURenderBG);
 
-var _PPURenderSprites = __webpack_require__(35);
+var _PPURenderSprites = __webpack_require__(34);
 
 var _PPURenderSprites2 = _interopRequireDefault(_PPURenderSprites);
 
@@ -21418,7 +21451,7 @@ PPU.screenPos = {
 exports.default = PPU;
 
 /***/ }),
-/* 38 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21690,7 +21723,7 @@ var Synchroniser = function () {
 exports.default = Synchroniser;
 
 /***/ }),
-/* 39 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21702,7 +21735,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Joypad = __webpack_require__(40);
+var _Joypad = __webpack_require__(39);
 
 var _Joypad2 = _interopRequireDefault(_Joypad);
 
@@ -21764,7 +21797,7 @@ var InputDeviceBus = function () {
 exports.default = InputDeviceBus;
 
 /***/ }),
-/* 40 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21872,7 +21905,7 @@ var Joypad = function () {
 exports.default = Joypad;
 
 /***/ }),
-/* 41 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21884,7 +21917,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _BaseMapper2 = __webpack_require__(3);
+var _BaseMapper2 = __webpack_require__(2);
 
 var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
 
@@ -21931,7 +21964,7 @@ var Mapper0 = function (_BaseMapper) {
 exports.default = Mapper0;
 
 /***/ }),
-/* 42 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21943,7 +21976,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _BaseMapper2 = __webpack_require__(3);
+var _BaseMapper2 = __webpack_require__(2);
 
 var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
 
@@ -22137,7 +22170,7 @@ var Mapper1 = function (_BaseMapper) {
 exports.default = Mapper1;
 
 /***/ }),
-/* 43 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22149,7 +22182,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _BaseMapper2 = __webpack_require__(3);
+var _BaseMapper2 = __webpack_require__(2);
 
 var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
 
@@ -22192,7 +22225,7 @@ var Mapper2 = function (_BaseMapper) {
 exports.default = Mapper2;
 
 /***/ }),
-/* 44 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22204,13 +22237,13 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _BaseMapper2 = __webpack_require__(3);
+var _BaseMapper2 = __webpack_require__(2);
 
 var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
 
 var _consts = __webpack_require__(0);
 
-var _serialisation = __webpack_require__(2);
+var _serialisation = __webpack_require__(1);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -22711,6 +22744,728 @@ var Mapper4 = function (_BaseMapper) {
 exports.default = Mapper4;
 
 /***/ }),
+/* 44 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _BaseMapper2 = __webpack_require__(2);
+
+var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
+
+var _serialisation = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Mapper5 = function (_BaseMapper) {
+	_inherits(Mapper5, _BaseMapper);
+
+	function Mapper5() {
+		_classCallCheck(this, Mapper5);
+
+		return _possibleConstructorReturn(this, (Mapper5.__proto__ || Object.getPrototypeOf(Mapper5)).apply(this, arguments));
+	}
+
+	_createClass(Mapper5, [{
+		key: 'init',
+		value: function init() {
+			this.mRenderingEnabled = false;
+
+			this._chrMode = 0;
+			this._prgMode = 0;
+			this._exRamMode = 0;
+			this._prgRegisters = new Int32Array(4);
+			this._nameTableFill = new Int32Array(1024);
+			this._internalExRam = new Int32Array(1024);
+			this._prgRam = new Int32Array(0x10000); // 64kb
+			this._prgRamPage = 0;
+			this._bigSpritesEnabled = false;
+
+			this._writeProtectA = false;
+			this._writeProtectB = false;
+			this._currentScanline = 0;
+			this._irqEnabled = false;
+			this._irqActive = false;
+			this._irqScanlineTrigger = 0;
+			this._triggerMtc = -1;
+			this._multiplier1 = 0;
+			this._multiplier2 = 0;
+
+			this._prgRamMap = new Int32Array(4); // 8k ram banks that map to 0x8000 -> 0x10000
+			this._prgRamIsActive = new Int32Array(4);
+			this._nameTableMap = new Int32Array(4);
+
+			this._chrRegsA = new Int32Array(8);
+			this._chrRegsB = new Int32Array(4);
+			this._chrUseBMap = false;
+			this._chrMapA = new Int32Array(8);
+			this._chrMapB = new Int32Array(4);
+			this._chrHighBits = 0;
+		}
+	}, {
+		key: 'mapperSaveState',
+		value: function mapperSaveState(state) {
+
+			state.mRenderingEnabled = this.mRenderingEnabled;
+			state._chrMode = this._chrMode;
+			state._prgMode = this._prgMode;
+			state._exRamMode = this._exRamMode;
+
+			state._prgRegisters = (0, _serialisation.uintArrayToString)(this._prgRegisters);
+			state._nameTableFill = (0, _serialisation.uintArrayToString)(this._nameTableFill);
+			state._internalExRam = (0, _serialisation.uintArrayToString)(this._internalExRam);
+			state._prgRam = (0, _serialisation.uintArrayToString)(this._prgRam);
+
+			state._prgRamPage = this._prgRamPage;
+			state._bigSpritesEnabled = this._bigSpritesEnabled;
+
+			state._writeProtectA = this._writeProtectA;
+			state._writeProtectB = this._writeProtectB;
+			state._currentScanline = this._currentScanline;
+			state._irqEnabled = this._irqEnabled;
+			state._irqActive = this._irqActive;
+			state._irqScanlineTrigger = this._irqScanlineTrigger;
+			state._triggerMtc = this._triggerMtc;
+			state._multiplier1 = this._multiplier1;
+			state._multiplier2 = this._multiplier2;
+
+			state._prgRamMap = (0, _serialisation.uintArrayToString)(this._prgRamMap);
+			state._prgRamIsActive = (0, _serialisation.uintArrayToString)(this._prgRamIsActive);
+			state._nameTableMap = (0, _serialisation.uintArrayToString)(this._nameTableMap);
+
+			state._chrRegsA = (0, _serialisation.uintArrayToString)(this._chrRegsA);
+			state._chrRegsB = (0, _serialisation.uintArrayToString)(this._chrRegsB);
+
+			state._chrUseBMap = this._chrUseBMap;
+			state._chrMapA = (0, _serialisation.uintArrayToString)(this._chrMapA);
+			state._chrMapB = (0, _serialisation.uintArrayToString)(this._chrMapB);
+			state._chrHighBits = this._chrHighBits;
+		}
+	}, {
+		key: 'mapperLoadState',
+		value: function mapperLoadState(state) {
+
+			this.mRenderingEnabled = state.mRenderingEnabled;
+			this._chrMode = state._chrMode;
+			this._prgMode = state._prgMode;
+			this._exRamMode = state._exRamMode;
+
+			this._prgRegisters = (0, _serialisation.stringToUintArray)(state._prgRegisters);
+			this._nameTableFill = (0, _serialisation.stringToUintArray)(state._nameTableFill);
+			this._internalExRam = (0, _serialisation.stringToUintArray)(state._internalExRam);
+			this._prgRam = (0, _serialisation.stringToUintArray)(state._prgRam);
+
+			this._prgRamPage = state._prgRamPage;
+			this._bigSpritesEnabled = state._bigSpritesEnabled;
+
+			this._writeProtectA = state._writeProtectA;
+			this._writeProtectB = state._writeProtectB;
+			this._currentScanline = state._currentScanline;
+			this._irqEnabled = state._irqEnabled;
+			this._irqActive = state._irqActive;
+			this._irqScanlineTrigger = state._irqScanlineTrigger;
+			this._triggerMtc = state._triggerMtc;
+			this._multiplier1 = state._multiplier1;
+			this._multiplier2 = state._multiplier2;
+
+			this._prgRamMap = (0, _serialisation.stringToUintArray)(state._prgRamMap);
+			this._prgRamIsActive = (0, _serialisation.stringToUintArray)(state._prgRamIsActive);
+			this._nameTableMap = (0, _serialisation.stringToUintArray)(state._nameTableMap);
+
+			this._chrRegsA = (0, _serialisation.stringToUintArray)(state._chrRegsA);
+			this._chrRegsB = (0, _serialisation.stringToUintArray)(state._chrRegsB);
+
+			this._chrUseBMap = state._chrUseBMap;
+			this._chrMapA = (0, _serialisation.stringToUintArray)(state._chrMapA);
+			this._chrMapB = (0, _serialisation.stringToUintArray)(state._chrMapB);
+			this._chrHighBits = state._chrHighBits;
+		}
+	}, {
+		key: 'reset',
+		value: function reset() {
+
+			this.mRenderingEnabled = false;
+			this._chrMode = 0;
+			this._prgMode = 3;
+			this._exRamMode = 0;
+			this._chrHighBits = 0;
+			this._prgRamPage = 0;
+			this._writeProtectA = false;
+			this._writeProtectB = false;
+			this._irqEnabled = false;
+			this._irqScanlineTrigger = 0;
+			this._irqActive = false;
+			this._multiplier1 = 0;
+			this._multiplier2 = 0;
+			this._currentScanline = 0;
+			this._triggerMtc = -1;
+			this._chrUseBMap = false;
+			this._bigSpritesEnabled = false;
+
+			for (var i = 0; i < this._prgRamMap.length; ++i) {
+				this._prgRamMap[i] = 0;
+				this._prgRamIsActive[i] = 0;
+			}
+			for (var i = 0; i < this._nameTableMap.length; ++i) {
+				this._nameTableMap[i] = 0;
+			}
+
+			for (var i = 0; i < this._prgRegisters.length; ++i) {
+				this._prgRegisters[i] = this.get8kPrgBankCount() - 4 + i;
+			}
+			for (var i = 0; i < this._chrRegsA.length; ++i) {
+				this._chrRegsA[i] = 0;
+			}
+			for (var i = 0; i < this._chrRegsB.length; ++i) {
+				this._chrRegsB[i] = 0;
+			}
+			for (var i = 0; i < this._chrMapA.length; ++i) {
+				this._chrMapA[i] = 0;
+			}
+			for (var i = 0; i < this._chrMapB.length; ++i) {
+				this._chrMapB[i] = 0;
+			}
+			this._syncPrg();
+			this._syncChr();
+			this.switch8kChrBank(0);
+
+			this.mainboard.ppu.changeMirroringMethod(this.mirroringMethod);
+
+			// TODO: Need to remove this event on mapper unload
+			var that = this;
+			this._irqEventId = this.mainboard.synchroniser.addEvent('mmc5 irq', -1, function (eventTime) {
+				that._irqEvent(eventTime);
+			});
+		}
+	}, {
+		key: 'renderingEnabledChanged',
+		value: function renderingEnabledChanged(enabled) {
+			this.mRenderingEnabled = enabled;
+			this._predictIrq(this.mainboard.synchroniser.getCpuMTC());
+		}
+	}, {
+		key: '_irqEvent',
+		value: function _irqEvent(eventTime) {
+
+			if (this.mRenderingEnabled && !this._irqActive && this._irqEnabled && this._irqScanlineTrigger > 0) {
+				this._irqActive = true;
+				this.mainboard.cpu.holdIrqLineLow(true);
+			}
+			this._predictIrq(eventTime);
+		}
+	}, {
+		key: '_syncPrg',
+		value: function _syncPrg() {
+
+			this.mainboard.synchroniser.synchronise();
+
+			for (var i = 0; i < this._prgRamMap.length; ++i) {
+				this._prgRamMap[i] = 0;
+				this._prgRamIsActive[i] = 0;
+			}
+
+			switch (this._prgMode) {
+				default:
+				case 0:
+					// 32k bank at 0x8000
+					this.switch32kPrgBank((this._prgRegisters[3] & 0x7f) >> 2);
+					break;
+				case 1:
+					// 16k bank at 0x8000
+					if ((this._prgRegisters[1] & 0x80) === 0) {
+						this._prgRamIsActive[0] = 1;
+						this._prgRamIsActive[1] = 1;
+						this._prgRamMap[0] = ((this._prgRegisters[1] & 0xE) >> 1) * 2;
+						this._prgRamMap[1] = this._prgRamMap[0] + 1;
+					} else {
+						this.switch16kPrgBank((this._prgRegisters[1] & 0x7f) >> 1, true);
+					}
+					// 16k bank at 0xC000
+					this.switch16kPrgBank((this._prgRegisters[3] & 0x7f) >> 1, false);
+					break;
+				case 2:
+					// 8k bank at 0xE000
+					this.switch8kPrgBank(this._prgRegisters[3] & 0x7f, 3);
+
+					// 8k bank at 0xC000
+					if ((this._prgRegisters[2] & 0x80) === 0) {
+						this._prgRamIsActive[2] = 1;
+						this._prgRamMap[2] = this._prgRegisters[2] & 0x7;
+					} else {
+						this.switch8kPrgBank(this._prgRegisters[2] & 0x7f, 2);
+					}
+
+					// 16k bank at 0x8000
+					if ((this._prgRegisters[1] & 0x80) === 0) {
+						this._prgRamIsActive[0] = 1;
+						this._prgRamIsActive[1] = 1;
+						this._prgRamMap[0] = ((this._prgRegisters[1] & 0xE) >> 1) * 2;
+						this._prgRamMap[1] = this._prgRamMap[0] + 1;
+					} else {
+						this.switch16kPrgBank((this._prgRegisters[1] & 0x7f) >> 1, true);
+					}
+					break;
+				case 3:
+					// 8k bank at 0xE000
+					this.switch8kPrgBank(this._prgRegisters[3] & 0x7f, 3);
+					// 8k bank at 0xC000
+					if ((this._prgRegisters[2] & 0x80) === 0) {
+						this._prgRamIsActive[2] = 1;
+						this._prgRamMap[2] = this._prgRegisters[2] & 0x7;
+					} else {
+						this.switch8kPrgBank(this._prgRegisters[2] & 0x7f, 2);
+					}
+					// 8k bank at 0xA000
+					if ((this._prgRegisters[1] & 0x80) === 0) {
+						this._prgRamIsActive[1] = 1;
+						this._prgRamMap[1] = this._prgRegisters[1] & 0x7;
+					} else {
+						this.switch8kPrgBank(this._prgRegisters[1] & 0x7f, 1);
+					}
+					// 8k bank at 0x8000
+					if ((this._prgRegisters[0] & 0x80) === 0) {
+						this._prgRamIsActive[0] = 1;
+						this._prgRamMap[0] = this._prgRegisters[0] & 0x7;
+					} else {
+						this.switch8kPrgBank(this._prgRegisters[0] & 0x7f, 0);
+					}
+					break;
+			}
+		}
+	}, {
+		key: '_chrBank',
+		value: function _chrBank(chrMap, banksize, bankpos, banknum) {
+
+			for (var i = 0; i < banksize; ++i) {
+				chrMap[i + bankpos] = (banknum + i) % this.get1kChrBankCount();
+			}
+		}
+	}, {
+		key: '_syncChr',
+		value: function _syncChr() {
+
+			this.mainboard.synchroniser.synchronise();
+
+			switch (this._chrMode) {
+				default:
+				case 0:
+					this._chrBank(this._chrMapA, 8, 0, this._chrRegsA[7]);
+					this._chrBank(this._chrMapB, 4, 0, this._chrRegsB[3]);
+					break;
+				case 1:
+					this._chrBank(this._chrMapA, 4, 0, this._chrRegsA[3]);
+					this._chrBank(this._chrMapA, 4, 4, this._chrRegsA[7]);
+					this._chrBank(this._chrMapB, 4, 0, this._chrRegsB[3]);
+					break;
+				case 2:
+					this._chrBank(this._chrMapA, 2, 0, this._chrRegsA[1]);
+					this._chrBank(this._chrMapA, 2, 2, this._chrRegsA[3]);
+					this._chrBank(this._chrMapA, 2, 4, this._chrRegsA[5]);
+					this._chrBank(this._chrMapA, 2, 6, this._chrRegsA[7]);
+					this._chrBank(this._chrMapB, 2, 0, this._chrRegsB[1]);
+					this._chrBank(this._chrMapB, 2, 2, this._chrRegsB[3]);
+					break;
+				case 3:
+					for (var i = 0; i < 8; ++i) {
+						this._chrBank(this._chrMapA, 1, i, this._chrRegsA[i]);
+					}
+					for (var i = 0; i < 4; ++i) {
+						this._chrBank(this._chrMapB, 1, i, this._chrRegsB[i]);
+					}
+					break;
+			}
+		}
+	}, {
+		key: 'write8PrgRom',
+		value: function write8PrgRom(offset, data) {
+			if (this._writeProtectA && this._writeProtectB) {
+				var top3Bits = (offset & 0xE000) >> 13;
+				if (this._prgRamIsActive[top3Bits] === 1) {
+					this._prgRam[this._prgRamMap[top3Bits] << 13 | offset & 0x1FFF] = data;
+				} else {
+					_BaseMapper3.default.prototype.write8PrgRom.call(this, offset, data);
+				}
+			}
+		}
+	}, {
+		key: 'read8PrgRom',
+		value: function read8PrgRom(offset) {
+			var top3Bits = (offset & 0xE000) >> 13;
+			if (this._prgRamIsActive[top3Bits] === 1) {
+				return this._prgRam[this._prgRamMap[top3Bits] << 13 | offset & 0x1FFF]; // this._prgRamMap[0] * 0x2000 + ( offset % 0x2000 ) ];
+			}
+			return _BaseMapper3.default.prototype.read8PrgRom.call(this, offset);
+		}
+	}, {
+		key: 'onEndFrame',
+		value: function onEndFrame() {
+			this._predictIrq(0);
+		}
+	}, {
+		key: '_predictIrq',
+		value: function _predictIrq(cpuMTC) {
+
+			// TODO: Check if MMC5 counter includes pre-render scanline
+			if (this.mRenderingEnabled && !this._irqActive && this._irqEnabled && this._irqScanlineTrigger > 0) {
+				var targetScanline = this._irqScanlineTrigger;
+				var triggerMtc = this.mainboard.ppu.screenCoordinatesToTicks(0, targetScanline);
+				if (triggerMtc > cpuMTC) {
+					if (this._triggerMtc !== triggerMtc) {
+						//var pos = this.mainboard.ppu.ticksToScreenCoordinates( triggerMtc );
+						this.mainboard.synchroniser.changeEventTime(this._irqEventId, triggerMtc);
+						this._triggerMtc = triggerMtc;
+					}
+				}
+				return;
+			}
+
+			if (this._triggerMtc !== -1) {
+				this._triggerMtc = -1;
+				this.mainboard.synchroniser.changeEventTime(this._irqEventId, -1);
+			}
+		}
+	}, {
+		key: 'write8EXRam',
+		value: function write8EXRam(offset, data) {
+			// 0x4018 -> 0x6000
+			switch (offset) {
+				case 0x5100:
+					// PRG mode
+					this._prgMode = data & 0x3;
+					this._syncPrg();
+					break;
+				case 0x5101:
+					// CHR mode
+					this._chrMode = data & 0x3;
+					this._syncChr();
+					break;
+				case 0x5102:
+					// PRG RAM write protect 1
+					this._writeProtectA = (data & 0x3) === 0x2;
+					break;
+				case 0x5103:
+					// PRG RAM write protect 2
+					this._writeProtectB = (data & 0x3) === 0x1;
+					break;
+				case 0x5104:
+					// extended RAM mode
+					this.mainboard.synchroniser.synchronise();
+					this._exRamMode = data & 0x3;
+					break;
+				case 0x5105:
+					// nametable mode
+					this.mainboard.synchroniser.synchronise();
+					this._setNametableMirroring(data);
+					break;
+				case 0x5106:
+					// fill mode tile number
+					this.mainboard.synchroniser.synchronise();
+					for (var i = 0; i < 32 * 30; ++i) {
+						this._nameTableFill[i] = data;
+					}
+					break;
+				case 0x5107:
+					// fill mode colour
+					this.mainboard.synchroniser.synchronise();
+					var attribute = data & 0x3 + (data & 3) << 2 + (data & 3) << 4 + (data & 3) << 6;
+					for (var i = 32 * 30; i < this._nameTableFill.length; ++i) {
+						this._nameTableFill[i] = attribute;
+					}
+					break;
+				case 0x5113:
+					// prg ram bank
+					this._prgRamPage = data & 0x7;
+					break;
+				case 0x5114:
+					// prg bank 0
+					this._prgRegisters[0] = data;
+					this._syncPrg();
+					break;
+				case 0x5115:
+					// prg bank 1
+					this._prgRegisters[1] = data;
+					this._syncPrg();
+					break;
+				case 0x5116:
+					// prg bank 2
+					this._prgRegisters[2] = data;
+					this._syncPrg();
+					break;
+				case 0x5117:
+					// prg bank 3
+					this._prgRegisters[3] = data;
+					this._syncPrg();
+					break;
+				case 0x5120:
+					// chr registers A
+					this._chrRegsA[0] = data | this._chrHighBits;
+					this._chrUseBMap = false;
+					this._syncChr();
+					break;
+				case 0x5121:
+					this._chrRegsA[1] = data | this._chrHighBits;
+					this._chrUseBMap = false;
+					this._syncChr();
+					break;
+				case 0x5122:
+					this._chrRegsA[2] = data | this._chrHighBits;
+					this._chrUseBMap = false;
+					this._syncChr();
+					break;
+				case 0x5123:
+					this._chrRegsA[3] = data | this._chrHighBits;
+					this._chrUseBMap = false;
+					this._syncChr();
+					break;
+				case 0x5124:
+					this._chrRegsA[4] = data | this._chrHighBits;
+					this._chrUseBMap = false;
+					this._syncChr();
+					break;
+				case 0x5125:
+					this._chrRegsA[5] = data | this._chrHighBits;
+					this._chrUseBMap = false;
+					this._syncChr();
+					break;
+				case 0x5126:
+					this._chrRegsA[6] = data | this._chrHighBits;
+					this._chrUseBMap = false;
+					this._syncChr();
+					break;
+				case 0x5127:
+					this._chrRegsA[7] = data | this._chrHighBits;
+					this._chrUseBMap = false;
+					this._syncChr();
+					break;
+				case 0x5128:
+					// Chr registers B
+					this._chrRegsB[0] = data | this._chrHighBits;
+					this._chrUseBMap = true;
+					this._syncChr();
+					break;
+				case 0x5129:
+					this._chrRegsB[1] = data | this._chrHighBits;
+					this._chrUseBMap = true;
+					this._syncChr();
+					break;
+				case 0x512A:
+					this._chrRegsB[2] = data | this._chrHighBits;
+					this._chrUseBMap = true;
+					this._syncChr();
+					break;
+				case 0x512B:
+					this._chrRegsB[3] = data | this._chrHighBits;
+					this._chrUseBMap = true;
+					this._syncChr();
+					break;
+				case 0x5130:
+					// CHR bank high bits
+					this.mainboard.synchroniser.synchronise();
+					this._chrHighBits = (data & 0x3) << 8;
+					break;
+				case 0x5200:
+					// vertical split mode
+					// dont bother with vertical mode as it was only used once in commercial games, for the intro sequence
+					break;
+				case 0x5201:
+					// vertical split scroll
+					break;
+				case 0x5202:
+					// vertical split chr page
+					break;
+				case 0x5203:
+					// irq scanline number trigger
+					this.mainboard.synchroniser.synchronise();
+					this._irqScanlineTrigger = data;
+					this._predictIrq(this.mainboard.synchroniser.getCpuMTC());
+					break;
+				case 0x5204:
+					// irq enable (different behaviour on read)
+					this.mainboard.synchroniser.synchronise();
+					this._irqEnabled = (data & 0x80) > 0;
+					this._predictIrq(this.mainboard.synchroniser.getCpuMTC());
+					break;
+				case 0x5205:
+					//  Writes specify the eight-bit multiplicand; reads return the lower eight bits of the product
+					this._multiplier1 = data;
+					break;
+				case 0x5206:
+					// Writes specify the eight-bit multiplier; reads return the upper eight bits of the product
+					this._multiplier2 = data;
+					break;
+			}
+
+			if (offset >= 0x5C00) {
+				// TODO: Remove synchronise and work out isRendering by mtc
+				this.mainboard.synchroniser.synchronise();
+				if (this._exRamMode === 0 || this._exRamMode === 1) {
+					// only allow writing during rendering, otherwise write 0
+					if (this.mainboard.ppu.isRendering(this.mainboard.synchroniser.getCpuMTC(), false)) {
+						this._internalExRam[offset - 0x5C00] = data;
+					} else {
+						this._internalExRam[offset - 0x5C00] = 0;
+					}
+				} else if (this._exRamMode === 2) {
+					// always write
+					this._internalExRam[offset - 0x5C00] = data;
+				}
+			}
+
+			//BaseMapper.prototype.write8EXRam.call( this, offset, data );
+		}
+	}, {
+		key: 'read8EXRam',
+		value: function read8EXRam(offset) {
+			// 0x4018 -> 0x6000
+			switch (offset) {
+				case 0x5015:
+					//sound status
+					//			return soundchip.status();
+					break;
+				case 0x5204:
+					//irq status
+					this.mainboard.synchroniser.synchronise();
+					var scan = this.mainboard.ppu.ticksToScreenCoordinates(this.mainboard.synchroniser.getCpuMTC());
+					var stat = (this._irqActive ? 0x80 : 0) + (scan.y >= 0 && scan.y < 240 ? 0x40 : 0);
+					if (this._irqActive) {
+						this._irqActive = false;
+						this.mainboard.cpu.holdIrqLineLow(false);
+					}
+					this._predictIrq(this.mainboard.synchroniser.getCpuMTC());
+					return stat;
+				case 0x5205:
+					//  Writes specify the eight-bit multiplicand; reads return the lower eight bits of the product
+					return this._multiplier1 * this._multiplier2 & 0xff;
+					break;
+				case 0x5206:
+					// Writes specify the eight-bit multiplier; reads return the upper eight bits of the product
+					return this._multiplier1 * this._multiplier2 >> 8 & 0xff;
+					break;
+			}
+
+			if (offset >= 0x5C00) {
+				if (this._exRamMode === 2 || this._exRamMode === 3) {
+					return this._internalExRam[offset - 0x5C00];
+				}
+			}
+
+			return 0; // supposed to be open bus
+		}
+	}, {
+		key: 'write8SRam',
+		value: function write8SRam(offset, data) {
+			// 0x6000 -> 0x8000
+			this._prgRam[this._prgRamPage << 13 | offset & 0x1FFF] = data; // this._prgRamPage * 0x2000 + ( offset % 0x2000 ) ] = data;
+		}
+	}, {
+		key: 'read8SRam',
+		value: function read8SRam(offset) {
+			// 0x6000 -> 0x8000
+			return this._prgRam[this._prgRamPage << 13 | offset & 0x1FFF];
+		}
+	}, {
+		key: '_setNametableMirroring',
+		value: function _setNametableMirroring(data) {
+
+			for (var nt = 0; nt < 4; ++nt) {
+				this._nameTableMap[nt] = data & 0x3;
+				data >>= 2;
+			}
+		}
+	}, {
+		key: 'read8ChrRom',
+		value: function read8ChrRom(offset, renderingSprites, readType) {
+			this.int32ChrData = this.int32ChrData || new Int32Array(this._chrData);
+			// Pattern table read < 0x2000
+			if (renderingSprites) {
+				var pageid = (offset & 0x1C00) >> 10; // Math.floor( offset / 0x400 );
+				var pagepos = this._chrMapA[pageid & 0x7];
+				var chrOffset = pagepos * 0x400 + (offset & 0x3FF);
+				return this.int32ChrData[chrOffset];
+			}
+
+			var useMapB = false;
+
+			if (this._bigSpritesEnabled) {
+				useMapB = !renderingSprites;
+			} else {
+				useMapB = this._chrUseBMap;
+			}
+
+			var pageid = (offset & 0x1C00) >> 10; // Math.floor( offset / 0x400 );
+			var pagepos = useMapB ? this._chrMapB[pageid & 0x3] : this._chrMapA[pageid & 0x7];
+			var chrOffset = pagepos * 0x400 + (offset & 0x3FF);
+			return this.int32ChrData[chrOffset];
+		}
+	}, {
+		key: 'nameTableRead',
+		value: function nameTableRead(nameTables, pageId, pageOffset) {
+
+			switch (this._nameTableMap[pageId]) {
+				default:
+				case 0:
+					return nameTables[0][pageOffset];
+				case 1:
+					return nameTables[1][pageOffset];
+				case 2:
+					if (this._exRamMode === 0 || this._exRamMode === 1) {
+						return this._internalExRam[pageOffset];
+					} else {
+						return 0;
+					}
+				case 3:
+					return this._nameTableFill[pageOffset];
+			}
+		}
+	}, {
+		key: 'nameTableWrite',
+		value: function nameTableWrite(nameTables, pageId, pageOffset, data) {
+
+			switch (this._nameTableMap[pageId]) {
+				default:
+				case 0:
+					nameTables[0][pageOffset] = data;
+					break;
+				case 1:
+					nameTables[1][pageOffset] = data;
+					break;
+				case 2:
+					if (this._exRamMode === 0 || this._exRamMode === 1) {
+						this._internalExRam[pageOffset] = data;
+					}
+					break;
+				case 3:
+					this._nameTableFill[pageOffset] = data;
+					break;
+			}
+		}
+	}, {
+		key: 'spriteSizeChanged',
+		value: function spriteSizeChanged(bigSprites) {
+
+			this._bigSpritesEnabled = bigSprites;
+		}
+	}]);
+
+	return Mapper5;
+}(_BaseMapper3.default);
+
+exports.default = Mapper5;
+
+/***/ }),
 /* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -22723,13 +23478,13 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _BaseMapper2 = __webpack_require__(3);
+var _BaseMapper2 = __webpack_require__(2);
 
 var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
 
 var _consts = __webpack_require__(0);
 
-var _serialisation = __webpack_require__(2);
+var _serialisation = __webpack_require__(1);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -22875,23 +23630,23 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = mapperFactory;
 
-var _Mapper = __webpack_require__(41);
+var _Mapper = __webpack_require__(40);
 
 var _Mapper2 = _interopRequireDefault(_Mapper);
 
-var _Mapper3 = __webpack_require__(42);
+var _Mapper3 = __webpack_require__(41);
 
 var _Mapper4 = _interopRequireDefault(_Mapper3);
 
-var _Mapper5 = __webpack_require__(43);
+var _Mapper5 = __webpack_require__(42);
 
 var _Mapper6 = _interopRequireDefault(_Mapper5);
 
-var _Mapper7 = __webpack_require__(44);
+var _Mapper7 = __webpack_require__(43);
 
 var _Mapper8 = _interopRequireDefault(_Mapper7);
 
-var _Mapper9 = __webpack_require__(87);
+var _Mapper9 = __webpack_require__(44);
 
 var _Mapper10 = _interopRequireDefault(_Mapper9);
 
@@ -22947,145 +23702,8 @@ function mapperFactory(mapperId, mainboard, mirroringMethod) {
 }
 
 /***/ }),
-/* 47 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _utils = __webpack_require__(8);
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var StateManager = function () {
-	function StateManager(app, createGuiComponents) {
-		_classCallCheck(this, StateManager);
-
-		this._app = app;
-		this._mainboard = this._app._mainboard;
-		this._renderSurface = this._app._renderSurface;
-
-		this._loadPending = '';
-		this._loadStatePending = false;
-		this._saveStatePending = false;
-	}
-
-	_createClass(StateManager, [{
-		key: 'quickSaveState',
-		value: function quickSaveState() {
-			this._saveStatePending = true;
-		}
-	}, {
-		key: 'quickLoadState',
-		value: function quickLoadState() {
-			this.loadState('quicksave');
-		}
-	}, {
-		key: 'loadState',
-		value: function loadState(slotName) {
-			this._loadPending = slotName;
-			this._loadStatePending = true;
-		}
-	}, {
-		key: '_doQuickSave',
-		value: function _doQuickSave() {
-			// push back previous quicksaves by renaming them, pushing them back in the queue
-			var hash = this._mainboard.cart.getHash();
-			(0, _utils.renameQuickSaveStates)("quicksave", hash, 3);
-			var screen = this._renderSurface.screenshotToString();
-			var state = this._mainboard.saveState();
-			(0, _utils.saveState)("quicksave", hash, state, screen);
-		}
-	}, {
-		key: '_doQuickLoad',
-		value: function _doQuickLoad() {
-			var state = (0, _utils.loadState)(this._loadPending, this._mainboard.cart.getHash());
-			if (state) {
-				this._mainboard.loadState(state);
-			}
-		}
-	}, {
-		key: 'onFrame',
-		value: function onFrame() {
-			if (this._mainboard.cart) {
-				if (this._saveStatePending) {
-					this._saveStatePending = false;
-					this._doQuickSave();
-				} else if (this._loadStatePending) {
-					this._loadStatePending = false;
-					this._doQuickLoad();
-				}
-			}
-		}
-	}]);
-
-	return StateManager;
-}();
-
-exports.default = StateManager;
-
-/***/ }),
-/* 48 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _rusha = __webpack_require__(79);
-
-var _rusha2 = _interopRequireDefault(_rusha);
-
-var _consts = __webpack_require__(0);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var TestRenderSurface = function () {
-	function TestRenderSurface(canvasParent) {
-		_classCallCheck(this, TestRenderSurface);
-
-		this._buffer = new Uint32Array(_consts.SCREEN_WIDTH * _consts.SCREEN_HEIGHT);
-	}
-
-	_createClass(TestRenderSurface, [{
-		key: 'writeToBuffer',
-		value: function writeToBuffer(bufferIndex, insertIndex, colour) {
-			this._buffer[insertIndex] = 0xFF000000 | colour;
-		}
-	}, {
-		key: 'clearBuffers',
-		value: function clearBuffers(backgroundColour) {
-			for (var i = 0; i < this._buffer.length; ++i) {
-				this._buffer[i] = 0xFF000000 | backgroundColour;
-			}
-		}
-	}, {
-		key: 'getRenderBufferHash',
-		value: function getRenderBufferHash() {
-			var rusha = new _rusha2.default();
-			return rusha.digestFromArrayBuffer(this._buffer).toUpperCase();
-		}
-	}]);
-
-	return TestRenderSurface;
-}();
-
-exports.default = TestRenderSurface;
-
-/***/ }),
+/* 47 */,
+/* 48 */,
 /* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -27034,13 +27652,15 @@ module.exports = __webpack_amd_options__;
 "use strict";
 
 
-var _NES = __webpack_require__(12);
+var _nES = __webpack_require__(12);
 
-var _NES2 = _interopRequireDefault(_NES);
+var _nES2 = _interopRequireDefault(_nES);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var App = new _NES2.default();
+var App = new _nES2.default({
+	headless: false
+});
 App.start();
 
 // ROM courtesy of TecmoBowl.org
@@ -27049,15 +27669,16 @@ var romToLoad = 'TecmoSuperBowl2k17';
 App.loadRomFromUrl('/roms/' + romToLoad + '.nes');
 
 /***/ }),
-/* 85 */,
-/* 86 */
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(84);
 
 
 /***/ }),
-/* 87 */
+/* 86 */,
+/* 87 */,
+/* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27069,714 +27690,561 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _BaseMapper2 = __webpack_require__(3);
+var _serialisation = __webpack_require__(1);
 
-var _BaseMapper3 = _interopRequireDefault(_BaseMapper2);
-
-var _serialisation = __webpack_require__(2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _consts = __webpack_require__(0);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+var HeadlessRenderSurface = function () {
+	function HeadlessRenderSurface() {
+		_classCallCheck(this, HeadlessRenderSurface);
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Mapper5 = function (_BaseMapper) {
-	_inherits(Mapper5, _BaseMapper);
-
-	function Mapper5() {
-		_classCallCheck(this, Mapper5);
-
-		return _possibleConstructorReturn(this, (Mapper5.__proto__ || Object.getPrototypeOf(Mapper5)).apply(this, arguments));
+		this._buffer = new Uint32Array(_consts.SCREEN_WIDTH * _consts.SCREEN_HEIGHT);
 	}
 
-	_createClass(Mapper5, [{
-		key: 'init',
-		value: function init() {
-			this.mRenderingEnabled = false;
-
-			this._chrMode = 0;
-			this._prgMode = 0;
-			this._exRamMode = 0;
-			this._prgRegisters = new Int32Array(4);
-			this._nameTableFill = new Int32Array(1024);
-			this._internalExRam = new Int32Array(1024);
-			this._prgRam = new Int32Array(0x10000); // 64kb
-			this._prgRamPage = 0;
-			this._bigSpritesEnabled = false;
-
-			this._writeProtectA = false;
-			this._writeProtectB = false;
-			this._currentScanline = 0;
-			this._irqEnabled = false;
-			this._irqActive = false;
-			this._irqScanlineTrigger = 0;
-			this._triggerMtc = -1;
-			this._multiplier1 = 0;
-			this._multiplier2 = 0;
-
-			this._prgRamMap = new Int32Array(4); // 8k ram banks that map to 0x8000 -> 0x10000
-			this._prgRamIsActive = new Int32Array(4);
-			this._nameTableMap = new Int32Array(4);
-
-			this._chrRegsA = new Int32Array(8);
-			this._chrRegsB = new Int32Array(4);
-			this._chrUseBMap = false;
-			this._chrMapA = new Int32Array(8);
-			this._chrMapB = new Int32Array(4);
-			this._chrHighBits = 0;
+	_createClass(HeadlessRenderSurface, [{
+		key: 'writeToBuffer',
+		value: function writeToBuffer(bufferIndex, insertIndex, colour) {
+			this._buffer[insertIndex] = 0xFF000000 | colour;
 		}
 	}, {
-		key: 'mapperSaveState',
-		value: function mapperSaveState(state) {
-
-			state.mRenderingEnabled = this.mRenderingEnabled;
-			state._chrMode = this._chrMode;
-			state._prgMode = this._prgMode;
-			state._exRamMode = this._exRamMode;
-
-			state._prgRegisters = (0, _serialisation.uintArrayToString)(this._prgRegisters);
-			state._nameTableFill = (0, _serialisation.uintArrayToString)(this._nameTableFill);
-			state._internalExRam = (0, _serialisation.uintArrayToString)(this._internalExRam);
-			state._prgRam = (0, _serialisation.uintArrayToString)(this._prgRam);
-
-			state._prgRamPage = this._prgRamPage;
-			state._bigSpritesEnabled = this._bigSpritesEnabled;
-
-			state._writeProtectA = this._writeProtectA;
-			state._writeProtectB = this._writeProtectB;
-			state._currentScanline = this._currentScanline;
-			state._irqEnabled = this._irqEnabled;
-			state._irqActive = this._irqActive;
-			state._irqScanlineTrigger = this._irqScanlineTrigger;
-			state._triggerMtc = this._triggerMtc;
-			state._multiplier1 = this._multiplier1;
-			state._multiplier2 = this._multiplier2;
-
-			state._prgRamMap = (0, _serialisation.uintArrayToString)(this._prgRamMap);
-			state._prgRamIsActive = (0, _serialisation.uintArrayToString)(this._prgRamIsActive);
-			state._nameTableMap = (0, _serialisation.uintArrayToString)(this._nameTableMap);
-
-			state._chrRegsA = (0, _serialisation.uintArrayToString)(this._chrRegsA);
-			state._chrRegsB = (0, _serialisation.uintArrayToString)(this._chrRegsB);
-
-			state._chrUseBMap = this._chrUseBMap;
-			state._chrMapA = (0, _serialisation.uintArrayToString)(this._chrMapA);
-			state._chrMapB = (0, _serialisation.uintArrayToString)(this._chrMapB);
-			state._chrHighBits = this._chrHighBits;
-		}
-	}, {
-		key: 'mapperLoadState',
-		value: function mapperLoadState(state) {
-
-			this.mRenderingEnabled = state.mRenderingEnabled;
-			this._chrMode = state._chrMode;
-			this._prgMode = state._prgMode;
-			this._exRamMode = state._exRamMode;
-
-			this._prgRegisters = stringToUintArray(state._prgRegisters);
-			this._nameTableFill = stringToUintArray(state._nameTableFill);
-			this._internalExRam = stringToUintArray(state._internalExRam);
-			this._prgRam = stringToUintArray(state._prgRam);
-
-			this._prgRamPage = state._prgRamPage;
-			this._bigSpritesEnabled = state._bigSpritesEnabled;
-
-			this._writeProtectA = state._writeProtectA;
-			this._writeProtectB = state._writeProtectB;
-			this._currentScanline = state._currentScanline;
-			this._irqEnabled = state._irqEnabled;
-			this._irqActive = state._irqActive;
-			this._irqScanlineTrigger = state._irqScanlineTrigger;
-			this._triggerMtc = state._triggerMtc;
-			this._multiplier1 = state._multiplier1;
-			this._multiplier2 = state._multiplier2;
-
-			this._prgRamMap = stringToUintArray(state._prgRamMap);
-			this._prgRamIsActive = stringToUintArray(state._prgRamIsActive);
-			this._nameTableMap = stringToUintArray(state._nameTableMap);
-
-			this._chrRegsA = stringToUintArray(state._chrRegsA);
-			this._chrRegsB = stringToUintArray(state._chrRegsB);
-
-			this._chrUseBMap = state._chrUseBMap;
-			this._chrMapA = stringToUintArray(state._chrMapA);
-			this._chrMapB = stringToUintArray(state._chrMapB);
-			this._chrHighBits = state._chrHighBits;
-		}
-	}, {
-		key: 'reset',
-		value: function reset() {
-
-			this.mRenderingEnabled = false;
-			this._chrMode = 0;
-			this._prgMode = 3;
-			this._exRamMode = 0;
-			this._chrHighBits = 0;
-			this._prgRamPage = 0;
-			this._writeProtectA = false;
-			this._writeProtectB = false;
-			this._irqEnabled = false;
-			this._irqScanlineTrigger = 0;
-			this._irqActive = false;
-			this._multiplier1 = 0;
-			this._multiplier2 = 0;
-			this._currentScanline = 0;
-			this._triggerMtc = -1;
-			this._chrUseBMap = false;
-			this._bigSpritesEnabled = false;
-
-			for (var i = 0; i < this._prgRamMap.length; ++i) {
-				this._prgRamMap[i] = 0;
-				this._prgRamIsActive[i] = 0;
-			}
-			for (var i = 0; i < this._nameTableMap.length; ++i) {
-				this._nameTableMap[i] = 0;
-			}
-
-			for (var i = 0; i < this._prgRegisters.length; ++i) {
-				this._prgRegisters[i] = this.get8kPrgBankCount() - 4 + i;
-			}
-			for (var i = 0; i < this._chrRegsA.length; ++i) {
-				this._chrRegsA[i] = 0;
-			}
-			for (var i = 0; i < this._chrRegsB.length; ++i) {
-				this._chrRegsB[i] = 0;
-			}
-			for (var i = 0; i < this._chrMapA.length; ++i) {
-				this._chrMapA[i] = 0;
-			}
-			for (var i = 0; i < this._chrMapB.length; ++i) {
-				this._chrMapB[i] = 0;
-			}
-			this._syncPrg();
-			this._syncChr();
-			this.switch8kChrBank(0);
-
-			this.mainboard.ppu.changeMirroringMethod(this.mirroringMethod);
-
-			// TODO: Need to remove this event on mapper unload
-			var that = this;
-			this._irqEventId = this.mainboard.synchroniser.addEvent('mmc5 irq', -1, function (eventTime) {
-				that._irqEvent(eventTime);
-			});
-		}
-	}, {
-		key: 'renderingEnabledChanged',
-		value: function renderingEnabledChanged(enabled) {
-			this.mRenderingEnabled = enabled;
-			this._predictIrq(this.mainboard.synchroniser.getCpuMTC());
-		}
-	}, {
-		key: '_irqEvent',
-		value: function _irqEvent(eventTime) {
-
-			if (this.mRenderingEnabled && !this._irqActive && this._irqEnabled && this._irqScanlineTrigger > 0) {
-				this._irqActive = true;
-				this.mainboard.cpu.holdIrqLineLow(true);
-			}
-			this._predictIrq(eventTime);
-		}
-	}, {
-		key: '_syncPrg',
-		value: function _syncPrg() {
-
-			this.mainboard.synchroniser.synchronise();
-
-			for (var i = 0; i < this._prgRamMap.length; ++i) {
-				this._prgRamMap[i] = 0;
-				this._prgRamIsActive[i] = 0;
-			}
-
-			switch (this._prgMode) {
-				default:
-				case 0:
-					// 32k bank at 0x8000
-					this.switch32kPrgBank((this._prgRegisters[3] & 0x7f) >> 2);
-					break;
-				case 1:
-					// 16k bank at 0x8000
-					if ((this._prgRegisters[1] & 0x80) === 0) {
-						this._prgRamIsActive[0] = 1;
-						this._prgRamIsActive[1] = 1;
-						this._prgRamMap[0] = ((this._prgRegisters[1] & 0xE) >> 1) * 2;
-						this._prgRamMap[1] = this._prgRamMap[0] + 1;
-					} else {
-						this.switch16kPrgBank((this._prgRegisters[1] & 0x7f) >> 1, true);
-					}
-					// 16k bank at 0xC000
-					this.switch16kPrgBank((this._prgRegisters[3] & 0x7f) >> 1, false);
-					break;
-				case 2:
-					// 8k bank at 0xE000
-					this.switch8kPrgBank(this._prgRegisters[3] & 0x7f, 3);
-
-					// 8k bank at 0xC000
-					if ((this._prgRegisters[2] & 0x80) === 0) {
-						this._prgRamIsActive[2] = 1;
-						this._prgRamMap[2] = this._prgRegisters[2] & 0x7;
-					} else {
-						this.switch8kPrgBank(this._prgRegisters[2] & 0x7f, 2);
-					}
-
-					// 16k bank at 0x8000
-					if ((this._prgRegisters[1] & 0x80) === 0) {
-						this._prgRamIsActive[0] = 1;
-						this._prgRamIsActive[1] = 1;
-						this._prgRamMap[0] = ((this._prgRegisters[1] & 0xE) >> 1) * 2;
-						this._prgRamMap[1] = this._prgRamMap[0] + 1;
-					} else {
-						this.switch16kPrgBank((this._prgRegisters[1] & 0x7f) >> 1, true);
-					}
-					break;
-				case 3:
-					// 8k bank at 0xE000
-					this.switch8kPrgBank(this._prgRegisters[3] & 0x7f, 3);
-					// 8k bank at 0xC000
-					if ((this._prgRegisters[2] & 0x80) === 0) {
-						this._prgRamIsActive[2] = 1;
-						this._prgRamMap[2] = this._prgRegisters[2] & 0x7;
-					} else {
-						this.switch8kPrgBank(this._prgRegisters[2] & 0x7f, 2);
-					}
-					// 8k bank at 0xA000
-					if ((this._prgRegisters[1] & 0x80) === 0) {
-						this._prgRamIsActive[1] = 1;
-						this._prgRamMap[1] = this._prgRegisters[1] & 0x7;
-					} else {
-						this.switch8kPrgBank(this._prgRegisters[1] & 0x7f, 1);
-					}
-					// 8k bank at 0x8000
-					if ((this._prgRegisters[0] & 0x80) === 0) {
-						this._prgRamIsActive[0] = 1;
-						this._prgRamMap[0] = this._prgRegisters[0] & 0x7;
-					} else {
-						this.switch8kPrgBank(this._prgRegisters[0] & 0x7f, 0);
-					}
-					break;
+		key: 'clearBuffers',
+		value: function clearBuffers(backgroundColour) {
+			for (var i = 0; i < this._buffer.length; ++i) {
+				this._buffer[i] = 0xFF000000 | backgroundColour;
 			}
 		}
 	}, {
-		key: '_chrBank',
-		value: function _chrBank(chrMap, banksize, bankpos, banknum) {
-
-			for (var i = 0; i < banksize; ++i) {
-				chrMap[i + bankpos] = (banknum + i) % this.get1kChrBankCount();
-			}
+		key: 'getRenderBufferHash',
+		value: function getRenderBufferHash() {
+			return _serialisation.rusha.digestFromArrayBuffer(this._buffer).toUpperCase();
 		}
 	}, {
-		key: '_syncChr',
-		value: function _syncChr() {
-
-			this.mainboard.synchroniser.synchronise();
-
-			switch (this._chrMode) {
-				default:
-				case 0:
-					this._chrBank(this._chrMapA, 8, 0, this._chrRegsA[7]);
-					this._chrBank(this._chrMapB, 4, 0, this._chrRegsB[3]);
-					break;
-				case 1:
-					this._chrBank(this._chrMapA, 4, 0, this._chrRegsA[3]);
-					this._chrBank(this._chrMapA, 4, 4, this._chrRegsA[7]);
-					this._chrBank(this._chrMapB, 4, 0, this._chrRegsB[3]);
-					break;
-				case 2:
-					this._chrBank(this._chrMapA, 2, 0, this._chrRegsA[1]);
-					this._chrBank(this._chrMapA, 2, 2, this._chrRegsA[3]);
-					this._chrBank(this._chrMapA, 2, 4, this._chrRegsA[5]);
-					this._chrBank(this._chrMapA, 2, 6, this._chrRegsA[7]);
-					this._chrBank(this._chrMapB, 2, 0, this._chrRegsB[1]);
-					this._chrBank(this._chrMapB, 2, 2, this._chrRegsB[3]);
-					break;
-				case 3:
-					for (var i = 0; i < 8; ++i) {
-						this._chrBank(this._chrMapA, 1, i, this._chrRegsA[i]);
-					}
-					for (var i = 0; i < 4; ++i) {
-						this._chrBank(this._chrMapB, 1, i, this._chrRegsB[i]);
-					}
-					break;
-			}
-		}
+		key: 'render',
+		value: function render() {}
 	}, {
-		key: 'write8PrgRom',
-		value: function write8PrgRom(offset, data) {
-			if (this._writeProtectA && this._writeProtectB) {
-				var top3Bits = (offset & 0xE000) >> 13;
-				if (this._prgRamIsActive[top3Bits] === 1) {
-					this._prgRam[this._prgRamMap[top3Bits] << 13 | offset & 0x1FFF] = data;
-				} else {
-					_BaseMapper3.default.prototype.write8PrgRom.call(this, offset, data);
-				}
-			}
-		}
+		key: 'screenshot',
+		value: function screenshot() {}
 	}, {
-		key: 'read8PrgRom',
-		value: function read8PrgRom(offset) {
-			var top3Bits = (offset & 0xE000) >> 13;
-			if (this._prgRamIsActive[top3Bits] === 1) {
-				return this._prgRam[this._prgRamMap[top3Bits] << 13 | offset & 0x1FFF]; // this._prgRamMap[0] * 0x2000 + ( offset % 0x2000 ) ];
-			}
-			return _BaseMapper3.default.prototype.read8PrgRom.call(this, offset);
-		}
-	}, {
-		key: 'onEndFrame',
-		value: function onEndFrame() {
-			this._predictIrq(0);
-		}
-	}, {
-		key: '_predictIrq',
-		value: function _predictIrq(cpuMTC) {
-
-			// TODO: Check if MMC5 counter includes pre-render scanline
-			if (this.mRenderingEnabled && !this._irqActive && this._irqEnabled && this._irqScanlineTrigger > 0) {
-				var targetScanline = this._irqScanlineTrigger;
-				var triggerMtc = this.mainboard.ppu.screenCoordinatesToTicks(0, targetScanline);
-				if (triggerMtc > cpuMTC) {
-					if (this._triggerMtc !== triggerMtc) {
-						//var pos = this.mainboard.ppu.ticksToScreenCoordinates( triggerMtc );
-						this.mainboard.synchroniser.changeEventTime(this._irqEventId, triggerMtc);
-						this._triggerMtc = triggerMtc;
-					}
-				}
-				return;
-			}
-
-			if (this._triggerMtc !== -1) {
-				this._triggerMtc = -1;
-				this.mainboard.synchroniser.changeEventTime(this._irqEventId, -1);
-			}
-		}
-	}, {
-		key: 'write8EXRam',
-		value: function write8EXRam(offset, data) {
-			// 0x4018 -> 0x6000
-			switch (offset) {
-				case 0x5100:
-					// PRG mode
-					this._prgMode = data & 0x3;
-					this._syncPrg();
-					break;
-				case 0x5101:
-					// CHR mode
-					this._chrMode = data & 0x3;
-					this._syncChr();
-					break;
-				case 0x5102:
-					// PRG RAM write protect 1
-					this._writeProtectA = (data & 0x3) === 0x2;
-					break;
-				case 0x5103:
-					// PRG RAM write protect 2
-					this._writeProtectB = (data & 0x3) === 0x1;
-					break;
-				case 0x5104:
-					// extended RAM mode
-					this.mainboard.synchroniser.synchronise();
-					this._exRamMode = data & 0x3;
-					break;
-				case 0x5105:
-					// nametable mode
-					this.mainboard.synchroniser.synchronise();
-					this._setNametableMirroring(data);
-					break;
-				case 0x5106:
-					// fill mode tile number
-					this.mainboard.synchroniser.synchronise();
-					for (var i = 0; i < 32 * 30; ++i) {
-						this._nameTableFill[i] = data;
-					}
-					break;
-				case 0x5107:
-					// fill mode colour
-					this.mainboard.synchroniser.synchronise();
-					var attribute = data & 0x3 + (data & 3) << 2 + (data & 3) << 4 + (data & 3) << 6;
-					for (var i = 32 * 30; i < this._nameTableFill.length; ++i) {
-						this._nameTableFill[i] = attribute;
-					}
-					break;
-				case 0x5113:
-					// prg ram bank
-					this._prgRamPage = data & 0x7;
-					break;
-				case 0x5114:
-					// prg bank 0
-					this._prgRegisters[0] = data;
-					this._syncPrg();
-					break;
-				case 0x5115:
-					// prg bank 1
-					this._prgRegisters[1] = data;
-					this._syncPrg();
-					break;
-				case 0x5116:
-					// prg bank 2
-					this._prgRegisters[2] = data;
-					this._syncPrg();
-					break;
-				case 0x5117:
-					// prg bank 3
-					this._prgRegisters[3] = data;
-					this._syncPrg();
-					break;
-				case 0x5120:
-					// chr registers A
-					this._chrRegsA[0] = data | this._chrHighBits;
-					this._chrUseBMap = false;
-					this._syncChr();
-					break;
-				case 0x5121:
-					this._chrRegsA[1] = data | this._chrHighBits;
-					this._chrUseBMap = false;
-					this._syncChr();
-					break;
-				case 0x5122:
-					this._chrRegsA[2] = data | this._chrHighBits;
-					this._chrUseBMap = false;
-					this._syncChr();
-					break;
-				case 0x5123:
-					this._chrRegsA[3] = data | this._chrHighBits;
-					this._chrUseBMap = false;
-					this._syncChr();
-					break;
-				case 0x5124:
-					this._chrRegsA[4] = data | this._chrHighBits;
-					this._chrUseBMap = false;
-					this._syncChr();
-					break;
-				case 0x5125:
-					this._chrRegsA[5] = data | this._chrHighBits;
-					this._chrUseBMap = false;
-					this._syncChr();
-					break;
-				case 0x5126:
-					this._chrRegsA[6] = data | this._chrHighBits;
-					this._chrUseBMap = false;
-					this._syncChr();
-					break;
-				case 0x5127:
-					this._chrRegsA[7] = data | this._chrHighBits;
-					this._chrUseBMap = false;
-					this._syncChr();
-					break;
-				case 0x5128:
-					// Chr registers B
-					this._chrRegsB[0] = data | this._chrHighBits;
-					this._chrUseBMap = true;
-					this._syncChr();
-					break;
-				case 0x5129:
-					this._chrRegsB[1] = data | this._chrHighBits;
-					this._chrUseBMap = true;
-					this._syncChr();
-					break;
-				case 0x512A:
-					this._chrRegsB[2] = data | this._chrHighBits;
-					this._chrUseBMap = true;
-					this._syncChr();
-					break;
-				case 0x512B:
-					this._chrRegsB[3] = data | this._chrHighBits;
-					this._chrUseBMap = true;
-					this._syncChr();
-					break;
-				case 0x5130:
-					// CHR bank high bits
-					this.mainboard.synchroniser.synchronise();
-					this._chrHighBits = (data & 0x3) << 8;
-					break;
-				case 0x5200:
-					// vertical split mode
-					// dont bother with vertical mode as it was only used once in commercial games, for the intro sequence
-					break;
-				case 0x5201:
-					// vertical split scroll
-					break;
-				case 0x5202:
-					// vertical split chr page
-					break;
-				case 0x5203:
-					// irq scanline number trigger
-					this.mainboard.synchroniser.synchronise();
-					this._irqScanlineTrigger = data;
-					this._predictIrq(this.mainboard.synchroniser.getCpuMTC());
-					break;
-				case 0x5204:
-					// irq enable (different behaviour on read)
-					this.mainboard.synchroniser.synchronise();
-					this._irqEnabled = (data & 0x80) > 0;
-					this._predictIrq(this.mainboard.synchroniser.getCpuMTC());
-					break;
-				case 0x5205:
-					//  Writes specify the eight-bit multiplicand; reads return the lower eight bits of the product
-					this._multiplier1 = data;
-					break;
-				case 0x5206:
-					// Writes specify the eight-bit multiplier; reads return the upper eight bits of the product
-					this._multiplier2 = data;
-					break;
-			}
-
-			if (offset >= 0x5C00) {
-				// TODO: Remove synchronise and work out isRendering by mtc
-				this.mainboard.synchroniser.synchronise();
-				if (this._exRamMode === 0 || this._exRamMode === 1) {
-					// only allow writing during rendering, otherwise write 0
-					if (this.mainboard.ppu.isRendering(this.mainboard.synchroniser.getCpuMTC(), false)) {
-						this._internalExRam[offset - 0x5C00] = data;
-					} else {
-						this._internalExRam[offset - 0x5C00] = 0;
-					}
-				} else if (this._exRamMode === 2) {
-					// always write
-					this._internalExRam[offset - 0x5C00] = data;
-				}
-			}
-
-			//BaseMapper.prototype.write8EXRam.call( this, offset, data );
-		}
-	}, {
-		key: 'read8EXRam',
-		value: function read8EXRam(offset) {
-			// 0x4018 -> 0x6000
-			switch (offset) {
-				case 0x5015:
-					//sound status
-					//			return soundchip.status();
-					break;
-				case 0x5204:
-					//irq status
-					this.mainboard.synchroniser.synchronise();
-					var scan = this.mainboard.ppu.ticksToScreenCoordinates(this.mainboard.synchroniser.getCpuMTC());
-					var stat = (this._irqActive ? 0x80 : 0) + (scan.y >= 0 && scan.y < 240 ? 0x40 : 0);
-					if (this._irqActive) {
-						this._irqActive = false;
-						this.mainboard.cpu.holdIrqLineLow(false);
-					}
-					this._predictIrq(this.mainboard.synchroniser.getCpuMTC());
-					return stat;
-				case 0x5205:
-					//  Writes specify the eight-bit multiplicand; reads return the lower eight bits of the product
-					return this._multiplier1 * this._multiplier2 & 0xff;
-					break;
-				case 0x5206:
-					// Writes specify the eight-bit multiplier; reads return the upper eight bits of the product
-					return this._multiplier1 * this._multiplier2 >> 8 & 0xff;
-					break;
-			}
-
-			if (offset >= 0x5C00) {
-				if (this._exRamMode === 2 || this._exRamMode === 3) {
-					return this._internalExRam[offset - 0x5C00];
-				}
-			}
-
-			return 0; // supposed to be open bus
-		}
-	}, {
-		key: 'write8SRam',
-		value: function write8SRam(offset, data) {
-			// 0x6000 -> 0x8000
-			this._prgRam[this._prgRamPage << 13 | offset & 0x1FFF] = data; // this._prgRamPage * 0x2000 + ( offset % 0x2000 ) ] = data;
-		}
-	}, {
-		key: 'read8SRam',
-		value: function read8SRam(offset) {
-			// 0x6000 -> 0x8000
-			return this._prgRam[this._prgRamPage << 13 | offset & 0x1FFF];
-		}
-	}, {
-		key: '_setNametableMirroring',
-		value: function _setNametableMirroring(data) {
-
-			for (var nt = 0; nt < 4; ++nt) {
-				this._nameTableMap[nt] = data & 0x3;
-				data >>= 2;
-			}
-		}
-	}, {
-		key: 'read8ChrRom',
-		value: function read8ChrRom(offset, renderingSprites, readType) {
-			this.int32ChrData = this.int32ChrData || new Int32Array(this._chrData);
-			// Pattern table read < 0x2000
-			if (renderingSprites) {
-				var pageid = (offset & 0x1C00) >> 10; // Math.floor( offset / 0x400 );
-				var pagepos = this._chrMapA[pageid & 0x7];
-				var chrOffset = pagepos * 0x400 + (offset & 0x3FF);
-				return this.int32ChrData[chrOffset];
-			}
-
-			var useMapB = false;
-
-			if (this._bigSpritesEnabled) {
-				useMapB = !renderingSprites;
-			} else {
-				useMapB = this._chrUseBMap;
-			}
-
-			var pageid = (offset & 0x1C00) >> 10; // Math.floor( offset / 0x400 );
-			var pagepos = useMapB ? this._chrMapB[pageid & 0x3] : this._chrMapA[pageid & 0x7];
-			var chrOffset = pagepos * 0x400 + (offset & 0x3FF);
-			return this.int32ChrData[chrOffset];
-		}
-	}, {
-		key: 'nameTableRead',
-		value: function nameTableRead(nameTables, pageId, pageOffset) {
-
-			switch (this._nameTableMap[pageId]) {
-				default:
-				case 0:
-					return nameTables[0][pageOffset];
-				case 1:
-					return nameTables[1][pageOffset];
-				case 2:
-					if (this._exRamMode === 0 || this._exRamMode === 1) {
-						return this._internalExRam[pageOffset];
-					} else {
-						return 0;
-					}
-				case 3:
-					return this._nameTableFill[pageOffset];
-			}
-		}
-	}, {
-		key: 'nameTableWrite',
-		value: function nameTableWrite(nameTables, pageId, pageOffset, data) {
-
-			switch (this._nameTableMap[pageId]) {
-				default:
-				case 0:
-					nameTables[0][pageOffset] = data;
-					break;
-				case 1:
-					nameTables[1][pageOffset] = data;
-					break;
-				case 2:
-					if (this._exRamMode === 0 || this._exRamMode === 1) {
-						this._internalExRam[pageOffset] = data;
-					}
-					break;
-				case 3:
-					this._nameTableFill[pageOffset] = data;
-					break;
-			}
-		}
-	}, {
-		key: 'spriteSizeChanged',
-		value: function spriteSizeChanged(bigSprites) {
-
-			this._bigSpritesEnabled = bigSprites;
+		key: 'screenshotToString',
+		value: function screenshotToString() {
+			return '';
 		}
 	}]);
 
-	return Mapper5;
-}(_BaseMapper3.default);
+	return HeadlessRenderSurface;
+}();
 
-exports.default = Mapper5;
+exports.default = HeadlessRenderSurface;
+
+/***/ }),
+/* 89 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c) 2013 Pieroxy <pieroxy@pieroxy.net>
+// This work is free. You can redistribute it and/or modify it
+// under the terms of the WTFPL, Version 2
+// For more information see LICENSE.txt or http://www.wtfpl.net/
+//
+// For more information, the home page:
+// http://pieroxy.net/blog/pages/lz-string/testing.html
+//
+// LZ-based compression algorithm, version 1.4.4
+var LZString = (function() {
+
+// private property
+var f = String.fromCharCode;
+var keyStrBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+var keyStrUriSafe = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$";
+var baseReverseDic = {};
+
+function getBaseValue(alphabet, character) {
+  if (!baseReverseDic[alphabet]) {
+    baseReverseDic[alphabet] = {};
+    for (var i=0 ; i<alphabet.length ; i++) {
+      baseReverseDic[alphabet][alphabet.charAt(i)] = i;
+    }
+  }
+  return baseReverseDic[alphabet][character];
+}
+
+var LZString = {
+  compressToBase64 : function (input) {
+    if (input == null) return "";
+    var res = LZString._compress(input, 6, function(a){return keyStrBase64.charAt(a);});
+    switch (res.length % 4) { // To produce valid Base64
+    default: // When could this happen ?
+    case 0 : return res;
+    case 1 : return res+"===";
+    case 2 : return res+"==";
+    case 3 : return res+"=";
+    }
+  },
+
+  decompressFromBase64 : function (input) {
+    if (input == null) return "";
+    if (input == "") return null;
+    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrBase64, input.charAt(index)); });
+  },
+
+  compressToUTF16 : function (input) {
+    if (input == null) return "";
+    return LZString._compress(input, 15, function(a){return f(a+32);}) + " ";
+  },
+
+  decompressFromUTF16: function (compressed) {
+    if (compressed == null) return "";
+    if (compressed == "") return null;
+    return LZString._decompress(compressed.length, 16384, function(index) { return compressed.charCodeAt(index) - 32; });
+  },
+
+  //compress into uint8array (UCS-2 big endian format)
+  compressToUint8Array: function (uncompressed) {
+    var compressed = LZString.compress(uncompressed);
+    var buf=new Uint8Array(compressed.length*2); // 2 bytes per character
+
+    for (var i=0, TotalLen=compressed.length; i<TotalLen; i++) {
+      var current_value = compressed.charCodeAt(i);
+      buf[i*2] = current_value >>> 8;
+      buf[i*2+1] = current_value % 256;
+    }
+    return buf;
+  },
+
+  //decompress from uint8array (UCS-2 big endian format)
+  decompressFromUint8Array:function (compressed) {
+    if (compressed===null || compressed===undefined){
+        return LZString.decompress(compressed);
+    } else {
+        var buf=new Array(compressed.length/2); // 2 bytes per character
+        for (var i=0, TotalLen=buf.length; i<TotalLen; i++) {
+          buf[i]=compressed[i*2]*256+compressed[i*2+1];
+        }
+
+        var result = [];
+        buf.forEach(function (c) {
+          result.push(f(c));
+        });
+        return LZString.decompress(result.join(''));
+
+    }
+
+  },
+
+
+  //compress into a string that is already URI encoded
+  compressToEncodedURIComponent: function (input) {
+    if (input == null) return "";
+    return LZString._compress(input, 6, function(a){return keyStrUriSafe.charAt(a);});
+  },
+
+  //decompress from an output of compressToEncodedURIComponent
+  decompressFromEncodedURIComponent:function (input) {
+    if (input == null) return "";
+    if (input == "") return null;
+    input = input.replace(/ /g, "+");
+    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrUriSafe, input.charAt(index)); });
+  },
+
+  compress: function (uncompressed) {
+    return LZString._compress(uncompressed, 16, function(a){return f(a);});
+  },
+  _compress: function (uncompressed, bitsPerChar, getCharFromInt) {
+    if (uncompressed == null) return "";
+    var i, value,
+        context_dictionary= {},
+        context_dictionaryToCreate= {},
+        context_c="",
+        context_wc="",
+        context_w="",
+        context_enlargeIn= 2, // Compensate for the first entry which should not count
+        context_dictSize= 3,
+        context_numBits= 2,
+        context_data=[],
+        context_data_val=0,
+        context_data_position=0,
+        ii;
+
+    for (ii = 0; ii < uncompressed.length; ii += 1) {
+      context_c = uncompressed.charAt(ii);
+      if (!Object.prototype.hasOwnProperty.call(context_dictionary,context_c)) {
+        context_dictionary[context_c] = context_dictSize++;
+        context_dictionaryToCreate[context_c] = true;
+      }
+
+      context_wc = context_w + context_c;
+      if (Object.prototype.hasOwnProperty.call(context_dictionary,context_wc)) {
+        context_w = context_wc;
+      } else {
+        if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
+          if (context_w.charCodeAt(0)<256) {
+            for (i=0 ; i<context_numBits ; i++) {
+              context_data_val = (context_data_val << 1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+            }
+            value = context_w.charCodeAt(0);
+            for (i=0 ; i<8 ; i++) {
+              context_data_val = (context_data_val << 1) | (value&1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = value >> 1;
+            }
+          } else {
+            value = 1;
+            for (i=0 ; i<context_numBits ; i++) {
+              context_data_val = (context_data_val << 1) | value;
+              if (context_data_position ==bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = 0;
+            }
+            value = context_w.charCodeAt(0);
+            for (i=0 ; i<16 ; i++) {
+              context_data_val = (context_data_val << 1) | (value&1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = value >> 1;
+            }
+          }
+          context_enlargeIn--;
+          if (context_enlargeIn == 0) {
+            context_enlargeIn = Math.pow(2, context_numBits);
+            context_numBits++;
+          }
+          delete context_dictionaryToCreate[context_w];
+        } else {
+          value = context_dictionary[context_w];
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+
+
+        }
+        context_enlargeIn--;
+        if (context_enlargeIn == 0) {
+          context_enlargeIn = Math.pow(2, context_numBits);
+          context_numBits++;
+        }
+        // Add wc to the dictionary.
+        context_dictionary[context_wc] = context_dictSize++;
+        context_w = String(context_c);
+      }
+    }
+
+    // Output the code for w.
+    if (context_w !== "") {
+      if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
+        if (context_w.charCodeAt(0)<256) {
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+          }
+          value = context_w.charCodeAt(0);
+          for (i=0 ; i<8 ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+        } else {
+          value = 1;
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1) | value;
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = 0;
+          }
+          value = context_w.charCodeAt(0);
+          for (i=0 ; i<16 ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+        }
+        context_enlargeIn--;
+        if (context_enlargeIn == 0) {
+          context_enlargeIn = Math.pow(2, context_numBits);
+          context_numBits++;
+        }
+        delete context_dictionaryToCreate[context_w];
+      } else {
+        value = context_dictionary[context_w];
+        for (i=0 ; i<context_numBits ; i++) {
+          context_data_val = (context_data_val << 1) | (value&1);
+          if (context_data_position == bitsPerChar-1) {
+            context_data_position = 0;
+            context_data.push(getCharFromInt(context_data_val));
+            context_data_val = 0;
+          } else {
+            context_data_position++;
+          }
+          value = value >> 1;
+        }
+
+
+      }
+      context_enlargeIn--;
+      if (context_enlargeIn == 0) {
+        context_enlargeIn = Math.pow(2, context_numBits);
+        context_numBits++;
+      }
+    }
+
+    // Mark the end of the stream
+    value = 2;
+    for (i=0 ; i<context_numBits ; i++) {
+      context_data_val = (context_data_val << 1) | (value&1);
+      if (context_data_position == bitsPerChar-1) {
+        context_data_position = 0;
+        context_data.push(getCharFromInt(context_data_val));
+        context_data_val = 0;
+      } else {
+        context_data_position++;
+      }
+      value = value >> 1;
+    }
+
+    // Flush the last char
+    while (true) {
+      context_data_val = (context_data_val << 1);
+      if (context_data_position == bitsPerChar-1) {
+        context_data.push(getCharFromInt(context_data_val));
+        break;
+      }
+      else context_data_position++;
+    }
+    return context_data.join('');
+  },
+
+  decompress: function (compressed) {
+    if (compressed == null) return "";
+    if (compressed == "") return null;
+    return LZString._decompress(compressed.length, 32768, function(index) { return compressed.charCodeAt(index); });
+  },
+
+  _decompress: function (length, resetValue, getNextValue) {
+    var dictionary = [],
+        next,
+        enlargeIn = 4,
+        dictSize = 4,
+        numBits = 3,
+        entry = "",
+        result = [],
+        i,
+        w,
+        bits, resb, maxpower, power,
+        c,
+        data = {val:getNextValue(0), position:resetValue, index:1};
+
+    for (i = 0; i < 3; i += 1) {
+      dictionary[i] = i;
+    }
+
+    bits = 0;
+    maxpower = Math.pow(2,2);
+    power=1;
+    while (power!=maxpower) {
+      resb = data.val & data.position;
+      data.position >>= 1;
+      if (data.position == 0) {
+        data.position = resetValue;
+        data.val = getNextValue(data.index++);
+      }
+      bits |= (resb>0 ? 1 : 0) * power;
+      power <<= 1;
+    }
+
+    switch (next = bits) {
+      case 0:
+          bits = 0;
+          maxpower = Math.pow(2,8);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+        c = f(bits);
+        break;
+      case 1:
+          bits = 0;
+          maxpower = Math.pow(2,16);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+        c = f(bits);
+        break;
+      case 2:
+        return "";
+    }
+    dictionary[3] = c;
+    w = c;
+    result.push(c);
+    while (true) {
+      if (data.index > length) {
+        return "";
+      }
+
+      bits = 0;
+      maxpower = Math.pow(2,numBits);
+      power=1;
+      while (power!=maxpower) {
+        resb = data.val & data.position;
+        data.position >>= 1;
+        if (data.position == 0) {
+          data.position = resetValue;
+          data.val = getNextValue(data.index++);
+        }
+        bits |= (resb>0 ? 1 : 0) * power;
+        power <<= 1;
+      }
+
+      switch (c = bits) {
+        case 0:
+          bits = 0;
+          maxpower = Math.pow(2,8);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+
+          dictionary[dictSize++] = f(bits);
+          c = dictSize-1;
+          enlargeIn--;
+          break;
+        case 1:
+          bits = 0;
+          maxpower = Math.pow(2,16);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+          dictionary[dictSize++] = f(bits);
+          c = dictSize-1;
+          enlargeIn--;
+          break;
+        case 2:
+          return result.join('');
+      }
+
+      if (enlargeIn == 0) {
+        enlargeIn = Math.pow(2, numBits);
+        numBits++;
+      }
+
+      if (dictionary[c]) {
+        entry = dictionary[c];
+      } else {
+        if (c === dictSize) {
+          entry = w + w.charAt(0);
+        } else {
+          return null;
+        }
+      }
+      result.push(entry);
+
+      // Add w+entry[0] to the dictionary.
+      dictionary[dictSize++] = w + entry.charAt(0);
+      enlargeIn--;
+
+      w = entry;
+
+      if (enlargeIn == 0) {
+        enlargeIn = Math.pow(2, numBits);
+        numBits++;
+      }
+
+    }
+  }
+};
+  return LZString;
+})();
+
+if (true) {
+  !(__WEBPACK_AMD_DEFINE_RESULT__ = function () { return LZString; }.call(exports, __webpack_require__, exports, module),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+} else if( typeof module !== 'undefined' && module != null ) {
+  module.exports = LZString
+}
+
 
 /***/ })
 /******/ ]);

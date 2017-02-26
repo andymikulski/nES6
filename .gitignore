@@ -9,3 +9,4 @@
 /tools/assembler/out.nes
 /tools/buildShaderManifest/*.log
 /src/roms
+npm-debug.log.*

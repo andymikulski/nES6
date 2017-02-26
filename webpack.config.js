@@ -28,7 +28,7 @@ module.exports = [
     context: __dirname,
     entry: {
       nes6: [
-        './src/NES.js'
+        './src/nES6.js'
       ],
       'nes6-demo': [
         './src/main.js'

@@ -1,6 +1,8 @@
-import NES from './NES.js';
+import nES6 from './nES6.js';
 
-const App = new NES();
+const App = new nES6({
+	headless: false,
+});
 App.start();
 
 // ROM courtesy of TecmoBowl.org

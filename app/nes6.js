@@ -229,9 +229,19 @@ var g_ClearScreenArray = exports.g_ClearScreenArray = new Int32Array(SCREEN_WIDT
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.rusha = undefined;
 exports.uintArrayToString = uintArrayToString;
 exports.stringToUintArray = stringToUintArray;
 exports.blobToString = blobToString;
+
+var _rusha = __webpack_require__(79);
+
+var _rusha2 = _interopRequireDefault(_rusha);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var rusha = exports.rusha = new _rusha2.default();
+
 var uintArrayCache = {};
 function uintArrayToString(uintArray) {
   if (!(uintArray instanceof Int32Array)) {
@@ -976,7 +986,7 @@ var saveAs = saveAs || (function(view) {
 
 if (typeof module !== "undefined" && module.exports) {
   module.exports.saveAs = saveAs;
-} else if (("function" !== "undefined" && __webpack_require__(83) !== null) && (__webpack_require__(84) !== null)) {
+} else if (("function" !== "undefined" && __webpack_require__(82) !== null) && (__webpack_require__(83) !== null)) {
   !(__WEBPACK_AMD_DEFINE_RESULT__ = function() {
     return saveAs;
   }.call(exports, __webpack_require__, exports, module),
@@ -1001,7 +1011,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 exports.getGlContext = getGlContext;
 exports.webGlSupported = webGlSupported;
 
-var _glMat = __webpack_require__(63);
+var _glMat = __webpack_require__(62);
 
 var _glMat2 = _interopRequireDefault(_glMat);
 
@@ -1520,22 +1530,31 @@ exports.renameQuickSaveStates = renameQuickSaveStates;
 exports.saveStateSupported = saveStateSupported;
 exports.saveToLocalStorage = saveToLocalStorage;
 exports.loadFromLocalStorage = loadFromLocalStorage;
-function compress(rawString) {
 
-	var compressed;
-	// LZString is way too slow and gives pretty much the same result, use jz.algos instead
-	//compressed = LZString.compress( raw );
-	var int32Array = Nes.stringToUintArray(rawString);
-	compressed = Nes.uintArrayToString(new Int32Array(jz.algos.deflate(new Uint8Array(int32Array))));
-	return compressed;
+var _lzString = __webpack_require__(89);
+
+var _lzString2 = _interopRequireDefault(_lzString);
+
+var _consts = __webpack_require__(0);
+
+var _serialisation = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var compressCache = {};
+function compress(rawString) {
+	if (!compressCache[rawString]) {
+		compressCache[rawString] = _lzString2.default.compress(rawString);
+	}
+	return compressCache[rawString];
 }
 
+var decompressCache = {};
 function decompress(rawString) {
-	var decompressed;
-	//decompressed = LZString.decompress( compressed );
-	var int32Array = Nes.stringToUintArray(rawString);
-	decompressed = Nes.uintArrayToString(new Int32Array(jz.algos.inflate(new Uint8Array(int32Array))));
-	return decompressed;
+	if (!decompressCache[rawString]) {
+		compressCache[rawString] = _lzString2.default.decompress(rawString);
+	}
+	return compressCache[rawString];
 }
 
 function getCartName(slotName, cartName) {
@@ -1557,26 +1576,19 @@ function getMetaObject(cartName) {
 }
 
 function setMetaObject(cartName, obj) {
-	saveToLocalStorage(getMetaName(cartName), obj);
+	return saveToLocalStorage(getMetaName(cartName), obj);
 }
 
 function saveState(slotName, cartName, data, screenData) {
-
-	if (localStorage) {
-		// save state data as it's own local storage object
-		saveToLocalStorage(getCartName(slotName, cartName), data);
-
-		// add to meta data object
-		var meta = getMetaObject(cartName);
-		var slotMeta = {};
-		if (screenData) {
-			slotMeta.screen = compress(screenData);
-			console.log("Saved screenshot size: " + slotMeta.screen.length + " (uncompressed: " + screenData.length + ")");
-		}
-		slotMeta.date = Date.now();
-		meta.slots[slotName] = slotMeta;
-		setMetaObject(cartName, meta);
+	// add to meta data object
+	var meta = getMetaObject(cartName);
+	var slotMeta = {};
+	if (screenData) {
+		slotMeta.screen = compress(screenData);
 	}
+	slotMeta.date = Date.now();
+	meta.slots[slotName] = slotMeta;
+	return setMetaObject(cartName, meta);
 }
 
 function loadState(slotName, cartName) {
@@ -1638,15 +1650,15 @@ function renameQuickSaveStates(slotName, cartName, limitCount) {
 	var meta = getMetaObject(cartName);
 
 	// remove last quicksave.
-	renameState(meta, slotName + ZERO_PAD(limitCount - 1, 2, 0), null, cartName);
+	renameState(meta, slotName + (0, _consts.ZERO_PAD)(limitCount - 1, 2, 0), null, cartName);
 
 	// rename any others, moving each one down. We go backwards so we don't overwrite
 	for (var i = limitCount - 2; i > 0; --i) {
-		renameState(meta, slotName + ZERO_PAD(i, 2, 0), slotName + ZERO_PAD(i + 1, 2, 0), cartName);
+		renameState(meta, slotName + (0, _consts.ZERO_PAD)(i, 2, 0), slotName + (0, _consts.ZERO_PAD)(i + 1, 2, 0), cartName);
 	}
 
 	// rename main 'quicksave' slot
-	renameState(meta, slotName, slotName + ZERO_PAD(1, 2, 0), cartName);
+	renameState(meta, slotName, slotName + (0, _consts.ZERO_PAD)(1, 2, 0), cartName);
 
 	setMetaObject(cartName, meta);
 }
@@ -1657,11 +1669,11 @@ function saveStateSupported() {
 }
 
 function saveToLocalStorage(name, data) {
-	if (localStorage) {
-		var raw = JSON.stringify(data);
-		var compressed = compress(raw);
-		localStorage.setItem(name, compressed);
-	}
+	var raw = JSON.stringify(data);
+	var compressed = compress(raw);
+	localStorage.setItem(name, compressed);
+
+	return compressed;
 }
 
 function loadFromLocalStorage(name) {
@@ -1790,21 +1802,17 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _stats = __webpack_require__(82);
+var _stats = __webpack_require__(81);
 
 var _stats2 = _interopRequireDefault(_stats);
 
 var _Event = __webpack_require__(4);
 
-var _TestRenderSurface = __webpack_require__(49);
-
-var _TestRenderSurface2 = _interopRequireDefault(_TestRenderSurface);
-
-var _Mainboard = __webpack_require__(32);
+var _Mainboard = __webpack_require__(31);
 
 var _Mainboard2 = _interopRequireDefault(_Mainboard);
 
-var _Cartridge = __webpack_require__(31);
+var _Cartridge = __webpack_require__(30);
 
 var _Cartridge2 = _interopRequireDefault(_Cartridge);
 
@@ -1812,13 +1820,17 @@ var _Trace = __webpack_require__(3);
 
 var _Trace2 = _interopRequireDefault(_Trace);
 
-var _loadRom = __webpack_require__(51);
+var _loadRom = __webpack_require__(50);
 
-var _gameGenie = __webpack_require__(50);
+var _gameGenie = __webpack_require__(49);
 
 var _CanvasParent = __webpack_require__(13);
 
 var _CanvasParent2 = _interopRequireDefault(_CanvasParent);
+
+var _HeadlessRenderSurface = __webpack_require__(88);
+
+var _HeadlessRenderSurface2 = _interopRequireDefault(_HeadlessRenderSurface);
 
 var _WebGlRenderSurface = __webpack_require__(19);
 
@@ -1830,10 +1842,6 @@ var _CanvasRenderSurface = __webpack_require__(16);
 
 var _CanvasRenderSurface2 = _interopRequireDefault(_CanvasRenderSurface);
 
-var _StateManager = __webpack_require__(48);
-
-var _StateManager2 = _interopRequireDefault(_StateManager);
-
 var _Input = __webpack_require__(18);
 
 var _Input2 = _interopRequireDefault(_Input);
@@ -1844,9 +1852,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var NES = function () {
-  function NES() {
-    _classCallCheck(this, NES);
+var nES6 = function () {
+  function nES6(options) {
+    _classCallCheck(this, nES6);
+
+    this._options = options || {};
 
     this._cart = null;
     this._romLoaded = false;
@@ -1873,14 +1883,12 @@ var NES = function () {
     this._pauseNextFrame = false;
     this._pauseOnFrame = -1;
 
-    this._options = {};
-
     this.animate = this._animate.bind(this);
 
     window.onerror = this._showError.bind(this);
   }
 
-  _createClass(NES, [{
+  _createClass(nES6, [{
     key: 'connect',
     value: function connect(name, cb) {
       this._eventBus.connect(name, cb);
@@ -1896,32 +1904,38 @@ var NES = function () {
       this._newRomWaiting = true;
       this._newRomLoaded = {
         name: name,
-        binaryString: binaryString
+        binaryString: binaryString,
+        fileSize: binaryString.length / 1000 // in KB
       };
     }
   }, {
     key: 'start',
-    value: function start(options) {
-      this._options = options || {};
-      this._options.triggerFrameRenderedEvent = this._options.triggerFrameRenderedEvent === undefined ? false : this._options.triggerFrameRenderedEvent;
-      this._options.createGuiComponents = !!this._options.createGuiComponents;
-
+    value: function start() {
       this._fpsMeter = new _stats2.default();
       this._fpsMeter.showPanel(1);
       document.body.appendChild(this._fpsMeter.dom);
 
       this._canvasParent = new _CanvasParent2.default();
       this._renderSurface = null;
-      if ((0, _utils.webGlSupported)()) {
-        this._renderSurface = new _WebGlRenderSurface2.default(this._canvasParent);
+
+      if (this._options['headless'] === true) {
+        this._renderSurface = new _HeadlessRenderSurface2.default();
       } else {
-        this._renderSurface = new _CanvasRenderSurface2.default(this._canvasParent);
+        if ((0, _utils.webGlSupported)()) {
+          this._renderSurface = new _WebGlRenderSurface2.default(this._canvasParent);
+        } else {
+          this._renderSurface = new _CanvasRenderSurface2.default(this._canvasParent);
+        }
       }
 
       this._mainboard = new _Mainboard2.default(this._renderSurface);
       this._mainboard.connect('reset', this._onReset.bind(this));
       this._input = new _Input2.default(this._mainboard);
-      this._stateManager = new _StateManager2.default(this, this._options.createGuiComponents);
+
+      // disable audio for headless rendering
+      if (this._options['headless'] === true) {
+        this._mainboard.enableSound(false);
+      }
 
       this.animate();
     }
@@ -2059,7 +2073,7 @@ var NES = function () {
       }
 
       if (this._newRomWaiting) {
-        this._doRomLoad(this._newRomLoaded.name, this._newRomLoaded.binaryString);
+        this._doRomLoad(this._newRomLoaded);
         this._newRomWaiting = false;
       }
 
@@ -2088,8 +2102,6 @@ var NES = function () {
       this._mainboard.doFrame();
       this._renderSurface.render(this._mainboard);
 
-      this._stateManager.onFrame();
-
       if (this._fpsMeter) {
         this._fpsMeter.end();
       }
@@ -2097,16 +2109,31 @@ var NES = function () {
       requestAnimationFrame(this.animate);
     }
   }, {
+    key: 'exportState',
+    value: function exportState() {
+      return this._mainboard.exportState();
+    }
+  }, {
+    key: 'importState',
+    value: function importState(loadedData) {
+      return this._mainboard.importState(loadedData);
+    }
+  }, {
     key: '_doRomLoad',
-    value: function _doRomLoad(name, binaryString) {
-      var that = this;
+    value: function _doRomLoad(_ref) {
+      var _this = this;
+
+      var name = _ref.name,
+          binaryString = _ref.binaryString,
+          fileSize = _ref.fileSize;
+
       this._cart = new _Cartridge2.default(this._mainboard);
-      this._cart.loadRom(name, binaryString, function (err) {
-        if (!err) {
-          that._romLoaded = true;
-        } else {
-          that._showError(err);
-        }
+      this._cart.loadRom({
+        name: name,
+        binaryString: binaryString,
+        fileSize: fileSize
+      }).catch(this._showError.bind(this)).then(function () {
+        _this._romLoaded = true;
       });
     }
   }, {
@@ -2154,10 +2181,10 @@ var NES = function () {
     }
   }]);
 
-  return NES;
+  return nES6;
 }();
 
-exports.default = NES;
+exports.default = nES6;
 
 /***/ }),
 /* 13 */
@@ -2381,6 +2408,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _fileSaver = __webpack_require__(5);
 
+var _serialisation = __webpack_require__(1);
+
 var _consts = __webpack_require__(0);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2427,9 +2456,7 @@ var CanvasRenderSurface = function () {
 	}, {
 		key: 'getRenderBufferHash',
 		value: function getRenderBufferHash() {
-
-			var rusha = new Rusha();
-			return rusha.digestFromArrayBuffer(this._offscreen32BitView).toUpperCase();
+			return _serialisation.rusha.digestFromArrayBuffer(this._offscreen32BitView).toUpperCase();
 		}
 	}, {
 		key: 'clearBuffers',
@@ -2827,6 +2854,8 @@ var _consts = __webpack_require__(0);
 
 var _fileSaver = __webpack_require__(5);
 
+var _serialisation = __webpack_require__(1);
+
 var _utils = __webpack_require__(6);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2935,8 +2964,7 @@ var WebGlRenderSurface = function () {
 	}, {
 		key: 'getRenderBufferHash',
 		value: function getRenderBufferHash() {
-			var rusha = new Rusha();
-			return rusha.digestFromArrayBuffer(this._offscreen32BitView).toUpperCase();
+			return _serialisation.rusha.digestFromArrayBuffer(this._offscreen32BitView).toUpperCase();
 		}
 	}, {
 		key: 'clearBuffers',
@@ -4927,7 +4955,7 @@ var _fastInstructions = __webpack_require__(28);
 
 var _fastInstructions2 = _interopRequireDefault(_fastInstructions);
 
-var _traceInstructions = __webpack_require__(30);
+var _traceInstructions = __webpack_require__(29);
 
 var _cpuTraceString = __webpack_require__(27);
 
@@ -13123,8 +13151,7 @@ instructions[255] = INS_ABSOLUTEX_255;
 exports.default = instructions;
 
 /***/ }),
-/* 29 */,
-/* 30 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19420,7 +19447,7 @@ var cpuInstructionsTrace = exports.cpuInstructionsTrace = instructions_TRACE;
 var cpuTrace = exports.cpuTrace = formatData;
 
 /***/ }),
-/* 31 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19432,13 +19459,13 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _sha = __webpack_require__(81);
+var _sha = __webpack_require__(80);
 
 var _sha2 = _interopRequireDefault(_sha);
 
 var _consts = __webpack_require__(0);
 
-var _mapperFactory = __webpack_require__(47);
+var _mapperFactory = __webpack_require__(46);
 
 var _mapperFactory2 = _interopRequireDefault(_mapperFactory);
 
@@ -19506,67 +19533,74 @@ var Cartridge = function () {
 		}
 	}, {
 		key: 'loadRom',
-		value: function loadRom(name, binaryString, completeCallback) {
-			this._name = name;
+		value: function loadRom(_ref) {
+			var _this = this;
 
-			var stringIndex = 0;
-			var correctHeader = [78, 69, 83, 26];
+			var name = _ref.name,
+			    binaryString = _ref.binaryString,
+			    fileSize = _ref.fileSize;
 
-			for (var i = 0; i < correctHeader.length; ++i) {
-				if (correctHeader[i] !== binaryString[stringIndex++]) {
-					throw new Error('Invalid NES header for file!');
+			return new Promise(function (resolve, reject) {
+				_this._name = name;
+				var stringIndex = 0;
+				var correctHeader = [78, 69, 83, 26];
+
+				for (var i = 0; i < correctHeader.length; ++i) {
+					if (correctHeader[i] !== binaryString[stringIndex++]) {
+						throw new Error('Invalid NES header for file!');
+					}
 				}
-			}
 
-			var prgPageCount = binaryString[stringIndex++] || 1;
-			var chrPageCount = binaryString[stringIndex++];
-			var controlByte1 = binaryString[stringIndex++];
-			var controlByte2 = binaryString[stringIndex++];
+				var prgPageCount = binaryString[stringIndex++] || 1;
+				var chrPageCount = binaryString[stringIndex++];
+				var controlByte1 = binaryString[stringIndex++];
+				var controlByte2 = binaryString[stringIndex++];
 
-			var horizontalMirroring = (controlByte1 & 0x01) === 0;
-			var sramEnabled = (controlByte1 & 0x02) > 0;
-			var hasTrainer = (controlByte1 & 0x04) > 0;
-			var fourScreenRamLayout = (controlByte1 & 0x08) > 0;
+				var horizontalMirroring = (controlByte1 & 0x01) === 0;
+				var sramEnabled = (controlByte1 & 0x02) > 0;
+				var hasTrainer = (controlByte1 & 0x04) > 0;
+				var fourScreenRamLayout = (controlByte1 & 0x08) > 0;
 
-			var mirroringMethod = 0;
-			if (fourScreenRamLayout) {
-				mirroringMethod = PPU_MIRRORING_FOURSCREEN;
-			} else if (!horizontalMirroring) {
-				mirroringMethod = _consts.PPU_MIRRORING_VERTICAL;
-			} else {
-				mirroringMethod = _consts.PPU_MIRRORING_HORIZONTAL;
-			}
+				var mirroringMethod = 0;
+				if (fourScreenRamLayout) {
+					mirroringMethod = PPU_MIRRORING_FOURSCREEN;
+				} else if (!horizontalMirroring) {
+					mirroringMethod = _consts.PPU_MIRRORING_VERTICAL;
+				} else {
+					mirroringMethod = _consts.PPU_MIRRORING_HORIZONTAL;
+				}
 
-			var mapperId = (controlByte1 & 0xF0) >> 4 | controlByte2 & 0xF0;
+				var mapperId = (controlByte1 & 0xF0) >> 4 | controlByte2 & 0xF0;
 
-			stringIndex = 16;
-			if (hasTrainer) stringIndex += 512;
+				stringIndex = 16;
+				if (hasTrainer) stringIndex += 512;
 
-			// calculate SHA1 on PRG and CHR data, look it up in the db, then load it
-			this._sha1 = (0, _sha2.default)(binaryString, stringIndex);
-			console.log("SHA1: " + this._sha1);
+				// calculate SHA1 on PRG and CHR data, look it up in the db, then load it
+				_this._sha1 = (0, _sha2.default)(binaryString, stringIndex);
+				console.log("SHA1: " + _this._sha1);
 
-			this.memoryMapper = (0, _mapperFactory2.default)(mapperId, this.mainboard, mirroringMethod);
+				_this.memoryMapper = (0, _mapperFactory2.default)(mapperId, _this.mainboard, mirroringMethod);
 
-			// read in program code
-			var prg8kChunkCount = prgPageCount * 2; // read in 8k chunks, prgPageCount is 16k chunks
-			var prgSize = 0x2000 * prg8kChunkCount;
-			this.memoryMapper.setPrgData(this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + prgSize), prgSize), prg8kChunkCount);
-			stringIndex += prgSize;
+				// read in program code
+				var prg8kChunkCount = prgPageCount * 2; // read in 8k chunks, prgPageCount is 16k chunks
+				var prgSize = 0x2000 * prg8kChunkCount;
+				_this.memoryMapper.setPrgData(_this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + prgSize), prgSize), prg8kChunkCount);
+				stringIndex += prgSize;
 
-			// read in character maps
-			var chr1kChunkCount = chrPageCount * 8; // 1kb per pattern table, chrPageCount is the 8kb count
-			var chrSize = 0x400 * chr1kChunkCount;
-			this.memoryMapper.setChrData(this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + chrSize), chrSize), chr1kChunkCount);
-			stringIndex += chrSize;
+				// read in character maps
+				var chr1kChunkCount = chrPageCount * 8; // 1kb per pattern table, chrPageCount is the 8kb count
+				var chrSize = 0x400 * chr1kChunkCount;
+				_this.memoryMapper.setChrData(_this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + chrSize), chrSize), chr1kChunkCount);
+				stringIndex += chrSize;
 
-			// determine NTSC or PAL
-			this._determineColourEncodingType(name);
-			(0, _consts.setColourEncodingType)(this._colourEncodingType);
-			var prgKb = prg8kChunkCount * 8;
-			console.log('Cartridge \'' + name + '\' loaded. \nMapper:\t\t' + mapperId + ' \nMirroring:\t' + (0, _consts.mirroringMethodToString)(mirroringMethod) + ' \nPRG:\t\t' + prgKb + 'kb \nCHR:\t\t' + chr1kChunkCount + 'kb \nEncoding:\t' + this._colourEncodingType);
+				// determine NTSC or PAL
+				_this._determineColourEncodingType(name);
+				(0, _consts.setColourEncodingType)(_this._colourEncodingType);
+				var prgKb = prg8kChunkCount * 8;
+				console.log('Cartridge \'' + name + '\' loaded. \nFile Size: \t' + fileSize + ' KB \nMapper:\t\t' + mapperId + ' \nMirroring:\t' + (0, _consts.mirroringMethodToString)(mirroringMethod) + ' \nPRG:\t\t' + prgKb + 'kb \nCHR:\t\t' + chr1kChunkCount + 'kb \nEncoding:\t' + _this._colourEncodingType);
 
-			completeCallback();
+				resolve();
+			});
 		}
 	}, {
 		key: 'reset',
@@ -19581,7 +19615,7 @@ var Cartridge = function () {
 exports.default = Cartridge;
 
 /***/ }),
-/* 32 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19595,15 +19629,15 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _Event = __webpack_require__(4);
 
-var _Memory = __webpack_require__(33);
+var _Memory = __webpack_require__(32);
 
 var _Memory2 = _interopRequireDefault(_Memory);
 
-var _PPU = __webpack_require__(37);
+var _PPU = __webpack_require__(36);
 
 var _PPU2 = _interopRequireDefault(_PPU);
 
-var _RenderBuffer = __webpack_require__(36);
+var _RenderBuffer = __webpack_require__(35);
 
 var _RenderBuffer2 = _interopRequireDefault(_RenderBuffer);
 
@@ -19611,11 +19645,11 @@ var _APULegacy = __webpack_require__(21);
 
 var _APULegacy2 = _interopRequireDefault(_APULegacy);
 
-var _InputDeviceBus = __webpack_require__(39);
+var _InputDeviceBus = __webpack_require__(38);
 
 var _InputDeviceBus2 = _interopRequireDefault(_InputDeviceBus);
 
-var _Synchroniser = __webpack_require__(38);
+var _Synchroniser = __webpack_require__(37);
 
 var _Synchroniser2 = _interopRequireDefault(_Synchroniser);
 
@@ -19762,7 +19796,7 @@ var Mainboard = function () {
 exports.default = Mainboard;
 
 /***/ }),
-/* 33 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19928,7 +19962,7 @@ var Memory = function () {
 exports.default = Memory;
 
 /***/ }),
-/* 34 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20238,7 +20272,7 @@ var PPURenderBG = function () {
 exports.default = PPURenderBG;
 
 /***/ }),
-/* 35 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20463,7 +20497,7 @@ var PPURenderSprites = function () {
 exports.default = PPURenderSprites;
 
 /***/ }),
-/* 36 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20577,7 +20611,6 @@ var RenderBuffer = function () {
 	}, {
 		key: 'saveState',
 		value: function saveState() {
-
 			return {
 				priorityBuffer: (0, _serialisation.uintArrayToString)(this.priorityBuffer)
 			};
@@ -20596,7 +20629,7 @@ var RenderBuffer = function () {
 exports.default = RenderBuffer;
 
 /***/ }),
-/* 37 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20614,11 +20647,11 @@ var _Trace = __webpack_require__(3);
 
 var _consts = __webpack_require__(0);
 
-var _PPURenderBG = __webpack_require__(34);
+var _PPURenderBG = __webpack_require__(33);
 
 var _PPURenderBG2 = _interopRequireDefault(_PPURenderBG);
 
-var _PPURenderSprites = __webpack_require__(35);
+var _PPURenderSprites = __webpack_require__(34);
 
 var _PPURenderSprites2 = _interopRequireDefault(_PPURenderSprites);
 
@@ -21418,7 +21451,7 @@ PPU.screenPos = {
 exports.default = PPU;
 
 /***/ }),
-/* 38 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21690,7 +21723,7 @@ var Synchroniser = function () {
 exports.default = Synchroniser;
 
 /***/ }),
-/* 39 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21702,7 +21735,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Joypad = __webpack_require__(40);
+var _Joypad = __webpack_require__(39);
 
 var _Joypad2 = _interopRequireDefault(_Joypad);
 
@@ -21764,7 +21797,7 @@ var InputDeviceBus = function () {
 exports.default = InputDeviceBus;
 
 /***/ }),
-/* 40 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21872,7 +21905,7 @@ var Joypad = function () {
 exports.default = Joypad;
 
 /***/ }),
-/* 41 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21931,7 +21964,7 @@ var Mapper0 = function (_BaseMapper) {
 exports.default = Mapper0;
 
 /***/ }),
-/* 42 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22137,7 +22170,7 @@ var Mapper1 = function (_BaseMapper) {
 exports.default = Mapper1;
 
 /***/ }),
-/* 43 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22192,7 +22225,7 @@ var Mapper2 = function (_BaseMapper) {
 exports.default = Mapper2;
 
 /***/ }),
-/* 44 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22711,7 +22744,7 @@ var Mapper4 = function (_BaseMapper) {
 exports.default = Mapper4;
 
 /***/ }),
-/* 45 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22830,10 +22863,10 @@ var Mapper5 = function (_BaseMapper) {
 			this._prgMode = state._prgMode;
 			this._exRamMode = state._exRamMode;
 
-			this._prgRegisters = stringToUintArray(state._prgRegisters);
-			this._nameTableFill = stringToUintArray(state._nameTableFill);
-			this._internalExRam = stringToUintArray(state._internalExRam);
-			this._prgRam = stringToUintArray(state._prgRam);
+			this._prgRegisters = (0, _serialisation.stringToUintArray)(state._prgRegisters);
+			this._nameTableFill = (0, _serialisation.stringToUintArray)(state._nameTableFill);
+			this._internalExRam = (0, _serialisation.stringToUintArray)(state._internalExRam);
+			this._prgRam = (0, _serialisation.stringToUintArray)(state._prgRam);
 
 			this._prgRamPage = state._prgRamPage;
 			this._bigSpritesEnabled = state._bigSpritesEnabled;
@@ -22848,16 +22881,16 @@ var Mapper5 = function (_BaseMapper) {
 			this._multiplier1 = state._multiplier1;
 			this._multiplier2 = state._multiplier2;
 
-			this._prgRamMap = stringToUintArray(state._prgRamMap);
-			this._prgRamIsActive = stringToUintArray(state._prgRamIsActive);
-			this._nameTableMap = stringToUintArray(state._nameTableMap);
+			this._prgRamMap = (0, _serialisation.stringToUintArray)(state._prgRamMap);
+			this._prgRamIsActive = (0, _serialisation.stringToUintArray)(state._prgRamIsActive);
+			this._nameTableMap = (0, _serialisation.stringToUintArray)(state._nameTableMap);
 
-			this._chrRegsA = stringToUintArray(state._chrRegsA);
-			this._chrRegsB = stringToUintArray(state._chrRegsB);
+			this._chrRegsA = (0, _serialisation.stringToUintArray)(state._chrRegsA);
+			this._chrRegsB = (0, _serialisation.stringToUintArray)(state._chrRegsB);
 
 			this._chrUseBMap = state._chrUseBMap;
-			this._chrMapA = stringToUintArray(state._chrMapA);
-			this._chrMapB = stringToUintArray(state._chrMapB);
+			this._chrMapA = (0, _serialisation.stringToUintArray)(state._chrMapA);
+			this._chrMapB = (0, _serialisation.stringToUintArray)(state._chrMapB);
 			this._chrHighBits = state._chrHighBits;
 		}
 	}, {
@@ -23433,7 +23466,7 @@ var Mapper5 = function (_BaseMapper) {
 exports.default = Mapper5;
 
 /***/ }),
-/* 46 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23586,7 +23619,7 @@ var Mapper9 = function (_BaseMapper) {
 exports.default = Mapper9;
 
 /***/ }),
-/* 47 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23597,27 +23630,27 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = mapperFactory;
 
-var _Mapper = __webpack_require__(41);
+var _Mapper = __webpack_require__(40);
 
 var _Mapper2 = _interopRequireDefault(_Mapper);
 
-var _Mapper3 = __webpack_require__(42);
+var _Mapper3 = __webpack_require__(41);
 
 var _Mapper4 = _interopRequireDefault(_Mapper3);
 
-var _Mapper5 = __webpack_require__(43);
+var _Mapper5 = __webpack_require__(42);
 
 var _Mapper6 = _interopRequireDefault(_Mapper5);
 
-var _Mapper7 = __webpack_require__(44);
+var _Mapper7 = __webpack_require__(43);
 
 var _Mapper8 = _interopRequireDefault(_Mapper7);
 
-var _Mapper9 = __webpack_require__(45);
+var _Mapper9 = __webpack_require__(44);
 
 var _Mapper10 = _interopRequireDefault(_Mapper9);
 
-var _Mapper11 = __webpack_require__(46);
+var _Mapper11 = __webpack_require__(45);
 
 var _Mapper12 = _interopRequireDefault(_Mapper11);
 
@@ -23669,146 +23702,9 @@ function mapperFactory(mapperId, mainboard, mirroringMethod) {
 }
 
 /***/ }),
-/* 48 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _utils = __webpack_require__(8);
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var StateManager = function () {
-	function StateManager(app, createGuiComponents) {
-		_classCallCheck(this, StateManager);
-
-		this._app = app;
-		this._mainboard = this._app._mainboard;
-		this._renderSurface = this._app._renderSurface;
-
-		this._loadPending = '';
-		this._loadStatePending = false;
-		this._saveStatePending = false;
-	}
-
-	_createClass(StateManager, [{
-		key: 'quickSaveState',
-		value: function quickSaveState() {
-			this._saveStatePending = true;
-		}
-	}, {
-		key: 'quickLoadState',
-		value: function quickLoadState() {
-			this.loadState('quicksave');
-		}
-	}, {
-		key: 'loadState',
-		value: function loadState(slotName) {
-			this._loadPending = slotName;
-			this._loadStatePending = true;
-		}
-	}, {
-		key: '_doQuickSave',
-		value: function _doQuickSave() {
-			// push back previous quicksaves by renaming them, pushing them back in the queue
-			var hash = this._mainboard.cart.getHash();
-			(0, _utils.renameQuickSaveStates)("quicksave", hash, 3);
-			var screen = this._renderSurface.screenshotToString();
-			var state = this._mainboard.saveState();
-			(0, _utils.saveState)("quicksave", hash, state, screen);
-		}
-	}, {
-		key: '_doQuickLoad',
-		value: function _doQuickLoad() {
-			var state = (0, _utils.loadState)(this._loadPending, this._mainboard.cart.getHash());
-			if (state) {
-				this._mainboard.loadState(state);
-			}
-		}
-	}, {
-		key: 'onFrame',
-		value: function onFrame() {
-			if (this._mainboard.cart) {
-				if (this._saveStatePending) {
-					this._saveStatePending = false;
-					this._doQuickSave();
-				} else if (this._loadStatePending) {
-					this._loadStatePending = false;
-					this._doQuickLoad();
-				}
-			}
-		}
-	}]);
-
-	return StateManager;
-}();
-
-exports.default = StateManager;
-
-/***/ }),
+/* 47 */,
+/* 48 */,
 /* 49 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _rusha = __webpack_require__(80);
-
-var _rusha2 = _interopRequireDefault(_rusha);
-
-var _consts = __webpack_require__(0);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var TestRenderSurface = function () {
-	function TestRenderSurface(canvasParent) {
-		_classCallCheck(this, TestRenderSurface);
-
-		this._buffer = new Uint32Array(_consts.SCREEN_WIDTH * _consts.SCREEN_HEIGHT);
-	}
-
-	_createClass(TestRenderSurface, [{
-		key: 'writeToBuffer',
-		value: function writeToBuffer(bufferIndex, insertIndex, colour) {
-			this._buffer[insertIndex] = 0xFF000000 | colour;
-		}
-	}, {
-		key: 'clearBuffers',
-		value: function clearBuffers(backgroundColour) {
-			for (var i = 0; i < this._buffer.length; ++i) {
-				this._buffer[i] = 0xFF000000 | backgroundColour;
-			}
-		}
-	}, {
-		key: 'getRenderBufferHash',
-		value: function getRenderBufferHash() {
-			var rusha = new _rusha2.default();
-			return rusha.digestFromArrayBuffer(this._buffer).toUpperCase();
-		}
-	}]);
-
-	return TestRenderSurface;
-}();
-
-exports.default = TestRenderSurface;
-
-/***/ }),
-/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23912,7 +23808,7 @@ function processGenieCode(mainboard, codeString, enable) {
 }
 
 /***/ }),
-/* 51 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23964,7 +23860,7 @@ function loadRomFromUrl(url, callback) {
 }
 
 /***/ }),
-/* 52 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24085,7 +23981,7 @@ function fromByteArray (uint8) {
 
 
 /***/ }),
-/* 53 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24099,9 +23995,9 @@ function fromByteArray (uint8) {
 
 
 
-var base64 = __webpack_require__(52)
-var ieee754 = __webpack_require__(78)
-var isArray = __webpack_require__(79)
+var base64 = __webpack_require__(51)
+var ieee754 = __webpack_require__(77)
+var isArray = __webpack_require__(78)
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
@@ -25882,7 +25778,7 @@ function isnan (val) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ }),
-/* 54 */
+/* 53 */
 /***/ (function(module, exports) {
 
 (function() {
@@ -25984,7 +25880,7 @@ function isnan (val) {
 
 
 /***/ }),
-/* 55 */
+/* 54 */
 /***/ (function(module, exports) {
 
 module.exports = adjoint;
@@ -26022,7 +25918,7 @@ function adjoint(out, a) {
 };
 
 /***/ }),
-/* 56 */
+/* 55 */
 /***/ (function(module, exports) {
 
 module.exports = clone;
@@ -26055,7 +25951,7 @@ function clone(a) {
 };
 
 /***/ }),
-/* 57 */
+/* 56 */
 /***/ (function(module, exports) {
 
 module.exports = copy;
@@ -26088,7 +25984,7 @@ function copy(out, a) {
 };
 
 /***/ }),
-/* 58 */
+/* 57 */
 /***/ (function(module, exports) {
 
 module.exports = create;
@@ -26120,7 +26016,7 @@ function create() {
 };
 
 /***/ }),
-/* 59 */
+/* 58 */
 /***/ (function(module, exports) {
 
 module.exports = determinant;
@@ -26155,7 +26051,7 @@ function determinant(a) {
 };
 
 /***/ }),
-/* 60 */
+/* 59 */
 /***/ (function(module, exports) {
 
 module.exports = fromQuat;
@@ -26207,7 +26103,7 @@ function fromQuat(out, q) {
 };
 
 /***/ }),
-/* 61 */
+/* 60 */
 /***/ (function(module, exports) {
 
 module.exports = fromRotationTranslation;
@@ -26265,7 +26161,7 @@ function fromRotationTranslation(out, q, v) {
 };
 
 /***/ }),
-/* 62 */
+/* 61 */
 /***/ (function(module, exports) {
 
 module.exports = frustum;
@@ -26306,37 +26202,37 @@ function frustum(out, left, right, bottom, top, near, far) {
 };
 
 /***/ }),
-/* 63 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = {
-  create: __webpack_require__(58)
-  , clone: __webpack_require__(56)
-  , copy: __webpack_require__(57)
+  create: __webpack_require__(57)
+  , clone: __webpack_require__(55)
+  , copy: __webpack_require__(56)
   , identity: __webpack_require__(10)
-  , transpose: __webpack_require__(77)
-  , invert: __webpack_require__(64)
-  , adjoint: __webpack_require__(55)
-  , determinant: __webpack_require__(59)
-  , multiply: __webpack_require__(66)
-  , translate: __webpack_require__(76)
-  , scale: __webpack_require__(74)
-  , rotate: __webpack_require__(70)
-  , rotateX: __webpack_require__(71)
-  , rotateY: __webpack_require__(72)
-  , rotateZ: __webpack_require__(73)
-  , fromRotationTranslation: __webpack_require__(61)
-  , fromQuat: __webpack_require__(60)
-  , frustum: __webpack_require__(62)
-  , perspective: __webpack_require__(68)
-  , perspectiveFromFieldOfView: __webpack_require__(69)
-  , ortho: __webpack_require__(67)
-  , lookAt: __webpack_require__(65)
-  , str: __webpack_require__(75)
+  , transpose: __webpack_require__(76)
+  , invert: __webpack_require__(63)
+  , adjoint: __webpack_require__(54)
+  , determinant: __webpack_require__(58)
+  , multiply: __webpack_require__(65)
+  , translate: __webpack_require__(75)
+  , scale: __webpack_require__(73)
+  , rotate: __webpack_require__(69)
+  , rotateX: __webpack_require__(70)
+  , rotateY: __webpack_require__(71)
+  , rotateZ: __webpack_require__(72)
+  , fromRotationTranslation: __webpack_require__(60)
+  , fromQuat: __webpack_require__(59)
+  , frustum: __webpack_require__(61)
+  , perspective: __webpack_require__(67)
+  , perspectiveFromFieldOfView: __webpack_require__(68)
+  , ortho: __webpack_require__(66)
+  , lookAt: __webpack_require__(64)
+  , str: __webpack_require__(74)
 }
 
 /***/ }),
-/* 64 */
+/* 63 */
 /***/ (function(module, exports) {
 
 module.exports = invert;
@@ -26396,7 +26292,7 @@ function invert(out, a) {
 };
 
 /***/ }),
-/* 65 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var identity = __webpack_require__(10);
@@ -26491,7 +26387,7 @@ function lookAt(out, eye, center, up) {
 };
 
 /***/ }),
-/* 66 */
+/* 65 */
 /***/ (function(module, exports) {
 
 module.exports = multiply;
@@ -26538,7 +26434,7 @@ function multiply(out, a, b) {
 };
 
 /***/ }),
-/* 67 */
+/* 66 */
 /***/ (function(module, exports) {
 
 module.exports = ortho;
@@ -26579,7 +26475,7 @@ function ortho(out, left, right, bottom, top, near, far) {
 };
 
 /***/ }),
-/* 68 */
+/* 67 */
 /***/ (function(module, exports) {
 
 module.exports = perspective;
@@ -26617,7 +26513,7 @@ function perspective(out, fovy, aspect, near, far) {
 };
 
 /***/ }),
-/* 69 */
+/* 68 */
 /***/ (function(module, exports) {
 
 module.exports = perspectiveFromFieldOfView;
@@ -26663,7 +26559,7 @@ function perspectiveFromFieldOfView(out, fov, near, far) {
 
 
 /***/ }),
-/* 70 */
+/* 69 */
 /***/ (function(module, exports) {
 
 module.exports = rotate;
@@ -26732,7 +26628,7 @@ function rotate(out, a, rad, axis) {
 };
 
 /***/ }),
-/* 71 */
+/* 70 */
 /***/ (function(module, exports) {
 
 module.exports = rotateX;
@@ -26781,7 +26677,7 @@ function rotateX(out, a, rad) {
 };
 
 /***/ }),
-/* 72 */
+/* 71 */
 /***/ (function(module, exports) {
 
 module.exports = rotateY;
@@ -26830,7 +26726,7 @@ function rotateY(out, a, rad) {
 };
 
 /***/ }),
-/* 73 */
+/* 72 */
 /***/ (function(module, exports) {
 
 module.exports = rotateZ;
@@ -26879,7 +26775,7 @@ function rotateZ(out, a, rad) {
 };
 
 /***/ }),
-/* 74 */
+/* 73 */
 /***/ (function(module, exports) {
 
 module.exports = scale;
@@ -26915,7 +26811,7 @@ function scale(out, a, v) {
 };
 
 /***/ }),
-/* 75 */
+/* 74 */
 /***/ (function(module, exports) {
 
 module.exports = str;
@@ -26934,7 +26830,7 @@ function str(a) {
 };
 
 /***/ }),
-/* 76 */
+/* 75 */
 /***/ (function(module, exports) {
 
 module.exports = translate;
@@ -26977,7 +26873,7 @@ function translate(out, a, v) {
 };
 
 /***/ }),
-/* 77 */
+/* 76 */
 /***/ (function(module, exports) {
 
 module.exports = transpose;
@@ -27031,7 +26927,7 @@ function transpose(out, a) {
 };
 
 /***/ }),
-/* 78 */
+/* 77 */
 /***/ (function(module, exports) {
 
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -27121,7 +27017,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 
 /***/ }),
-/* 79 */
+/* 78 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -27132,7 +27028,7 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 80 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {(function () {
@@ -27632,11 +27528,11 @@ module.exports = Array.isArray || function (arr) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ }),
-/* 81 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer) {(function() {
-  var crypt = __webpack_require__(54),
+  var crypt = __webpack_require__(53),
       utf8 = __webpack_require__(9).utf8,
       bin = __webpack_require__(9).bin,
 
@@ -27718,10 +27614,10 @@ module.exports = Array.isArray || function (arr) {
   module.exports = api;
 })();
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(53).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(52).Buffer))
 
 /***/ }),
-/* 82 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // stats.js - http://github.com/mrdoob/stats.js
@@ -27732,7 +27628,7 @@ b.fillRect(d,m,n,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d,m,n,p);return{do
 
 
 /***/ }),
-/* 83 */
+/* 82 */
 /***/ (function(module, exports) {
 
 module.exports = function() {
@@ -27741,7 +27637,7 @@ module.exports = function() {
 
 
 /***/ }),
-/* 84 */
+/* 83 */
 /***/ (function(module, exports) {
 
 /* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
@@ -27750,11 +27646,582 @@ module.exports = __webpack_amd_options__;
 /* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ }),
+/* 84 */,
 /* 85 */,
 /* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(12);
+
+
+/***/ }),
+/* 87 */,
+/* 88 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _serialisation = __webpack_require__(1);
+
+var _consts = __webpack_require__(0);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var HeadlessRenderSurface = function () {
+	function HeadlessRenderSurface() {
+		_classCallCheck(this, HeadlessRenderSurface);
+
+		this._buffer = new Uint32Array(_consts.SCREEN_WIDTH * _consts.SCREEN_HEIGHT);
+	}
+
+	_createClass(HeadlessRenderSurface, [{
+		key: 'writeToBuffer',
+		value: function writeToBuffer(bufferIndex, insertIndex, colour) {
+			this._buffer[insertIndex] = 0xFF000000 | colour;
+		}
+	}, {
+		key: 'clearBuffers',
+		value: function clearBuffers(backgroundColour) {
+			for (var i = 0; i < this._buffer.length; ++i) {
+				this._buffer[i] = 0xFF000000 | backgroundColour;
+			}
+		}
+	}, {
+		key: 'getRenderBufferHash',
+		value: function getRenderBufferHash() {
+			return _serialisation.rusha.digestFromArrayBuffer(this._buffer).toUpperCase();
+		}
+	}, {
+		key: 'render',
+		value: function render() {}
+	}, {
+		key: 'screenshot',
+		value: function screenshot() {}
+	}, {
+		key: 'screenshotToString',
+		value: function screenshotToString() {
+			return '';
+		}
+	}]);
+
+	return HeadlessRenderSurface;
+}();
+
+exports.default = HeadlessRenderSurface;
+
+/***/ }),
+/* 89 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c) 2013 Pieroxy <pieroxy@pieroxy.net>
+// This work is free. You can redistribute it and/or modify it
+// under the terms of the WTFPL, Version 2
+// For more information see LICENSE.txt or http://www.wtfpl.net/
+//
+// For more information, the home page:
+// http://pieroxy.net/blog/pages/lz-string/testing.html
+//
+// LZ-based compression algorithm, version 1.4.4
+var LZString = (function() {
+
+// private property
+var f = String.fromCharCode;
+var keyStrBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+var keyStrUriSafe = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$";
+var baseReverseDic = {};
+
+function getBaseValue(alphabet, character) {
+  if (!baseReverseDic[alphabet]) {
+    baseReverseDic[alphabet] = {};
+    for (var i=0 ; i<alphabet.length ; i++) {
+      baseReverseDic[alphabet][alphabet.charAt(i)] = i;
+    }
+  }
+  return baseReverseDic[alphabet][character];
+}
+
+var LZString = {
+  compressToBase64 : function (input) {
+    if (input == null) return "";
+    var res = LZString._compress(input, 6, function(a){return keyStrBase64.charAt(a);});
+    switch (res.length % 4) { // To produce valid Base64
+    default: // When could this happen ?
+    case 0 : return res;
+    case 1 : return res+"===";
+    case 2 : return res+"==";
+    case 3 : return res+"=";
+    }
+  },
+
+  decompressFromBase64 : function (input) {
+    if (input == null) return "";
+    if (input == "") return null;
+    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrBase64, input.charAt(index)); });
+  },
+
+  compressToUTF16 : function (input) {
+    if (input == null) return "";
+    return LZString._compress(input, 15, function(a){return f(a+32);}) + " ";
+  },
+
+  decompressFromUTF16: function (compressed) {
+    if (compressed == null) return "";
+    if (compressed == "") return null;
+    return LZString._decompress(compressed.length, 16384, function(index) { return compressed.charCodeAt(index) - 32; });
+  },
+
+  //compress into uint8array (UCS-2 big endian format)
+  compressToUint8Array: function (uncompressed) {
+    var compressed = LZString.compress(uncompressed);
+    var buf=new Uint8Array(compressed.length*2); // 2 bytes per character
+
+    for (var i=0, TotalLen=compressed.length; i<TotalLen; i++) {
+      var current_value = compressed.charCodeAt(i);
+      buf[i*2] = current_value >>> 8;
+      buf[i*2+1] = current_value % 256;
+    }
+    return buf;
+  },
+
+  //decompress from uint8array (UCS-2 big endian format)
+  decompressFromUint8Array:function (compressed) {
+    if (compressed===null || compressed===undefined){
+        return LZString.decompress(compressed);
+    } else {
+        var buf=new Array(compressed.length/2); // 2 bytes per character
+        for (var i=0, TotalLen=buf.length; i<TotalLen; i++) {
+          buf[i]=compressed[i*2]*256+compressed[i*2+1];
+        }
+
+        var result = [];
+        buf.forEach(function (c) {
+          result.push(f(c));
+        });
+        return LZString.decompress(result.join(''));
+
+    }
+
+  },
+
+
+  //compress into a string that is already URI encoded
+  compressToEncodedURIComponent: function (input) {
+    if (input == null) return "";
+    return LZString._compress(input, 6, function(a){return keyStrUriSafe.charAt(a);});
+  },
+
+  //decompress from an output of compressToEncodedURIComponent
+  decompressFromEncodedURIComponent:function (input) {
+    if (input == null) return "";
+    if (input == "") return null;
+    input = input.replace(/ /g, "+");
+    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrUriSafe, input.charAt(index)); });
+  },
+
+  compress: function (uncompressed) {
+    return LZString._compress(uncompressed, 16, function(a){return f(a);});
+  },
+  _compress: function (uncompressed, bitsPerChar, getCharFromInt) {
+    if (uncompressed == null) return "";
+    var i, value,
+        context_dictionary= {},
+        context_dictionaryToCreate= {},
+        context_c="",
+        context_wc="",
+        context_w="",
+        context_enlargeIn= 2, // Compensate for the first entry which should not count
+        context_dictSize= 3,
+        context_numBits= 2,
+        context_data=[],
+        context_data_val=0,
+        context_data_position=0,
+        ii;
+
+    for (ii = 0; ii < uncompressed.length; ii += 1) {
+      context_c = uncompressed.charAt(ii);
+      if (!Object.prototype.hasOwnProperty.call(context_dictionary,context_c)) {
+        context_dictionary[context_c] = context_dictSize++;
+        context_dictionaryToCreate[context_c] = true;
+      }
+
+      context_wc = context_w + context_c;
+      if (Object.prototype.hasOwnProperty.call(context_dictionary,context_wc)) {
+        context_w = context_wc;
+      } else {
+        if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
+          if (context_w.charCodeAt(0)<256) {
+            for (i=0 ; i<context_numBits ; i++) {
+              context_data_val = (context_data_val << 1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+            }
+            value = context_w.charCodeAt(0);
+            for (i=0 ; i<8 ; i++) {
+              context_data_val = (context_data_val << 1) | (value&1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = value >> 1;
+            }
+          } else {
+            value = 1;
+            for (i=0 ; i<context_numBits ; i++) {
+              context_data_val = (context_data_val << 1) | value;
+              if (context_data_position ==bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = 0;
+            }
+            value = context_w.charCodeAt(0);
+            for (i=0 ; i<16 ; i++) {
+              context_data_val = (context_data_val << 1) | (value&1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = value >> 1;
+            }
+          }
+          context_enlargeIn--;
+          if (context_enlargeIn == 0) {
+            context_enlargeIn = Math.pow(2, context_numBits);
+            context_numBits++;
+          }
+          delete context_dictionaryToCreate[context_w];
+        } else {
+          value = context_dictionary[context_w];
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+
+
+        }
+        context_enlargeIn--;
+        if (context_enlargeIn == 0) {
+          context_enlargeIn = Math.pow(2, context_numBits);
+          context_numBits++;
+        }
+        // Add wc to the dictionary.
+        context_dictionary[context_wc] = context_dictSize++;
+        context_w = String(context_c);
+      }
+    }
+
+    // Output the code for w.
+    if (context_w !== "") {
+      if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
+        if (context_w.charCodeAt(0)<256) {
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+          }
+          value = context_w.charCodeAt(0);
+          for (i=0 ; i<8 ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+        } else {
+          value = 1;
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1) | value;
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = 0;
+          }
+          value = context_w.charCodeAt(0);
+          for (i=0 ; i<16 ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+        }
+        context_enlargeIn--;
+        if (context_enlargeIn == 0) {
+          context_enlargeIn = Math.pow(2, context_numBits);
+          context_numBits++;
+        }
+        delete context_dictionaryToCreate[context_w];
+      } else {
+        value = context_dictionary[context_w];
+        for (i=0 ; i<context_numBits ; i++) {
+          context_data_val = (context_data_val << 1) | (value&1);
+          if (context_data_position == bitsPerChar-1) {
+            context_data_position = 0;
+            context_data.push(getCharFromInt(context_data_val));
+            context_data_val = 0;
+          } else {
+            context_data_position++;
+          }
+          value = value >> 1;
+        }
+
+
+      }
+      context_enlargeIn--;
+      if (context_enlargeIn == 0) {
+        context_enlargeIn = Math.pow(2, context_numBits);
+        context_numBits++;
+      }
+    }
+
+    // Mark the end of the stream
+    value = 2;
+    for (i=0 ; i<context_numBits ; i++) {
+      context_data_val = (context_data_val << 1) | (value&1);
+      if (context_data_position == bitsPerChar-1) {
+        context_data_position = 0;
+        context_data.push(getCharFromInt(context_data_val));
+        context_data_val = 0;
+      } else {
+        context_data_position++;
+      }
+      value = value >> 1;
+    }
+
+    // Flush the last char
+    while (true) {
+      context_data_val = (context_data_val << 1);
+      if (context_data_position == bitsPerChar-1) {
+        context_data.push(getCharFromInt(context_data_val));
+        break;
+      }
+      else context_data_position++;
+    }
+    return context_data.join('');
+  },
+
+  decompress: function (compressed) {
+    if (compressed == null) return "";
+    if (compressed == "") return null;
+    return LZString._decompress(compressed.length, 32768, function(index) { return compressed.charCodeAt(index); });
+  },
+
+  _decompress: function (length, resetValue, getNextValue) {
+    var dictionary = [],
+        next,
+        enlargeIn = 4,
+        dictSize = 4,
+        numBits = 3,
+        entry = "",
+        result = [],
+        i,
+        w,
+        bits, resb, maxpower, power,
+        c,
+        data = {val:getNextValue(0), position:resetValue, index:1};
+
+    for (i = 0; i < 3; i += 1) {
+      dictionary[i] = i;
+    }
+
+    bits = 0;
+    maxpower = Math.pow(2,2);
+    power=1;
+    while (power!=maxpower) {
+      resb = data.val & data.position;
+      data.position >>= 1;
+      if (data.position == 0) {
+        data.position = resetValue;
+        data.val = getNextValue(data.index++);
+      }
+      bits |= (resb>0 ? 1 : 0) * power;
+      power <<= 1;
+    }
+
+    switch (next = bits) {
+      case 0:
+          bits = 0;
+          maxpower = Math.pow(2,8);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+        c = f(bits);
+        break;
+      case 1:
+          bits = 0;
+          maxpower = Math.pow(2,16);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+        c = f(bits);
+        break;
+      case 2:
+        return "";
+    }
+    dictionary[3] = c;
+    w = c;
+    result.push(c);
+    while (true) {
+      if (data.index > length) {
+        return "";
+      }
+
+      bits = 0;
+      maxpower = Math.pow(2,numBits);
+      power=1;
+      while (power!=maxpower) {
+        resb = data.val & data.position;
+        data.position >>= 1;
+        if (data.position == 0) {
+          data.position = resetValue;
+          data.val = getNextValue(data.index++);
+        }
+        bits |= (resb>0 ? 1 : 0) * power;
+        power <<= 1;
+      }
+
+      switch (c = bits) {
+        case 0:
+          bits = 0;
+          maxpower = Math.pow(2,8);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+
+          dictionary[dictSize++] = f(bits);
+          c = dictSize-1;
+          enlargeIn--;
+          break;
+        case 1:
+          bits = 0;
+          maxpower = Math.pow(2,16);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+          dictionary[dictSize++] = f(bits);
+          c = dictSize-1;
+          enlargeIn--;
+          break;
+        case 2:
+          return result.join('');
+      }
+
+      if (enlargeIn == 0) {
+        enlargeIn = Math.pow(2, numBits);
+        numBits++;
+      }
+
+      if (dictionary[c]) {
+        entry = dictionary[c];
+      } else {
+        if (c === dictSize) {
+          entry = w + w.charAt(0);
+        } else {
+          return null;
+        }
+      }
+      result.push(entry);
+
+      // Add w+entry[0] to the dictionary.
+      dictionary[dictSize++] = w + entry.charAt(0);
+      enlargeIn--;
+
+      w = entry;
+
+      if (enlargeIn == 0) {
+        enlargeIn = Math.pow(2, numBits);
+        numBits++;
+      }
+
+    }
+  }
+};
+  return LZString;
+})();
+
+if (true) {
+  !(__WEBPACK_AMD_DEFINE_RESULT__ = function () { return LZString; }.call(exports, __webpack_require__, exports, module),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+} else if( typeof module !== 'undefined' && module != null ) {
+  module.exports = LZString
+}
 
 
 /***/ })
