@@ -78,14 +78,26 @@ export default class nES6 {
     this._canvasParent = new CanvasParent();
     this._renderSurface = null;
 
-    if(this._options['headless'] === true) {
-      this._renderSurface = new HeadlessRenderSurface();
-    } else {
-      if (webGlSupported()) {
-        this._renderSurface = new WebGlRenderSurface(this._canvasParent);
-      } else {
+    switch (this._options['render']) {
+      // headless render
+      case 'headless':
+        this._renderSurface = new HeadlessRenderSurface();
+        break;
+      // canvas render
+      case 'canvas':
         this._renderSurface = new CanvasRenderSurface(this._canvasParent);
-      }
+        break;
+      // webgl is the same as auto - webgl will run if possible but will
+      // fallback to canvas automatically
+      case 'webgl':
+      case 'auto':
+      default:
+        if (webGlSupported()) {
+          this._renderSurface = new WebGlRenderSurface(this._canvasParent);
+        } else {
+          this._renderSurface = new CanvasRenderSurface(this._canvasParent);
+        }
+        break;
     }
 
     this._mainboard = new Mainboard(this._renderSurface);
@@ -93,7 +105,7 @@ export default class nES6 {
     this._input = new Input(this._mainboard);
 
     // disable audio for headless rendering
-    if (this._options['headless'] === true) {
+    if (this._options['render'] === 'headless') {
       this._mainboard.enableSound(false);
     }
 
@@ -268,7 +280,7 @@ export default class nES6 {
   }
 
   exportState(){
-    return this._mainboard.exportState();
+    return this._mainboard.saveState();
   }
 
   importState(loadedData){

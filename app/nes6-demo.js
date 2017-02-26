@@ -1918,14 +1918,26 @@ var nES6 = function () {
       this._canvasParent = new _CanvasParent2.default();
       this._renderSurface = null;
 
-      if (this._options['headless'] === true) {
-        this._renderSurface = new _HeadlessRenderSurface2.default();
-      } else {
-        if ((0, _utils.webGlSupported)()) {
-          this._renderSurface = new _WebGlRenderSurface2.default(this._canvasParent);
-        } else {
+      switch (this._options['render']) {
+        // headless render
+        case 'headless':
+          this._renderSurface = new _HeadlessRenderSurface2.default();
+          break;
+        // canvas render
+        case 'canvas':
           this._renderSurface = new _CanvasRenderSurface2.default(this._canvasParent);
-        }
+          break;
+        // webgl is the same as auto - webgl will run if possible but will
+        // fallback to canvas automatically
+        case 'webgl':
+        case 'auto':
+        default:
+          if ((0, _utils.webGlSupported)()) {
+            this._renderSurface = new _WebGlRenderSurface2.default(this._canvasParent);
+          } else {
+            this._renderSurface = new _CanvasRenderSurface2.default(this._canvasParent);
+          }
+          break;
       }
 
       this._mainboard = new _Mainboard2.default(this._renderSurface);
@@ -1933,7 +1945,7 @@ var nES6 = function () {
       this._input = new _Input2.default(this._mainboard);
 
       // disable audio for headless rendering
-      if (this._options['headless'] === true) {
+      if (this._options['render'] === 'headless') {
         this._mainboard.enableSound(false);
       }
 
@@ -2111,7 +2123,7 @@ var nES6 = function () {
   }, {
     key: 'exportState',
     value: function exportState() {
-      return this._mainboard.exportState();
+      return this._mainboard.saveState();
     }
   }, {
     key: 'importState',
@@ -20611,6 +20623,7 @@ var RenderBuffer = function () {
 	}, {
 		key: 'saveState',
 		value: function saveState() {
+
 			return {
 				priorityBuffer: (0, _serialisation.uintArrayToString)(this.priorityBuffer)
 			};
@@ -27659,8 +27672,7 @@ var _nES2 = _interopRequireDefault(_nES);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var App = new _nES2.default({
-	headless: false
-});
+	render: 'auto' });
 App.start();
 
 // ROM courtesy of TecmoBowl.org

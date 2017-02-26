@@ -1,6 +1,7 @@
 import BaseMapper from './BaseMapper.js';
 import {
 	uintArrayToString,
+	stringToUintArray,
 } from '../../utils/serialisation';
 
 export default class Mapper5 extends BaseMapper {

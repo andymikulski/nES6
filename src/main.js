@@ -1,7 +1,7 @@
 import nES6 from './nES6.js';
 
 const App = new nES6({
-	headless: false,
+	render: 'auto', // 'auto', 'canvas', 'webgl', 'headless'
 });
 App.start();
 
@@ -9,4 +9,3 @@ App.start();
 const romToLoad = 'TecmoSuperBowl2k17';
 
 App.loadRomFromUrl(`/roms/${romToLoad}.nes`);
-

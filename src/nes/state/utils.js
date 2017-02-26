@@ -1,20 +1,29 @@
-function compress(rawString) {
+import LZString from 'lz-string'
 
-	var compressed;
-	// LZString is way too slow and gives pretty much the same result, use jz.algos instead
-	//compressed = LZString.compress( raw );
-	var int32Array = Nes.stringToUintArray(rawString);
-	compressed = Nes.uintArrayToString(new Int32Array(jz.algos.deflate(new Uint8Array(int32Array))));
-	return compressed;
+import {
+	ZERO_PAD,
+} from '../../config/consts.js';
+
+import {
+	uintArrayToString,
+	stringToUintArray
+} from '../../utils/serialisation';
+
+
+const compressCache = {};
+function compress(rawString) {
+	if (!compressCache[rawString]){
+		compressCache[rawString] = LZString.compress(rawString);
+	}
+	return compressCache[rawString];
 }
 
-
+const decompressCache = {};
 function decompress(rawString) {
-	var decompressed;
-	//decompressed = LZString.decompress( compressed );
-	var int32Array = Nes.stringToUintArray(rawString);
-	decompressed = Nes.uintArrayToString(new Int32Array(jz.algos.inflate(new Uint8Array(int32Array))));
-	return decompressed;
+	if (!decompressCache[rawString]){
+		compressCache[rawString] = LZString.decompress(rawString);
+	}
+	return compressCache[rawString];
 }
 
 
@@ -40,27 +49,20 @@ export function getMetaObject(cartName) {
 
 
 export function setMetaObject(cartName, obj) {
-	saveToLocalStorage(getMetaName(cartName), obj);
+	return saveToLocalStorage(getMetaName(cartName), obj);
 }
 
 
 export function saveState(slotName, cartName, data, screenData) {
-
-	if (localStorage) {
-		// save state data as it's own local storage object
-		saveToLocalStorage(getCartName(slotName, cartName), data);
-
-		// add to meta data object
-		var meta = getMetaObject(cartName);
-		var slotMeta = {};
-		if (screenData) {
-			slotMeta.screen = compress(screenData);
-			console.log("Saved screenshot size: " + slotMeta.screen.length + " (uncompressed: " + screenData.length + ")");
-		}
-		slotMeta.date = Date.now();
-		meta.slots[slotName] = slotMeta;
-		setMetaObject(cartName, meta);
+	// add to meta data object
+	var meta = getMetaObject(cartName);
+	var slotMeta = {};
+	if (screenData) {
+		slotMeta.screen = compress(screenData);
 	}
+	slotMeta.date = Date.now();
+	meta.slots[slotName] = slotMeta;
+	return setMetaObject(cartName, meta);
 }
 
 
@@ -147,11 +149,11 @@ export function saveStateSupported() {
 
 
 export function saveToLocalStorage(name, data) {
-	if (localStorage) {
-		var raw = JSON.stringify(data);
-		var compressed = compress(raw);
-		localStorage.setItem(name, compressed);
-	}
+	var raw = JSON.stringify(data);
+	var compressed = compress(raw);
+	localStorage.setItem(name, compressed);
+
+	return compressed;
 }
 
 

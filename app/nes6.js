@@ -1011,7 +1011,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 exports.getGlContext = getGlContext;
 exports.webGlSupported = webGlSupported;
 
-var _glMat = __webpack_require__(62);
+var _glMat = __webpack_require__(61);
 
 var _glMat2 = _interopRequireDefault(_glMat);
 
@@ -1510,187 +1510,6 @@ exports.default = BlipSynth;
 
 /***/ }),
 /* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-exports.getCartName = getCartName;
-exports.getMetaName = getMetaName;
-exports.getMetaObject = getMetaObject;
-exports.setMetaObject = setMetaObject;
-exports.saveState = saveState;
-exports.loadState = loadState;
-exports.getStateMetaData = getStateMetaData;
-exports.renameState = renameState;
-exports.renameQuickSaveStates = renameQuickSaveStates;
-exports.saveStateSupported = saveStateSupported;
-exports.saveToLocalStorage = saveToLocalStorage;
-exports.loadFromLocalStorage = loadFromLocalStorage;
-
-var _lzString = __webpack_require__(89);
-
-var _lzString2 = _interopRequireDefault(_lzString);
-
-var _consts = __webpack_require__(0);
-
-var _serialisation = __webpack_require__(1);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var compressCache = {};
-function compress(rawString) {
-	if (!compressCache[rawString]) {
-		compressCache[rawString] = _lzString2.default.compress(rawString);
-	}
-	return compressCache[rawString];
-}
-
-var decompressCache = {};
-function decompress(rawString) {
-	if (!decompressCache[rawString]) {
-		compressCache[rawString] = _lzString2.default.decompress(rawString);
-	}
-	return compressCache[rawString];
-}
-
-function getCartName(slotName, cartName) {
-	return slotName + ":" + cartName;
-}
-
-function getMetaName(cartName) {
-	return "meta:" + cartName;
-}
-
-function getMetaObject(cartName) {
-	var obj = loadFromLocalStorage(getMetaName(cartName));
-	if (!obj) {
-		obj = {
-			slots: {}
-		};
-	}
-	return obj;
-}
-
-function setMetaObject(cartName, obj) {
-	return saveToLocalStorage(getMetaName(cartName), obj);
-}
-
-function saveState(slotName, cartName, data, screenData) {
-	// add to meta data object
-	var meta = getMetaObject(cartName);
-	var slotMeta = {};
-	if (screenData) {
-		slotMeta.screen = compress(screenData);
-	}
-	slotMeta.date = Date.now();
-	meta.slots[slotName] = slotMeta;
-	return setMetaObject(cartName, meta);
-}
-
-function loadState(slotName, cartName) {
-
-	if (localStorage) {
-		var compressed = localStorage.getItem(getCartName(slotName, cartName));
-		if (compressed) {
-			var compressedLength = compressed.length;
-			var decompressed = decompress(compressed);
-			var obj = JSON.parse(decompressed);
-			console.log("Loaded data size: " + compressedLength + " (uncompressed: " + decompressed.length + ")");
-			return obj;
-		}
-	} else {
-		//( 'Browser does not support local storage' );
-	}
-	return null;
-}
-
-function getStateMetaData(cartName, decompressScreenData) {
-	var meta = getMetaObject(cartName);
-	// decompress all image data before passing it back
-	if (decompressScreenData) {
-		var keyNames = Object.keys(meta.slots);
-		for (var keyIndex = 0; keyIndex < keyNames.length; ++keyIndex) {
-			var slotName = keyNames[keyIndex];
-			var slot = meta.slots[slotName];
-			if (slot.screen) {
-				slot.screen = decompress(slot.screen);
-			}
-		}
-	}
-	return meta;
-}
-
-function renameState(meta, slotName, newSlotName, cartName) {
-
-	// rename data object
-	var itemName = getCartName(slotName, cartName);
-	var data = localStorage.getItem(itemName);
-	if (data) {
-		localStorage.removeItem(itemName);
-
-		if (newSlotName) {
-			var newItemName = getCartName(newSlotName, cartName);
-			localStorage.setItem(newItemName, data);
-		}
-
-		// rename it in meta object
-		if (newSlotName) {
-			meta.slots[newSlotName] = meta.slots[slotName];
-		}
-		delete meta.slots[slotName];
-	}
-}
-
-function renameQuickSaveStates(slotName, cartName, limitCount) {
-
-	var meta = getMetaObject(cartName);
-
-	// remove last quicksave.
-	renameState(meta, slotName + (0, _consts.ZERO_PAD)(limitCount - 1, 2, 0), null, cartName);
-
-	// rename any others, moving each one down. We go backwards so we don't overwrite
-	for (var i = limitCount - 2; i > 0; --i) {
-		renameState(meta, slotName + (0, _consts.ZERO_PAD)(i, 2, 0), slotName + (0, _consts.ZERO_PAD)(i + 1, 2, 0), cartName);
-	}
-
-	// rename main 'quicksave' slot
-	renameState(meta, slotName, slotName + (0, _consts.ZERO_PAD)(1, 2, 0), cartName);
-
-	setMetaObject(cartName, meta);
-}
-
-function saveStateSupported() {
-
-	return !!localStorage;
-}
-
-function saveToLocalStorage(name, data) {
-	var raw = JSON.stringify(data);
-	var compressed = compress(raw);
-	localStorage.setItem(name, compressed);
-
-	return compressed;
-}
-
-function loadFromLocalStorage(name) {
-	if (localStorage) {
-		var compressed = localStorage.getItem(name);
-		if (compressed) {
-			var compressedLength = compressed.length;
-			var decompressed = decompress(compressed);
-			var obj = JSON.parse(decompressed);
-			return obj;
-		}
-	}
-	return null;
-}
-
-/***/ }),
-/* 9 */
 /***/ (function(module, exports) {
 
 var charenc = {
@@ -1729,7 +1548,7 @@ module.exports = charenc;
 
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports) {
 
 module.exports = identity;
@@ -1761,7 +1580,7 @@ function identity(out) {
 };
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports) {
 
 var g;
@@ -1788,7 +1607,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1820,15 +1639,15 @@ var _Trace = __webpack_require__(3);
 
 var _Trace2 = _interopRequireDefault(_Trace);
 
-var _loadRom = __webpack_require__(50);
+var _loadRom = __webpack_require__(49);
 
-var _gameGenie = __webpack_require__(49);
+var _gameGenie = __webpack_require__(48);
 
-var _CanvasParent = __webpack_require__(13);
+var _CanvasParent = __webpack_require__(12);
 
 var _CanvasParent2 = _interopRequireDefault(_CanvasParent);
 
-var _HeadlessRenderSurface = __webpack_require__(88);
+var _HeadlessRenderSurface = __webpack_require__(16);
 
 var _HeadlessRenderSurface2 = _interopRequireDefault(_HeadlessRenderSurface);
 
@@ -1838,7 +1657,7 @@ var _WebGlRenderSurface2 = _interopRequireDefault(_WebGlRenderSurface);
 
 var _utils = __webpack_require__(6);
 
-var _CanvasRenderSurface = __webpack_require__(16);
+var _CanvasRenderSurface = __webpack_require__(15);
 
 var _CanvasRenderSurface2 = _interopRequireDefault(_CanvasRenderSurface);
 
@@ -1918,14 +1737,26 @@ var nES6 = function () {
       this._canvasParent = new _CanvasParent2.default();
       this._renderSurface = null;
 
-      if (this._options['headless'] === true) {
-        this._renderSurface = new _HeadlessRenderSurface2.default();
-      } else {
-        if ((0, _utils.webGlSupported)()) {
-          this._renderSurface = new _WebGlRenderSurface2.default(this._canvasParent);
-        } else {
+      switch (this._options['render']) {
+        // headless render
+        case 'headless':
+          this._renderSurface = new _HeadlessRenderSurface2.default();
+          break;
+        // canvas render
+        case 'canvas':
           this._renderSurface = new _CanvasRenderSurface2.default(this._canvasParent);
-        }
+          break;
+        // webgl is the same as auto - webgl will run if possible but will
+        // fallback to canvas automatically
+        case 'webgl':
+        case 'auto':
+        default:
+          if ((0, _utils.webGlSupported)()) {
+            this._renderSurface = new _WebGlRenderSurface2.default(this._canvasParent);
+          } else {
+            this._renderSurface = new _CanvasRenderSurface2.default(this._canvasParent);
+          }
+          break;
       }
 
       this._mainboard = new _Mainboard2.default(this._renderSurface);
@@ -1933,7 +1764,7 @@ var nES6 = function () {
       this._input = new _Input2.default(this._mainboard);
 
       // disable audio for headless rendering
-      if (this._options['headless'] === true) {
+      if (this._options['render'] === 'headless') {
         this._mainboard.enableSound(false);
       }
 
@@ -2111,7 +1942,7 @@ var nES6 = function () {
   }, {
     key: 'exportState',
     value: function exportState() {
-      return this._mainboard.exportState();
+      return this._mainboard.saveState();
     }
   }, {
     key: 'importState',
@@ -2187,7 +2018,7 @@ var nES6 = function () {
 exports.default = nES6;
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2278,7 +2109,7 @@ var CanvasParent = function () {
 exports.default = CanvasParent;
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2336,7 +2167,7 @@ var WebAudioBuffer = function () {
 exports.default = WebAudioBuffer;
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2348,7 +2179,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _WebAudioBuffer = __webpack_require__(14);
+var _WebAudioBuffer = __webpack_require__(13);
 
 var _WebAudioBuffer2 = _interopRequireDefault(_WebAudioBuffer);
 
@@ -2394,7 +2225,7 @@ var WebAudioRenderer = function () {
 exports.default = WebAudioRenderer;
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2507,6 +2338,67 @@ var CanvasRenderSurface = function () {
 exports.default = CanvasRenderSurface;
 
 /***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _serialisation = __webpack_require__(1);
+
+var _consts = __webpack_require__(0);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var HeadlessRenderSurface = function () {
+	function HeadlessRenderSurface() {
+		_classCallCheck(this, HeadlessRenderSurface);
+
+		this._buffer = new Uint32Array(_consts.SCREEN_WIDTH * _consts.SCREEN_HEIGHT);
+	}
+
+	_createClass(HeadlessRenderSurface, [{
+		key: 'writeToBuffer',
+		value: function writeToBuffer(bufferIndex, insertIndex, colour) {
+			this._buffer[insertIndex] = 0xFF000000 | colour;
+		}
+	}, {
+		key: 'clearBuffers',
+		value: function clearBuffers(backgroundColour) {
+			for (var i = 0; i < this._buffer.length; ++i) {
+				this._buffer[i] = 0xFF000000 | backgroundColour;
+			}
+		}
+	}, {
+		key: 'getRenderBufferHash',
+		value: function getRenderBufferHash() {
+			return _serialisation.rusha.digestFromArrayBuffer(this._buffer).toUpperCase();
+		}
+	}, {
+		key: 'render',
+		value: function render() {}
+	}, {
+		key: 'screenshot',
+		value: function screenshot() {}
+	}, {
+		key: 'screenshotToString',
+		value: function screenshotToString() {
+			return '';
+		}
+	}]);
+
+	return HeadlessRenderSurface;
+}();
+
+exports.default = HeadlessRenderSurface;
+
+/***/ }),
 /* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2593,7 +2485,7 @@ var _GamePad = __webpack_require__(17);
 
 var _GamePad2 = _interopRequireDefault(_GamePad);
 
-var _utils = __webpack_require__(8);
+var _utils = __webpack_require__(47);
 
 var _consts = __webpack_require__(0);
 
@@ -3501,7 +3393,7 @@ var _BlipBuffer = __webpack_require__(22);
 
 var _BlipBuffer2 = _interopRequireDefault(_BlipBuffer);
 
-var _WebAudioRenderer = __webpack_require__(15);
+var _WebAudioRenderer = __webpack_require__(14);
 
 var _WebAudioRenderer2 = _interopRequireDefault(_WebAudioRenderer);
 
@@ -20611,6 +20503,7 @@ var RenderBuffer = function () {
 	}, {
 		key: 'saveState',
 		value: function saveState() {
+
 			return {
 				priorityBuffer: (0, _serialisation.uintArrayToString)(this.priorityBuffer)
 			};
@@ -23702,9 +23595,188 @@ function mapperFactory(mapperId, mainboard, mirroringMethod) {
 }
 
 /***/ }),
-/* 47 */,
-/* 48 */,
-/* 49 */
+/* 47 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+exports.getCartName = getCartName;
+exports.getMetaName = getMetaName;
+exports.getMetaObject = getMetaObject;
+exports.setMetaObject = setMetaObject;
+exports.saveState = saveState;
+exports.loadState = loadState;
+exports.getStateMetaData = getStateMetaData;
+exports.renameState = renameState;
+exports.renameQuickSaveStates = renameQuickSaveStates;
+exports.saveStateSupported = saveStateSupported;
+exports.saveToLocalStorage = saveToLocalStorage;
+exports.loadFromLocalStorage = loadFromLocalStorage;
+
+var _lzString = __webpack_require__(78);
+
+var _lzString2 = _interopRequireDefault(_lzString);
+
+var _consts = __webpack_require__(0);
+
+var _serialisation = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var compressCache = {};
+function compress(rawString) {
+	if (!compressCache[rawString]) {
+		compressCache[rawString] = _lzString2.default.compress(rawString);
+	}
+	return compressCache[rawString];
+}
+
+var decompressCache = {};
+function decompress(rawString) {
+	if (!decompressCache[rawString]) {
+		compressCache[rawString] = _lzString2.default.decompress(rawString);
+	}
+	return compressCache[rawString];
+}
+
+function getCartName(slotName, cartName) {
+	return slotName + ":" + cartName;
+}
+
+function getMetaName(cartName) {
+	return "meta:" + cartName;
+}
+
+function getMetaObject(cartName) {
+	var obj = loadFromLocalStorage(getMetaName(cartName));
+	if (!obj) {
+		obj = {
+			slots: {}
+		};
+	}
+	return obj;
+}
+
+function setMetaObject(cartName, obj) {
+	return saveToLocalStorage(getMetaName(cartName), obj);
+}
+
+function saveState(slotName, cartName, data, screenData) {
+	// add to meta data object
+	var meta = getMetaObject(cartName);
+	var slotMeta = {};
+	if (screenData) {
+		slotMeta.screen = compress(screenData);
+	}
+	slotMeta.date = Date.now();
+	meta.slots[slotName] = slotMeta;
+	return setMetaObject(cartName, meta);
+}
+
+function loadState(slotName, cartName) {
+
+	if (localStorage) {
+		var compressed = localStorage.getItem(getCartName(slotName, cartName));
+		if (compressed) {
+			var compressedLength = compressed.length;
+			var decompressed = decompress(compressed);
+			var obj = JSON.parse(decompressed);
+			console.log("Loaded data size: " + compressedLength + " (uncompressed: " + decompressed.length + ")");
+			return obj;
+		}
+	} else {
+		//( 'Browser does not support local storage' );
+	}
+	return null;
+}
+
+function getStateMetaData(cartName, decompressScreenData) {
+	var meta = getMetaObject(cartName);
+	// decompress all image data before passing it back
+	if (decompressScreenData) {
+		var keyNames = Object.keys(meta.slots);
+		for (var keyIndex = 0; keyIndex < keyNames.length; ++keyIndex) {
+			var slotName = keyNames[keyIndex];
+			var slot = meta.slots[slotName];
+			if (slot.screen) {
+				slot.screen = decompress(slot.screen);
+			}
+		}
+	}
+	return meta;
+}
+
+function renameState(meta, slotName, newSlotName, cartName) {
+
+	// rename data object
+	var itemName = getCartName(slotName, cartName);
+	var data = localStorage.getItem(itemName);
+	if (data) {
+		localStorage.removeItem(itemName);
+
+		if (newSlotName) {
+			var newItemName = getCartName(newSlotName, cartName);
+			localStorage.setItem(newItemName, data);
+		}
+
+		// rename it in meta object
+		if (newSlotName) {
+			meta.slots[newSlotName] = meta.slots[slotName];
+		}
+		delete meta.slots[slotName];
+	}
+}
+
+function renameQuickSaveStates(slotName, cartName, limitCount) {
+
+	var meta = getMetaObject(cartName);
+
+	// remove last quicksave.
+	renameState(meta, slotName + (0, _consts.ZERO_PAD)(limitCount - 1, 2, 0), null, cartName);
+
+	// rename any others, moving each one down. We go backwards so we don't overwrite
+	for (var i = limitCount - 2; i > 0; --i) {
+		renameState(meta, slotName + (0, _consts.ZERO_PAD)(i, 2, 0), slotName + (0, _consts.ZERO_PAD)(i + 1, 2, 0), cartName);
+	}
+
+	// rename main 'quicksave' slot
+	renameState(meta, slotName, slotName + (0, _consts.ZERO_PAD)(1, 2, 0), cartName);
+
+	setMetaObject(cartName, meta);
+}
+
+function saveStateSupported() {
+
+	return !!localStorage;
+}
+
+function saveToLocalStorage(name, data) {
+	var raw = JSON.stringify(data);
+	var compressed = compress(raw);
+	localStorage.setItem(name, compressed);
+
+	return compressed;
+}
+
+function loadFromLocalStorage(name) {
+	if (localStorage) {
+		var compressed = localStorage.getItem(name);
+		if (compressed) {
+			var compressedLength = compressed.length;
+			var decompressed = decompress(compressed);
+			var obj = JSON.parse(decompressed);
+			return obj;
+		}
+	}
+	return null;
+}
+
+/***/ }),
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23808,7 +23880,7 @@ function processGenieCode(mainboard, codeString, enable) {
 }
 
 /***/ }),
-/* 50 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23860,7 +23932,7 @@ function loadRomFromUrl(url, callback) {
 }
 
 /***/ }),
-/* 51 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23981,7 +24053,7 @@ function fromByteArray (uint8) {
 
 
 /***/ }),
-/* 52 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23995,9 +24067,9 @@ function fromByteArray (uint8) {
 
 
 
-var base64 = __webpack_require__(51)
-var ieee754 = __webpack_require__(77)
-var isArray = __webpack_require__(78)
+var base64 = __webpack_require__(50)
+var ieee754 = __webpack_require__(76)
+var isArray = __webpack_require__(77)
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
@@ -25775,10 +25847,10 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
 
 /***/ }),
-/* 53 */
+/* 52 */
 /***/ (function(module, exports) {
 
 (function() {
@@ -25880,7 +25952,7 @@ function isnan (val) {
 
 
 /***/ }),
-/* 54 */
+/* 53 */
 /***/ (function(module, exports) {
 
 module.exports = adjoint;
@@ -25918,7 +25990,7 @@ function adjoint(out, a) {
 };
 
 /***/ }),
-/* 55 */
+/* 54 */
 /***/ (function(module, exports) {
 
 module.exports = clone;
@@ -25951,7 +26023,7 @@ function clone(a) {
 };
 
 /***/ }),
-/* 56 */
+/* 55 */
 /***/ (function(module, exports) {
 
 module.exports = copy;
@@ -25984,7 +26056,7 @@ function copy(out, a) {
 };
 
 /***/ }),
-/* 57 */
+/* 56 */
 /***/ (function(module, exports) {
 
 module.exports = create;
@@ -26016,7 +26088,7 @@ function create() {
 };
 
 /***/ }),
-/* 58 */
+/* 57 */
 /***/ (function(module, exports) {
 
 module.exports = determinant;
@@ -26051,7 +26123,7 @@ function determinant(a) {
 };
 
 /***/ }),
-/* 59 */
+/* 58 */
 /***/ (function(module, exports) {
 
 module.exports = fromQuat;
@@ -26103,7 +26175,7 @@ function fromQuat(out, q) {
 };
 
 /***/ }),
-/* 60 */
+/* 59 */
 /***/ (function(module, exports) {
 
 module.exports = fromRotationTranslation;
@@ -26161,7 +26233,7 @@ function fromRotationTranslation(out, q, v) {
 };
 
 /***/ }),
-/* 61 */
+/* 60 */
 /***/ (function(module, exports) {
 
 module.exports = frustum;
@@ -26202,37 +26274,37 @@ function frustum(out, left, right, bottom, top, near, far) {
 };
 
 /***/ }),
-/* 62 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = {
-  create: __webpack_require__(57)
-  , clone: __webpack_require__(55)
-  , copy: __webpack_require__(56)
-  , identity: __webpack_require__(10)
-  , transpose: __webpack_require__(76)
-  , invert: __webpack_require__(63)
-  , adjoint: __webpack_require__(54)
-  , determinant: __webpack_require__(58)
-  , multiply: __webpack_require__(65)
-  , translate: __webpack_require__(75)
-  , scale: __webpack_require__(73)
-  , rotate: __webpack_require__(69)
-  , rotateX: __webpack_require__(70)
-  , rotateY: __webpack_require__(71)
-  , rotateZ: __webpack_require__(72)
-  , fromRotationTranslation: __webpack_require__(60)
-  , fromQuat: __webpack_require__(59)
-  , frustum: __webpack_require__(61)
-  , perspective: __webpack_require__(67)
-  , perspectiveFromFieldOfView: __webpack_require__(68)
-  , ortho: __webpack_require__(66)
-  , lookAt: __webpack_require__(64)
-  , str: __webpack_require__(74)
+  create: __webpack_require__(56)
+  , clone: __webpack_require__(54)
+  , copy: __webpack_require__(55)
+  , identity: __webpack_require__(9)
+  , transpose: __webpack_require__(75)
+  , invert: __webpack_require__(62)
+  , adjoint: __webpack_require__(53)
+  , determinant: __webpack_require__(57)
+  , multiply: __webpack_require__(64)
+  , translate: __webpack_require__(74)
+  , scale: __webpack_require__(72)
+  , rotate: __webpack_require__(68)
+  , rotateX: __webpack_require__(69)
+  , rotateY: __webpack_require__(70)
+  , rotateZ: __webpack_require__(71)
+  , fromRotationTranslation: __webpack_require__(59)
+  , fromQuat: __webpack_require__(58)
+  , frustum: __webpack_require__(60)
+  , perspective: __webpack_require__(66)
+  , perspectiveFromFieldOfView: __webpack_require__(67)
+  , ortho: __webpack_require__(65)
+  , lookAt: __webpack_require__(63)
+  , str: __webpack_require__(73)
 }
 
 /***/ }),
-/* 63 */
+/* 62 */
 /***/ (function(module, exports) {
 
 module.exports = invert;
@@ -26292,10 +26364,10 @@ function invert(out, a) {
 };
 
 /***/ }),
-/* 64 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var identity = __webpack_require__(10);
+var identity = __webpack_require__(9);
 
 module.exports = lookAt;
 
@@ -26387,7 +26459,7 @@ function lookAt(out, eye, center, up) {
 };
 
 /***/ }),
-/* 65 */
+/* 64 */
 /***/ (function(module, exports) {
 
 module.exports = multiply;
@@ -26434,7 +26506,7 @@ function multiply(out, a, b) {
 };
 
 /***/ }),
-/* 66 */
+/* 65 */
 /***/ (function(module, exports) {
 
 module.exports = ortho;
@@ -26475,7 +26547,7 @@ function ortho(out, left, right, bottom, top, near, far) {
 };
 
 /***/ }),
-/* 67 */
+/* 66 */
 /***/ (function(module, exports) {
 
 module.exports = perspective;
@@ -26513,7 +26585,7 @@ function perspective(out, fovy, aspect, near, far) {
 };
 
 /***/ }),
-/* 68 */
+/* 67 */
 /***/ (function(module, exports) {
 
 module.exports = perspectiveFromFieldOfView;
@@ -26559,7 +26631,7 @@ function perspectiveFromFieldOfView(out, fov, near, far) {
 
 
 /***/ }),
-/* 69 */
+/* 68 */
 /***/ (function(module, exports) {
 
 module.exports = rotate;
@@ -26628,7 +26700,7 @@ function rotate(out, a, rad, axis) {
 };
 
 /***/ }),
-/* 70 */
+/* 69 */
 /***/ (function(module, exports) {
 
 module.exports = rotateX;
@@ -26677,7 +26749,7 @@ function rotateX(out, a, rad) {
 };
 
 /***/ }),
-/* 71 */
+/* 70 */
 /***/ (function(module, exports) {
 
 module.exports = rotateY;
@@ -26726,7 +26798,7 @@ function rotateY(out, a, rad) {
 };
 
 /***/ }),
-/* 72 */
+/* 71 */
 /***/ (function(module, exports) {
 
 module.exports = rotateZ;
@@ -26775,7 +26847,7 @@ function rotateZ(out, a, rad) {
 };
 
 /***/ }),
-/* 73 */
+/* 72 */
 /***/ (function(module, exports) {
 
 module.exports = scale;
@@ -26811,7 +26883,7 @@ function scale(out, a, v) {
 };
 
 /***/ }),
-/* 74 */
+/* 73 */
 /***/ (function(module, exports) {
 
 module.exports = str;
@@ -26830,7 +26902,7 @@ function str(a) {
 };
 
 /***/ }),
-/* 75 */
+/* 74 */
 /***/ (function(module, exports) {
 
 module.exports = translate;
@@ -26873,7 +26945,7 @@ function translate(out, a, v) {
 };
 
 /***/ }),
-/* 76 */
+/* 75 */
 /***/ (function(module, exports) {
 
 module.exports = transpose;
@@ -26927,7 +26999,7 @@ function transpose(out, a) {
 };
 
 /***/ }),
-/* 77 */
+/* 76 */
 /***/ (function(module, exports) {
 
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -27017,7 +27089,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 
 /***/ }),
-/* 78 */
+/* 77 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -27028,696 +27100,7 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 79 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(global) {(function () {
-    var /*
- * Rusha, a JavaScript implementation of the Secure Hash Algorithm, SHA-1,
- * as defined in FIPS PUB 180-1, tuned for high performance with large inputs.
- * (http://github.com/srijs/rusha)
- *
- * Inspired by Paul Johnstons implementation (http://pajhome.org.uk/crypt/md5).
- *
- * Copyright (c) 2013 Sam Rijs (http://awesam.de).
- * Released under the terms of the MIT license as follows:
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE.
- */
-    util = {
-        getDataType: function (data) {
-            if (typeof data === 'string') {
-                return 'string';
-            }
-            if (data instanceof Array) {
-                return 'array';
-            }
-            if (typeof global !== 'undefined' && global.Buffer && global.Buffer.isBuffer(data)) {
-                return 'buffer';
-            }
-            if (data instanceof ArrayBuffer) {
-                return 'arraybuffer';
-            }
-            if (data.buffer instanceof ArrayBuffer) {
-                return 'view';
-            }
-            if (data instanceof Blob) {
-                return 'blob';
-            }
-            throw new Error('Unsupported data type.');
-        }
-    };
-    function Rusha(chunkSize) {
-        'use strict';
-        var // Private object structure.
-        self$2 = { fill: 0 };
-        var // Calculate the length of buffer that the sha1 routine uses
-        // including the padding.
-        padlen = function (len) {
-            for (len += 9; len % 64 > 0; len += 1);
-            return len;
-        };
-        var padZeroes = function (bin, len) {
-            var h8 = new Uint8Array(bin.buffer);
-            var om = len % 4, align = len - om;
-            switch (om) {
-            case 0:
-                h8[align + 3] = 0;
-            case 1:
-                h8[align + 2] = 0;
-            case 2:
-                h8[align + 1] = 0;
-            case 3:
-                h8[align + 0] = 0;
-            }
-            for (var i$2 = (len >> 2) + 1; i$2 < bin.length; i$2++)
-                bin[i$2] = 0;
-        };
-        var padData = function (bin, chunkLen, msgLen) {
-            bin[chunkLen >> 2] |= 128 << 24 - (chunkLen % 4 << 3);
-            // To support msgLen >= 2 GiB, use a float division when computing the
-            // high 32-bits of the big-endian message length in bits.
-            bin[((chunkLen >> 2) + 2 & ~15) + 14] = msgLen / (1 << 29) | 0;
-            bin[((chunkLen >> 2) + 2 & ~15) + 15] = msgLen << 3;
-        };
-        var // Convert a binary string and write it to the heap.
-        // A binary string is expected to only contain char codes < 256.
-        convStr = function (H8, H32, start, len, off) {
-            var str = this, i$2, om = off % 4, lm = (len + om) % 4, j = len - lm;
-            switch (om) {
-            case 0:
-                H8[off] = str.charCodeAt(start + 3);
-            case 1:
-                H8[off + 1 - (om << 1) | 0] = str.charCodeAt(start + 2);
-            case 2:
-                H8[off + 2 - (om << 1) | 0] = str.charCodeAt(start + 1);
-            case 3:
-                H8[off + 3 - (om << 1) | 0] = str.charCodeAt(start);
-            }
-            if (len < lm + om) {
-                return;
-            }
-            for (i$2 = 4 - om; i$2 < j; i$2 = i$2 + 4 | 0) {
-                H32[off + i$2 >> 2] = str.charCodeAt(start + i$2) << 24 | str.charCodeAt(start + i$2 + 1) << 16 | str.charCodeAt(start + i$2 + 2) << 8 | str.charCodeAt(start + i$2 + 3);
-            }
-            switch (lm) {
-            case 3:
-                H8[off + j + 1 | 0] = str.charCodeAt(start + j + 2);
-            case 2:
-                H8[off + j + 2 | 0] = str.charCodeAt(start + j + 1);
-            case 1:
-                H8[off + j + 3 | 0] = str.charCodeAt(start + j);
-            }
-        };
-        var // Convert a buffer or array and write it to the heap.
-        // The buffer or array is expected to only contain elements < 256.
-        convBuf = function (H8, H32, start, len, off) {
-            var buf = this, i$2, om = off % 4, lm = (len + om) % 4, j = len - lm;
-            switch (om) {
-            case 0:
-                H8[off] = buf[start + 3];
-            case 1:
-                H8[off + 1 - (om << 1) | 0] = buf[start + 2];
-            case 2:
-                H8[off + 2 - (om << 1) | 0] = buf[start + 1];
-            case 3:
-                H8[off + 3 - (om << 1) | 0] = buf[start];
-            }
-            if (len < lm + om) {
-                return;
-            }
-            for (i$2 = 4 - om; i$2 < j; i$2 = i$2 + 4 | 0) {
-                H32[off + i$2 >> 2 | 0] = buf[start + i$2] << 24 | buf[start + i$2 + 1] << 16 | buf[start + i$2 + 2] << 8 | buf[start + i$2 + 3];
-            }
-            switch (lm) {
-            case 3:
-                H8[off + j + 1 | 0] = buf[start + j + 2];
-            case 2:
-                H8[off + j + 2 | 0] = buf[start + j + 1];
-            case 1:
-                H8[off + j + 3 | 0] = buf[start + j];
-            }
-        };
-        var convBlob = function (H8, H32, start, len, off) {
-            var blob = this, i$2, om = off % 4, lm = (len + om) % 4, j = len - lm;
-            var buf = new Uint8Array(reader.readAsArrayBuffer(blob.slice(start, start + len)));
-            switch (om) {
-            case 0:
-                H8[off] = buf[3];
-            case 1:
-                H8[off + 1 - (om << 1) | 0] = buf[2];
-            case 2:
-                H8[off + 2 - (om << 1) | 0] = buf[1];
-            case 3:
-                H8[off + 3 - (om << 1) | 0] = buf[0];
-            }
-            if (len < lm + om) {
-                return;
-            }
-            for (i$2 = 4 - om; i$2 < j; i$2 = i$2 + 4 | 0) {
-                H32[off + i$2 >> 2 | 0] = buf[i$2] << 24 | buf[i$2 + 1] << 16 | buf[i$2 + 2] << 8 | buf[i$2 + 3];
-            }
-            switch (lm) {
-            case 3:
-                H8[off + j + 1 | 0] = buf[j + 2];
-            case 2:
-                H8[off + j + 2 | 0] = buf[j + 1];
-            case 1:
-                H8[off + j + 3 | 0] = buf[j];
-            }
-        };
-        var convFn = function (data) {
-            switch (util.getDataType(data)) {
-            case 'string':
-                return convStr.bind(data);
-            case 'array':
-                return convBuf.bind(data);
-            case 'buffer':
-                return convBuf.bind(data);
-            case 'arraybuffer':
-                return convBuf.bind(new Uint8Array(data));
-            case 'view':
-                return convBuf.bind(new Uint8Array(data.buffer, data.byteOffset, data.byteLength));
-            case 'blob':
-                return convBlob.bind(data);
-            }
-        };
-        var slice = function (data, offset) {
-            switch (util.getDataType(data)) {
-            case 'string':
-                return data.slice(offset);
-            case 'array':
-                return data.slice(offset);
-            case 'buffer':
-                return data.slice(offset);
-            case 'arraybuffer':
-                return data.slice(offset);
-            case 'view':
-                return data.buffer.slice(offset);
-            }
-        };
-        var // Precompute 00 - ff strings
-        precomputedHex = new Array(256);
-        for (var i = 0; i < 256; i++) {
-            precomputedHex[i] = (i < 16 ? '0' : '') + i.toString(16);
-        }
-        var // Convert an ArrayBuffer into its hexadecimal string representation.
-        hex = function (arrayBuffer) {
-            var binarray = new Uint8Array(arrayBuffer);
-            var res = new Array(arrayBuffer.byteLength);
-            for (var i$2 = 0; i$2 < res.length; i$2++) {
-                res[i$2] = precomputedHex[binarray[i$2]];
-            }
-            return res.join('');
-        };
-        var ceilHeapSize = function (v) {
-            // The asm.js spec says:
-            // The heap object's byteLength must be either
-            // 2^n for n in [12, 24) or 2^24 * n for n ≥ 1.
-            // Also, byteLengths smaller than 2^16 are deprecated.
-            var p;
-            if (// If v is smaller than 2^16, the smallest possible solution
-                // is 2^16.
-                v <= 65536)
-                return 65536;
-            if (// If v < 2^24, we round up to 2^n,
-                // otherwise we round up to 2^24 * n.
-                v < 16777216) {
-                for (p = 1; p < v; p = p << 1);
-            } else {
-                for (p = 16777216; p < v; p += 16777216);
-            }
-            return p;
-        };
-        var // Initialize the internal data structures to a new capacity.
-        init = function (size) {
-            if (size % 64 > 0) {
-                throw new Error('Chunk size must be a multiple of 128 bit');
-            }
-            self$2.offset = 0;
-            self$2.maxChunkLen = size;
-            self$2.padMaxChunkLen = padlen(size);
-            // The size of the heap is the sum of:
-            // 1. The padded input message size
-            // 2. The extended space the algorithm needs (320 byte)
-            // 3. The 160 bit state the algoritm uses
-            self$2.heap = new ArrayBuffer(ceilHeapSize(self$2.padMaxChunkLen + 320 + 20));
-            self$2.h32 = new Int32Array(self$2.heap);
-            self$2.h8 = new Int8Array(self$2.heap);
-            self$2.core = new Rusha._core({
-                Int32Array: Int32Array,
-                DataView: DataView
-            }, {}, self$2.heap);
-            self$2.buffer = null;
-        };
-        // Iinitializethe datastructures according
-        // to a chunk siyze.
-        init(chunkSize || 64 * 1024);
-        var initState = function (heap, padMsgLen) {
-            self$2.offset = 0;
-            var io = new Int32Array(heap, padMsgLen + 320, 5);
-            io[0] = 1732584193;
-            io[1] = -271733879;
-            io[2] = -1732584194;
-            io[3] = 271733878;
-            io[4] = -1009589776;
-        };
-        var padChunk = function (chunkLen, msgLen) {
-            var padChunkLen = padlen(chunkLen);
-            var view = new Int32Array(self$2.heap, 0, padChunkLen >> 2);
-            padZeroes(view, chunkLen);
-            padData(view, chunkLen, msgLen);
-            return padChunkLen;
-        };
-        var // Write data to the heap.
-        write = function (data, chunkOffset, chunkLen, off) {
-            convFn(data)(self$2.h8, self$2.h32, chunkOffset, chunkLen, off || 0);
-        };
-        var // Initialize and call the RushaCore,
-        // assuming an input buffer of length len * 4.
-        coreCall = function (data, chunkOffset, chunkLen, msgLen, finalize) {
-            var padChunkLen = chunkLen;
-            write(data, chunkOffset, chunkLen);
-            if (finalize) {
-                padChunkLen = padChunk(chunkLen, msgLen);
-            }
-            self$2.core.hash(padChunkLen, self$2.padMaxChunkLen);
-        };
-        var getRawDigest = function (heap, padMaxChunkLen) {
-            var io = new Int32Array(heap, padMaxChunkLen + 320, 5);
-            var out = new Int32Array(5);
-            var arr = new DataView(out.buffer);
-            arr.setInt32(0, io[0], false);
-            arr.setInt32(4, io[1], false);
-            arr.setInt32(8, io[2], false);
-            arr.setInt32(12, io[3], false);
-            arr.setInt32(16, io[4], false);
-            return out;
-        };
-        var // Calculate the hash digest as an array of 5 32bit integers.
-        rawDigest = this.rawDigest = function (str) {
-            var msgLen = str.byteLength || str.length || str.size || 0;
-            initState(self$2.heap, self$2.padMaxChunkLen);
-            var chunkOffset = 0, chunkLen = self$2.maxChunkLen, last;
-            for (chunkOffset = 0; msgLen > chunkOffset + chunkLen; chunkOffset += chunkLen) {
-                coreCall(str, chunkOffset, chunkLen, msgLen, false);
-            }
-            coreCall(str, chunkOffset, msgLen - chunkOffset, msgLen, true);
-            return getRawDigest(self$2.heap, self$2.padMaxChunkLen);
-        };
-        // The digest and digestFrom* interface returns the hash digest
-        // as a hex string.
-        this.digest = this.digestFromString = this.digestFromBuffer = this.digestFromArrayBuffer = function (str) {
-            return hex(rawDigest(str).buffer);
-        };
-        this.resetState = function () {
-            initState(self$2.heap, self$2.padMaxChunkLen);
-            return this;
-        };
-        this.append = function (chunk) {
-            var chunkOffset = 0;
-            var chunkLen = chunk.byteLength || chunk.length || chunk.size || 0;
-            var turnOffset = self$2.offset % self$2.maxChunkLen;
-            var inputLen;
-            self$2.offset += chunkLen;
-            while (chunkOffset < chunkLen) {
-                inputLen = Math.min(chunkLen - chunkOffset, self$2.maxChunkLen - turnOffset);
-                write(chunk, chunkOffset, inputLen, turnOffset);
-                turnOffset += inputLen;
-                chunkOffset += inputLen;
-                if (turnOffset === self$2.maxChunkLen) {
-                    self$2.core.hash(self$2.maxChunkLen, self$2.padMaxChunkLen);
-                    turnOffset = 0;
-                }
-            }
-            return this;
-        };
-        this.getState = function () {
-            var turnOffset = self$2.offset % self$2.maxChunkLen;
-            var heap;
-            if (!turnOffset) {
-                var io = new Int32Array(self$2.heap, self$2.padMaxChunkLen + 320, 5);
-                heap = io.buffer.slice(io.byteOffset, io.byteOffset + io.byteLength);
-            } else {
-                heap = self$2.heap.slice(0);
-            }
-            return {
-                offset: self$2.offset,
-                heap: heap
-            };
-        };
-        this.setState = function (state) {
-            self$2.offset = state.offset;
-            if (state.heap.byteLength === 20) {
-                var io = new Int32Array(self$2.heap, self$2.padMaxChunkLen + 320, 5);
-                io.set(new Int32Array(state.heap));
-            } else {
-                self$2.h32.set(new Int32Array(state.heap));
-            }
-            return this;
-        };
-        var rawEnd = this.rawEnd = function () {
-            var msgLen = self$2.offset;
-            var chunkLen = msgLen % self$2.maxChunkLen;
-            var padChunkLen = padChunk(chunkLen, msgLen);
-            self$2.core.hash(padChunkLen, self$2.padMaxChunkLen);
-            var result = getRawDigest(self$2.heap, self$2.padMaxChunkLen);
-            initState(self$2.heap, self$2.padMaxChunkLen);
-            return result;
-        };
-        this.end = function () {
-            return hex(rawEnd().buffer);
-        };
-    }
-    ;
-    // The low-level RushCore module provides the heart of Rusha,
-    // a high-speed sha1 implementation working on an Int32Array heap.
-    // At first glance, the implementation seems complicated, however
-    // with the SHA1 spec at hand, it is obvious this almost a textbook
-    // implementation that has a few functions hand-inlined and a few loops
-    // hand-unrolled.
-    Rusha._core = function RushaCore(stdlib, foreign, heap) {
-        'use asm';
-        var H = new stdlib.Int32Array(heap);
-        function hash(k, x) {
-            // k in bytes
-            k = k | 0;
-            x = x | 0;
-            var i = 0, j = 0, y0 = 0, z0 = 0, y1 = 0, z1 = 0, y2 = 0, z2 = 0, y3 = 0, z3 = 0, y4 = 0, z4 = 0, t0 = 0, t1 = 0;
-            y0 = H[x + 320 >> 2] | 0;
-            y1 = H[x + 324 >> 2] | 0;
-            y2 = H[x + 328 >> 2] | 0;
-            y3 = H[x + 332 >> 2] | 0;
-            y4 = H[x + 336 >> 2] | 0;
-            for (i = 0; (i | 0) < (k | 0); i = i + 64 | 0) {
-                z0 = y0;
-                z1 = y1;
-                z2 = y2;
-                z3 = y3;
-                z4 = y4;
-                for (j = 0; (j | 0) < 64; j = j + 4 | 0) {
-                    t1 = H[i + j >> 2] | 0;
-                    t0 = ((y0 << 5 | y0 >>> 27) + (y1 & y2 | ~y1 & y3) | 0) + ((t1 + y4 | 0) + 1518500249 | 0) | 0;
-                    y4 = y3;
-                    y3 = y2;
-                    y2 = y1 << 30 | y1 >>> 2;
-                    y1 = y0;
-                    y0 = t0;
-                    H[k + j >> 2] = t1;
-                }
-                for (j = k + 64 | 0; (j | 0) < (k + 80 | 0); j = j + 4 | 0) {
-                    t1 = (H[j - 12 >> 2] ^ H[j - 32 >> 2] ^ H[j - 56 >> 2] ^ H[j - 64 >> 2]) << 1 | (H[j - 12 >> 2] ^ H[j - 32 >> 2] ^ H[j - 56 >> 2] ^ H[j - 64 >> 2]) >>> 31;
-                    t0 = ((y0 << 5 | y0 >>> 27) + (y1 & y2 | ~y1 & y3) | 0) + ((t1 + y4 | 0) + 1518500249 | 0) | 0;
-                    y4 = y3;
-                    y3 = y2;
-                    y2 = y1 << 30 | y1 >>> 2;
-                    y1 = y0;
-                    y0 = t0;
-                    H[j >> 2] = t1;
-                }
-                for (j = k + 80 | 0; (j | 0) < (k + 160 | 0); j = j + 4 | 0) {
-                    t1 = (H[j - 12 >> 2] ^ H[j - 32 >> 2] ^ H[j - 56 >> 2] ^ H[j - 64 >> 2]) << 1 | (H[j - 12 >> 2] ^ H[j - 32 >> 2] ^ H[j - 56 >> 2] ^ H[j - 64 >> 2]) >>> 31;
-                    t0 = ((y0 << 5 | y0 >>> 27) + (y1 ^ y2 ^ y3) | 0) + ((t1 + y4 | 0) + 1859775393 | 0) | 0;
-                    y4 = y3;
-                    y3 = y2;
-                    y2 = y1 << 30 | y1 >>> 2;
-                    y1 = y0;
-                    y0 = t0;
-                    H[j >> 2] = t1;
-                }
-                for (j = k + 160 | 0; (j | 0) < (k + 240 | 0); j = j + 4 | 0) {
-                    t1 = (H[j - 12 >> 2] ^ H[j - 32 >> 2] ^ H[j - 56 >> 2] ^ H[j - 64 >> 2]) << 1 | (H[j - 12 >> 2] ^ H[j - 32 >> 2] ^ H[j - 56 >> 2] ^ H[j - 64 >> 2]) >>> 31;
-                    t0 = ((y0 << 5 | y0 >>> 27) + (y1 & y2 | y1 & y3 | y2 & y3) | 0) + ((t1 + y4 | 0) - 1894007588 | 0) | 0;
-                    y4 = y3;
-                    y3 = y2;
-                    y2 = y1 << 30 | y1 >>> 2;
-                    y1 = y0;
-                    y0 = t0;
-                    H[j >> 2] = t1;
-                }
-                for (j = k + 240 | 0; (j | 0) < (k + 320 | 0); j = j + 4 | 0) {
-                    t1 = (H[j - 12 >> 2] ^ H[j - 32 >> 2] ^ H[j - 56 >> 2] ^ H[j - 64 >> 2]) << 1 | (H[j - 12 >> 2] ^ H[j - 32 >> 2] ^ H[j - 56 >> 2] ^ H[j - 64 >> 2]) >>> 31;
-                    t0 = ((y0 << 5 | y0 >>> 27) + (y1 ^ y2 ^ y3) | 0) + ((t1 + y4 | 0) - 899497514 | 0) | 0;
-                    y4 = y3;
-                    y3 = y2;
-                    y2 = y1 << 30 | y1 >>> 2;
-                    y1 = y0;
-                    y0 = t0;
-                    H[j >> 2] = t1;
-                }
-                y0 = y0 + z0 | 0;
-                y1 = y1 + z1 | 0;
-                y2 = y2 + z2 | 0;
-                y3 = y3 + z3 | 0;
-                y4 = y4 + z4 | 0;
-            }
-            H[x + 320 >> 2] = y0;
-            H[x + 324 >> 2] = y1;
-            H[x + 328 >> 2] = y2;
-            H[x + 332 >> 2] = y3;
-            H[x + 336 >> 2] = y4;
-        }
-        return { hash: hash };
-    };
-    if (// If we'e running in Node.JS, export a module.
-        true) {
-        module.exports = Rusha;
-    } else if (// If we're running in a DOM context, export
-        // the Rusha object to toplevel.
-        typeof window !== 'undefined') {
-        window.Rusha = Rusha;
-    }
-    if (// If we're running in a webworker, accept
-        // messages containing a jobid and a buffer
-        // or blob object, and return the hash result.
-        typeof FileReaderSync !== 'undefined') {
-        var reader = new FileReaderSync(), hasher = new Rusha(4 * 1024 * 1024);
-        self.onmessage = function onMessage(event) {
-            var hash, data = event.data.data;
-            try {
-                hash = hasher.digest(data);
-                self.postMessage({
-                    id: event.data.id,
-                    hash: hash
-                });
-            } catch (e) {
-                self.postMessage({
-                    id: event.data.id,
-                    error: e.name
-                });
-            }
-        };
-    }
-}());
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
-
-/***/ }),
-/* 80 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(Buffer) {(function() {
-  var crypt = __webpack_require__(53),
-      utf8 = __webpack_require__(9).utf8,
-      bin = __webpack_require__(9).bin,
-
-  // The core
-  sha1 = function (message) {
-    // Convert to byte array
-    if (message.constructor == String)
-      message = utf8.stringToBytes(message);
-    else if (typeof Buffer !== 'undefined' && typeof Buffer.isBuffer == 'function' && Buffer.isBuffer(message))
-      message = Array.prototype.slice.call(message, 0);
-    else if (!Array.isArray(message))
-      message = message.toString();
-
-    // otherwise assume byte array
-
-    var m  = crypt.bytesToWords(message),
-        l  = message.length * 8,
-        w  = [],
-        H0 =  1732584193,
-        H1 = -271733879,
-        H2 = -1732584194,
-        H3 =  271733878,
-        H4 = -1009589776;
-
-    // Padding
-    m[l >> 5] |= 0x80 << (24 - l % 32);
-    m[((l + 64 >>> 9) << 4) + 15] = l;
-
-    for (var i = 0; i < m.length; i += 16) {
-      var a = H0,
-          b = H1,
-          c = H2,
-          d = H3,
-          e = H4;
-
-      for (var j = 0; j < 80; j++) {
-
-        if (j < 16)
-          w[j] = m[i + j];
-        else {
-          var n = w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16];
-          w[j] = (n << 1) | (n >>> 31);
-        }
-
-        var t = ((H0 << 5) | (H0 >>> 27)) + H4 + (w[j] >>> 0) + (
-                j < 20 ? (H1 & H2 | ~H1 & H3) + 1518500249 :
-                j < 40 ? (H1 ^ H2 ^ H3) + 1859775393 :
-                j < 60 ? (H1 & H2 | H1 & H3 | H2 & H3) - 1894007588 :
-                         (H1 ^ H2 ^ H3) - 899497514);
-
-        H4 = H3;
-        H3 = H2;
-        H2 = (H1 << 30) | (H1 >>> 2);
-        H1 = H0;
-        H0 = t;
-      }
-
-      H0 += a;
-      H1 += b;
-      H2 += c;
-      H3 += d;
-      H4 += e;
-    }
-
-    return [H0, H1, H2, H3, H4];
-  },
-
-  // Public API
-  api = function (message, options) {
-    var digestbytes = crypt.wordsToBytes(sha1(message));
-    return options && options.asBytes ? digestbytes :
-        options && options.asString ? bin.bytesToString(digestbytes) :
-        crypt.bytesToHex(digestbytes);
-  };
-
-  api._blocksize = 16;
-  api._digestsize = 20;
-
-  module.exports = api;
-})();
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(52).Buffer))
-
-/***/ }),
-/* 81 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// stats.js - http://github.com/mrdoob/stats.js
-(function(f,e){ true?module.exports=e():"function"===typeof define&&define.amd?define(e):f.Stats=e()})(this,function(){var f=function(){function e(a){c.appendChild(a.dom);return a}function u(a){for(var d=0;d<c.children.length;d++)c.children[d].style.display=d===a?"block":"none";l=a}var l=0,c=document.createElement("div");c.style.cssText="position:fixed;top:0;left:0;cursor:pointer;opacity:0.9;z-index:10000";c.addEventListener("click",function(a){a.preventDefault();
-u(++l%c.children.length)},!1);var k=(performance||Date).now(),g=k,a=0,r=e(new f.Panel("FPS","#0ff","#002")),h=e(new f.Panel("MS","#0f0","#020"));if(self.performance&&self.performance.memory)var t=e(new f.Panel("MB","#f08","#201"));u(0);return{REVISION:16,dom:c,addPanel:e,showPanel:u,begin:function(){k=(performance||Date).now()},end:function(){a++;var c=(performance||Date).now();h.update(c-k,200);if(c>g+1E3&&(r.update(1E3*a/(c-g),100),g=c,a=0,t)){var d=performance.memory;t.update(d.usedJSHeapSize/
-1048576,d.jsHeapSizeLimit/1048576)}return c},update:function(){k=this.end()},domElement:c,setMode:u}};f.Panel=function(e,f,l){var c=Infinity,k=0,g=Math.round,a=g(window.devicePixelRatio||1),r=80*a,h=48*a,t=3*a,v=2*a,d=3*a,m=15*a,n=74*a,p=30*a,q=document.createElement("canvas");q.width=r;q.height=h;q.style.cssText="width:80px;height:48px";var b=q.getContext("2d");b.font="bold "+9*a+"px Helvetica,Arial,sans-serif";b.textBaseline="top";b.fillStyle=l;b.fillRect(0,0,r,h);b.fillStyle=f;b.fillText(e,t,v);
-b.fillRect(d,m,n,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d,m,n,p);return{dom:q,update:function(h,w){c=Math.min(c,h);k=Math.max(k,h);b.fillStyle=l;b.globalAlpha=1;b.fillRect(0,0,r,m);b.fillStyle=f;b.fillText(g(h)+" "+e+" ("+g(c)+"-"+g(k)+")",t,v);b.drawImage(q,d+a,m,n-a,p,d,m,n-a,p);b.fillRect(d+n-a,m,a,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d+n-a,m,a,g((1-h/w)*p))}}};return f});
-
-
-/***/ }),
-/* 82 */
-/***/ (function(module, exports) {
-
-module.exports = function() {
-	throw new Error("define cannot be used indirect");
-};
-
-
-/***/ }),
-/* 83 */
-/***/ (function(module, exports) {
-
-/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
-module.exports = __webpack_amd_options__;
-
-/* WEBPACK VAR INJECTION */}.call(exports, {}))
-
-/***/ }),
-/* 84 */,
-/* 85 */,
-/* 86 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(12);
-
-
-/***/ }),
-/* 87 */,
-/* 88 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _serialisation = __webpack_require__(1);
-
-var _consts = __webpack_require__(0);
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var HeadlessRenderSurface = function () {
-	function HeadlessRenderSurface() {
-		_classCallCheck(this, HeadlessRenderSurface);
-
-		this._buffer = new Uint32Array(_consts.SCREEN_WIDTH * _consts.SCREEN_HEIGHT);
-	}
-
-	_createClass(HeadlessRenderSurface, [{
-		key: 'writeToBuffer',
-		value: function writeToBuffer(bufferIndex, insertIndex, colour) {
-			this._buffer[insertIndex] = 0xFF000000 | colour;
-		}
-	}, {
-		key: 'clearBuffers',
-		value: function clearBuffers(backgroundColour) {
-			for (var i = 0; i < this._buffer.length; ++i) {
-				this._buffer[i] = 0xFF000000 | backgroundColour;
-			}
-		}
-	}, {
-		key: 'getRenderBufferHash',
-		value: function getRenderBufferHash() {
-			return _serialisation.rusha.digestFromArrayBuffer(this._buffer).toUpperCase();
-		}
-	}, {
-		key: 'render',
-		value: function render() {}
-	}, {
-		key: 'screenshot',
-		value: function screenshot() {}
-	}, {
-		key: 'screenshotToString',
-		value: function screenshotToString() {
-			return '';
-		}
-	}]);
-
-	return HeadlessRenderSurface;
-}();
-
-exports.default = HeadlessRenderSurface;
-
-/***/ }),
-/* 89 */
+/* 78 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c) 2013 Pieroxy <pieroxy@pieroxy.net>
@@ -28222,6 +27605,633 @@ if (true) {
 } else if( typeof module !== 'undefined' && module != null ) {
   module.exports = LZString
 }
+
+
+/***/ }),
+/* 79 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(global) {(function () {
+    var /*
+ * Rusha, a JavaScript implementation of the Secure Hash Algorithm, SHA-1,
+ * as defined in FIPS PUB 180-1, tuned for high performance with large inputs.
+ * (http://github.com/srijs/rusha)
+ *
+ * Inspired by Paul Johnstons implementation (http://pajhome.org.uk/crypt/md5).
+ *
+ * Copyright (c) 2013 Sam Rijs (http://awesam.de).
+ * Released under the terms of the MIT license as follows:
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ */
+    util = {
+        getDataType: function (data) {
+            if (typeof data === 'string') {
+                return 'string';
+            }
+            if (data instanceof Array) {
+                return 'array';
+            }
+            if (typeof global !== 'undefined' && global.Buffer && global.Buffer.isBuffer(data)) {
+                return 'buffer';
+            }
+            if (data instanceof ArrayBuffer) {
+                return 'arraybuffer';
+            }
+            if (data.buffer instanceof ArrayBuffer) {
+                return 'view';
+            }
+            if (data instanceof Blob) {
+                return 'blob';
+            }
+            throw new Error('Unsupported data type.');
+        }
+    };
+    function Rusha(chunkSize) {
+        'use strict';
+        var // Private object structure.
+        self$2 = { fill: 0 };
+        var // Calculate the length of buffer that the sha1 routine uses
+        // including the padding.
+        padlen = function (len) {
+            for (len += 9; len % 64 > 0; len += 1);
+            return len;
+        };
+        var padZeroes = function (bin, len) {
+            var h8 = new Uint8Array(bin.buffer);
+            var om = len % 4, align = len - om;
+            switch (om) {
+            case 0:
+                h8[align + 3] = 0;
+            case 1:
+                h8[align + 2] = 0;
+            case 2:
+                h8[align + 1] = 0;
+            case 3:
+                h8[align + 0] = 0;
+            }
+            for (var i$2 = (len >> 2) + 1; i$2 < bin.length; i$2++)
+                bin[i$2] = 0;
+        };
+        var padData = function (bin, chunkLen, msgLen) {
+            bin[chunkLen >> 2] |= 128 << 24 - (chunkLen % 4 << 3);
+            // To support msgLen >= 2 GiB, use a float division when computing the
+            // high 32-bits of the big-endian message length in bits.
+            bin[((chunkLen >> 2) + 2 & ~15) + 14] = msgLen / (1 << 29) | 0;
+            bin[((chunkLen >> 2) + 2 & ~15) + 15] = msgLen << 3;
+        };
+        var // Convert a binary string and write it to the heap.
+        // A binary string is expected to only contain char codes < 256.
+        convStr = function (H8, H32, start, len, off) {
+            var str = this, i$2, om = off % 4, lm = (len + om) % 4, j = len - lm;
+            switch (om) {
+            case 0:
+                H8[off] = str.charCodeAt(start + 3);
+            case 1:
+                H8[off + 1 - (om << 1) | 0] = str.charCodeAt(start + 2);
+            case 2:
+                H8[off + 2 - (om << 1) | 0] = str.charCodeAt(start + 1);
+            case 3:
+                H8[off + 3 - (om << 1) | 0] = str.charCodeAt(start);
+            }
+            if (len < lm + om) {
+                return;
+            }
+            for (i$2 = 4 - om; i$2 < j; i$2 = i$2 + 4 | 0) {
+                H32[off + i$2 >> 2] = str.charCodeAt(start + i$2) << 24 | str.charCodeAt(start + i$2 + 1) << 16 | str.charCodeAt(start + i$2 + 2) << 8 | str.charCodeAt(start + i$2 + 3);
+            }
+            switch (lm) {
+            case 3:
+                H8[off + j + 1 | 0] = str.charCodeAt(start + j + 2);
+            case 2:
+                H8[off + j + 2 | 0] = str.charCodeAt(start + j + 1);
+            case 1:
+                H8[off + j + 3 | 0] = str.charCodeAt(start + j);
+            }
+        };
+        var // Convert a buffer or array and write it to the heap.
+        // The buffer or array is expected to only contain elements < 256.
+        convBuf = function (H8, H32, start, len, off) {
+            var buf = this, i$2, om = off % 4, lm = (len + om) % 4, j = len - lm;
+            switch (om) {
+            case 0:
+                H8[off] = buf[start + 3];
+            case 1:
+                H8[off + 1 - (om << 1) | 0] = buf[start + 2];
+            case 2:
+                H8[off + 2 - (om << 1) | 0] = buf[start + 1];
+            case 3:
+                H8[off + 3 - (om << 1) | 0] = buf[start];
+            }
+            if (len < lm + om) {
+                return;
+            }
+            for (i$2 = 4 - om; i$2 < j; i$2 = i$2 + 4 | 0) {
+                H32[off + i$2 >> 2 | 0] = buf[start + i$2] << 24 | buf[start + i$2 + 1] << 16 | buf[start + i$2 + 2] << 8 | buf[start + i$2 + 3];
+            }
+            switch (lm) {
+            case 3:
+                H8[off + j + 1 | 0] = buf[start + j + 2];
+            case 2:
+                H8[off + j + 2 | 0] = buf[start + j + 1];
+            case 1:
+                H8[off + j + 3 | 0] = buf[start + j];
+            }
+        };
+        var convBlob = function (H8, H32, start, len, off) {
+            var blob = this, i$2, om = off % 4, lm = (len + om) % 4, j = len - lm;
+            var buf = new Uint8Array(reader.readAsArrayBuffer(blob.slice(start, start + len)));
+            switch (om) {
+            case 0:
+                H8[off] = buf[3];
+            case 1:
+                H8[off + 1 - (om << 1) | 0] = buf[2];
+            case 2:
+                H8[off + 2 - (om << 1) | 0] = buf[1];
+            case 3:
+                H8[off + 3 - (om << 1) | 0] = buf[0];
+            }
+            if (len < lm + om) {
+                return;
+            }
+            for (i$2 = 4 - om; i$2 < j; i$2 = i$2 + 4 | 0) {
+                H32[off + i$2 >> 2 | 0] = buf[i$2] << 24 | buf[i$2 + 1] << 16 | buf[i$2 + 2] << 8 | buf[i$2 + 3];
+            }
+            switch (lm) {
+            case 3:
+                H8[off + j + 1 | 0] = buf[j + 2];
+            case 2:
+                H8[off + j + 2 | 0] = buf[j + 1];
+            case 1:
+                H8[off + j + 3 | 0] = buf[j];
+            }
+        };
+        var convFn = function (data) {
+            switch (util.getDataType(data)) {
+            case 'string':
+                return convStr.bind(data);
+            case 'array':
+                return convBuf.bind(data);
+            case 'buffer':
+                return convBuf.bind(data);
+            case 'arraybuffer':
+                return convBuf.bind(new Uint8Array(data));
+            case 'view':
+                return convBuf.bind(new Uint8Array(data.buffer, data.byteOffset, data.byteLength));
+            case 'blob':
+                return convBlob.bind(data);
+            }
+        };
+        var slice = function (data, offset) {
+            switch (util.getDataType(data)) {
+            case 'string':
+                return data.slice(offset);
+            case 'array':
+                return data.slice(offset);
+            case 'buffer':
+                return data.slice(offset);
+            case 'arraybuffer':
+                return data.slice(offset);
+            case 'view':
+                return data.buffer.slice(offset);
+            }
+        };
+        var // Precompute 00 - ff strings
+        precomputedHex = new Array(256);
+        for (var i = 0; i < 256; i++) {
+            precomputedHex[i] = (i < 16 ? '0' : '') + i.toString(16);
+        }
+        var // Convert an ArrayBuffer into its hexadecimal string representation.
+        hex = function (arrayBuffer) {
+            var binarray = new Uint8Array(arrayBuffer);
+            var res = new Array(arrayBuffer.byteLength);
+            for (var i$2 = 0; i$2 < res.length; i$2++) {
+                res[i$2] = precomputedHex[binarray[i$2]];
+            }
+            return res.join('');
+        };
+        var ceilHeapSize = function (v) {
+            // The asm.js spec says:
+            // The heap object's byteLength must be either
+            // 2^n for n in [12, 24) or 2^24 * n for n ≥ 1.
+            // Also, byteLengths smaller than 2^16 are deprecated.
+            var p;
+            if (// If v is smaller than 2^16, the smallest possible solution
+                // is 2^16.
+                v <= 65536)
+                return 65536;
+            if (// If v < 2^24, we round up to 2^n,
+                // otherwise we round up to 2^24 * n.
+                v < 16777216) {
+                for (p = 1; p < v; p = p << 1);
+            } else {
+                for (p = 16777216; p < v; p += 16777216);
+            }
+            return p;
+        };
+        var // Initialize the internal data structures to a new capacity.
+        init = function (size) {
+            if (size % 64 > 0) {
+                throw new Error('Chunk size must be a multiple of 128 bit');
+            }
+            self$2.offset = 0;
+            self$2.maxChunkLen = size;
+            self$2.padMaxChunkLen = padlen(size);
+            // The size of the heap is the sum of:
+            // 1. The padded input message size
+            // 2. The extended space the algorithm needs (320 byte)
+            // 3. The 160 bit state the algoritm uses
+            self$2.heap = new ArrayBuffer(ceilHeapSize(self$2.padMaxChunkLen + 320 + 20));
+            self$2.h32 = new Int32Array(self$2.heap);
+            self$2.h8 = new Int8Array(self$2.heap);
+            self$2.core = new Rusha._core({
+                Int32Array: Int32Array,
+                DataView: DataView
+            }, {}, self$2.heap);
+            self$2.buffer = null;
+        };
+        // Iinitializethe datastructures according
+        // to a chunk siyze.
+        init(chunkSize || 64 * 1024);
+        var initState = function (heap, padMsgLen) {
+            self$2.offset = 0;
+            var io = new Int32Array(heap, padMsgLen + 320, 5);
+            io[0] = 1732584193;
+            io[1] = -271733879;
+            io[2] = -1732584194;
+            io[3] = 271733878;
+            io[4] = -1009589776;
+        };
+        var padChunk = function (chunkLen, msgLen) {
+            var padChunkLen = padlen(chunkLen);
+            var view = new Int32Array(self$2.heap, 0, padChunkLen >> 2);
+            padZeroes(view, chunkLen);
+            padData(view, chunkLen, msgLen);
+            return padChunkLen;
+        };
+        var // Write data to the heap.
+        write = function (data, chunkOffset, chunkLen, off) {
+            convFn(data)(self$2.h8, self$2.h32, chunkOffset, chunkLen, off || 0);
+        };
+        var // Initialize and call the RushaCore,
+        // assuming an input buffer of length len * 4.
+        coreCall = function (data, chunkOffset, chunkLen, msgLen, finalize) {
+            var padChunkLen = chunkLen;
+            write(data, chunkOffset, chunkLen);
+            if (finalize) {
+                padChunkLen = padChunk(chunkLen, msgLen);
+            }
+            self$2.core.hash(padChunkLen, self$2.padMaxChunkLen);
+        };
+        var getRawDigest = function (heap, padMaxChunkLen) {
+            var io = new Int32Array(heap, padMaxChunkLen + 320, 5);
+            var out = new Int32Array(5);
+            var arr = new DataView(out.buffer);
+            arr.setInt32(0, io[0], false);
+            arr.setInt32(4, io[1], false);
+            arr.setInt32(8, io[2], false);
+            arr.setInt32(12, io[3], false);
+            arr.setInt32(16, io[4], false);
+            return out;
+        };
+        var // Calculate the hash digest as an array of 5 32bit integers.
+        rawDigest = this.rawDigest = function (str) {
+            var msgLen = str.byteLength || str.length || str.size || 0;
+            initState(self$2.heap, self$2.padMaxChunkLen);
+            var chunkOffset = 0, chunkLen = self$2.maxChunkLen, last;
+            for (chunkOffset = 0; msgLen > chunkOffset + chunkLen; chunkOffset += chunkLen) {
+                coreCall(str, chunkOffset, chunkLen, msgLen, false);
+            }
+            coreCall(str, chunkOffset, msgLen - chunkOffset, msgLen, true);
+            return getRawDigest(self$2.heap, self$2.padMaxChunkLen);
+        };
+        // The digest and digestFrom* interface returns the hash digest
+        // as a hex string.
+        this.digest = this.digestFromString = this.digestFromBuffer = this.digestFromArrayBuffer = function (str) {
+            return hex(rawDigest(str).buffer);
+        };
+        this.resetState = function () {
+            initState(self$2.heap, self$2.padMaxChunkLen);
+            return this;
+        };
+        this.append = function (chunk) {
+            var chunkOffset = 0;
+            var chunkLen = chunk.byteLength || chunk.length || chunk.size || 0;
+            var turnOffset = self$2.offset % self$2.maxChunkLen;
+            var inputLen;
+            self$2.offset += chunkLen;
+            while (chunkOffset < chunkLen) {
+                inputLen = Math.min(chunkLen - chunkOffset, self$2.maxChunkLen - turnOffset);
+                write(chunk, chunkOffset, inputLen, turnOffset);
+                turnOffset += inputLen;
+                chunkOffset += inputLen;
+                if (turnOffset === self$2.maxChunkLen) {
+                    self$2.core.hash(self$2.maxChunkLen, self$2.padMaxChunkLen);
+                    turnOffset = 0;
+                }
+            }
+            return this;
+        };
+        this.getState = function () {
+            var turnOffset = self$2.offset % self$2.maxChunkLen;
+            var heap;
+            if (!turnOffset) {
+                var io = new Int32Array(self$2.heap, self$2.padMaxChunkLen + 320, 5);
+                heap = io.buffer.slice(io.byteOffset, io.byteOffset + io.byteLength);
+            } else {
+                heap = self$2.heap.slice(0);
+            }
+            return {
+                offset: self$2.offset,
+                heap: heap
+            };
+        };
+        this.setState = function (state) {
+            self$2.offset = state.offset;
+            if (state.heap.byteLength === 20) {
+                var io = new Int32Array(self$2.heap, self$2.padMaxChunkLen + 320, 5);
+                io.set(new Int32Array(state.heap));
+            } else {
+                self$2.h32.set(new Int32Array(state.heap));
+            }
+            return this;
+        };
+        var rawEnd = this.rawEnd = function () {
+            var msgLen = self$2.offset;
+            var chunkLen = msgLen % self$2.maxChunkLen;
+            var padChunkLen = padChunk(chunkLen, msgLen);
+            self$2.core.hash(padChunkLen, self$2.padMaxChunkLen);
+            var result = getRawDigest(self$2.heap, self$2.padMaxChunkLen);
+            initState(self$2.heap, self$2.padMaxChunkLen);
+            return result;
+        };
+        this.end = function () {
+            return hex(rawEnd().buffer);
+        };
+    }
+    ;
+    // The low-level RushCore module provides the heart of Rusha,
+    // a high-speed sha1 implementation working on an Int32Array heap.
+    // At first glance, the implementation seems complicated, however
+    // with the SHA1 spec at hand, it is obvious this almost a textbook
+    // implementation that has a few functions hand-inlined and a few loops
+    // hand-unrolled.
+    Rusha._core = function RushaCore(stdlib, foreign, heap) {
+        'use asm';
+        var H = new stdlib.Int32Array(heap);
+        function hash(k, x) {
+            // k in bytes
+            k = k | 0;
+            x = x | 0;
+            var i = 0, j = 0, y0 = 0, z0 = 0, y1 = 0, z1 = 0, y2 = 0, z2 = 0, y3 = 0, z3 = 0, y4 = 0, z4 = 0, t0 = 0, t1 = 0;
+            y0 = H[x + 320 >> 2] | 0;
+            y1 = H[x + 324 >> 2] | 0;
+            y2 = H[x + 328 >> 2] | 0;
+            y3 = H[x + 332 >> 2] | 0;
+            y4 = H[x + 336 >> 2] | 0;
+            for (i = 0; (i | 0) < (k | 0); i = i + 64 | 0) {
+                z0 = y0;
+                z1 = y1;
+                z2 = y2;
+                z3 = y3;
+                z4 = y4;
+                for (j = 0; (j | 0) < 64; j = j + 4 | 0) {
+                    t1 = H[i + j >> 2] | 0;
+                    t0 = ((y0 << 5 | y0 >>> 27) + (y1 & y2 | ~y1 & y3) | 0) + ((t1 + y4 | 0) + 1518500249 | 0) | 0;
+                    y4 = y3;
+                    y3 = y2;
+                    y2 = y1 << 30 | y1 >>> 2;
+                    y1 = y0;
+                    y0 = t0;
+                    H[k + j >> 2] = t1;
+                }
+                for (j = k + 64 | 0; (j | 0) < (k + 80 | 0); j = j + 4 | 0) {
+                    t1 = (H[j - 12 >> 2] ^ H[j - 32 >> 2] ^ H[j - 56 >> 2] ^ H[j - 64 >> 2]) << 1 | (H[j - 12 >> 2] ^ H[j - 32 >> 2] ^ H[j - 56 >> 2] ^ H[j - 64 >> 2]) >>> 31;
+                    t0 = ((y0 << 5 | y0 >>> 27) + (y1 & y2 | ~y1 & y3) | 0) + ((t1 + y4 | 0) + 1518500249 | 0) | 0;
+                    y4 = y3;
+                    y3 = y2;
+                    y2 = y1 << 30 | y1 >>> 2;
+                    y1 = y0;
+                    y0 = t0;
+                    H[j >> 2] = t1;
+                }
+                for (j = k + 80 | 0; (j | 0) < (k + 160 | 0); j = j + 4 | 0) {
+                    t1 = (H[j - 12 >> 2] ^ H[j - 32 >> 2] ^ H[j - 56 >> 2] ^ H[j - 64 >> 2]) << 1 | (H[j - 12 >> 2] ^ H[j - 32 >> 2] ^ H[j - 56 >> 2] ^ H[j - 64 >> 2]) >>> 31;
+                    t0 = ((y0 << 5 | y0 >>> 27) + (y1 ^ y2 ^ y3) | 0) + ((t1 + y4 | 0) + 1859775393 | 0) | 0;
+                    y4 = y3;
+                    y3 = y2;
+                    y2 = y1 << 30 | y1 >>> 2;
+                    y1 = y0;
+                    y0 = t0;
+                    H[j >> 2] = t1;
+                }
+                for (j = k + 160 | 0; (j | 0) < (k + 240 | 0); j = j + 4 | 0) {
+                    t1 = (H[j - 12 >> 2] ^ H[j - 32 >> 2] ^ H[j - 56 >> 2] ^ H[j - 64 >> 2]) << 1 | (H[j - 12 >> 2] ^ H[j - 32 >> 2] ^ H[j - 56 >> 2] ^ H[j - 64 >> 2]) >>> 31;
+                    t0 = ((y0 << 5 | y0 >>> 27) + (y1 & y2 | y1 & y3 | y2 & y3) | 0) + ((t1 + y4 | 0) - 1894007588 | 0) | 0;
+                    y4 = y3;
+                    y3 = y2;
+                    y2 = y1 << 30 | y1 >>> 2;
+                    y1 = y0;
+                    y0 = t0;
+                    H[j >> 2] = t1;
+                }
+                for (j = k + 240 | 0; (j | 0) < (k + 320 | 0); j = j + 4 | 0) {
+                    t1 = (H[j - 12 >> 2] ^ H[j - 32 >> 2] ^ H[j - 56 >> 2] ^ H[j - 64 >> 2]) << 1 | (H[j - 12 >> 2] ^ H[j - 32 >> 2] ^ H[j - 56 >> 2] ^ H[j - 64 >> 2]) >>> 31;
+                    t0 = ((y0 << 5 | y0 >>> 27) + (y1 ^ y2 ^ y3) | 0) + ((t1 + y4 | 0) - 899497514 | 0) | 0;
+                    y4 = y3;
+                    y3 = y2;
+                    y2 = y1 << 30 | y1 >>> 2;
+                    y1 = y0;
+                    y0 = t0;
+                    H[j >> 2] = t1;
+                }
+                y0 = y0 + z0 | 0;
+                y1 = y1 + z1 | 0;
+                y2 = y2 + z2 | 0;
+                y3 = y3 + z3 | 0;
+                y4 = y4 + z4 | 0;
+            }
+            H[x + 320 >> 2] = y0;
+            H[x + 324 >> 2] = y1;
+            H[x + 328 >> 2] = y2;
+            H[x + 332 >> 2] = y3;
+            H[x + 336 >> 2] = y4;
+        }
+        return { hash: hash };
+    };
+    if (// If we'e running in Node.JS, export a module.
+        true) {
+        module.exports = Rusha;
+    } else if (// If we're running in a DOM context, export
+        // the Rusha object to toplevel.
+        typeof window !== 'undefined') {
+        window.Rusha = Rusha;
+    }
+    if (// If we're running in a webworker, accept
+        // messages containing a jobid and a buffer
+        // or blob object, and return the hash result.
+        typeof FileReaderSync !== 'undefined') {
+        var reader = new FileReaderSync(), hasher = new Rusha(4 * 1024 * 1024);
+        self.onmessage = function onMessage(event) {
+            var hash, data = event.data.data;
+            try {
+                hash = hasher.digest(data);
+                self.postMessage({
+                    id: event.data.id,
+                    hash: hash
+                });
+            } catch (e) {
+                self.postMessage({
+                    id: event.data.id,
+                    error: e.name
+                });
+            }
+        };
+    }
+}());
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
+
+/***/ }),
+/* 80 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(Buffer) {(function() {
+  var crypt = __webpack_require__(52),
+      utf8 = __webpack_require__(8).utf8,
+      bin = __webpack_require__(8).bin,
+
+  // The core
+  sha1 = function (message) {
+    // Convert to byte array
+    if (message.constructor == String)
+      message = utf8.stringToBytes(message);
+    else if (typeof Buffer !== 'undefined' && typeof Buffer.isBuffer == 'function' && Buffer.isBuffer(message))
+      message = Array.prototype.slice.call(message, 0);
+    else if (!Array.isArray(message))
+      message = message.toString();
+
+    // otherwise assume byte array
+
+    var m  = crypt.bytesToWords(message),
+        l  = message.length * 8,
+        w  = [],
+        H0 =  1732584193,
+        H1 = -271733879,
+        H2 = -1732584194,
+        H3 =  271733878,
+        H4 = -1009589776;
+
+    // Padding
+    m[l >> 5] |= 0x80 << (24 - l % 32);
+    m[((l + 64 >>> 9) << 4) + 15] = l;
+
+    for (var i = 0; i < m.length; i += 16) {
+      var a = H0,
+          b = H1,
+          c = H2,
+          d = H3,
+          e = H4;
+
+      for (var j = 0; j < 80; j++) {
+
+        if (j < 16)
+          w[j] = m[i + j];
+        else {
+          var n = w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16];
+          w[j] = (n << 1) | (n >>> 31);
+        }
+
+        var t = ((H0 << 5) | (H0 >>> 27)) + H4 + (w[j] >>> 0) + (
+                j < 20 ? (H1 & H2 | ~H1 & H3) + 1518500249 :
+                j < 40 ? (H1 ^ H2 ^ H3) + 1859775393 :
+                j < 60 ? (H1 & H2 | H1 & H3 | H2 & H3) - 1894007588 :
+                         (H1 ^ H2 ^ H3) - 899497514);
+
+        H4 = H3;
+        H3 = H2;
+        H2 = (H1 << 30) | (H1 >>> 2);
+        H1 = H0;
+        H0 = t;
+      }
+
+      H0 += a;
+      H1 += b;
+      H2 += c;
+      H3 += d;
+      H4 += e;
+    }
+
+    return [H0, H1, H2, H3, H4];
+  },
+
+  // Public API
+  api = function (message, options) {
+    var digestbytes = crypt.wordsToBytes(sha1(message));
+    return options && options.asBytes ? digestbytes :
+        options && options.asString ? bin.bytesToString(digestbytes) :
+        crypt.bytesToHex(digestbytes);
+  };
+
+  api._blocksize = 16;
+  api._digestsize = 20;
+
+  module.exports = api;
+})();
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(51).Buffer))
+
+/***/ }),
+/* 81 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// stats.js - http://github.com/mrdoob/stats.js
+(function(f,e){ true?module.exports=e():"function"===typeof define&&define.amd?define(e):f.Stats=e()})(this,function(){var f=function(){function e(a){c.appendChild(a.dom);return a}function u(a){for(var d=0;d<c.children.length;d++)c.children[d].style.display=d===a?"block":"none";l=a}var l=0,c=document.createElement("div");c.style.cssText="position:fixed;top:0;left:0;cursor:pointer;opacity:0.9;z-index:10000";c.addEventListener("click",function(a){a.preventDefault();
+u(++l%c.children.length)},!1);var k=(performance||Date).now(),g=k,a=0,r=e(new f.Panel("FPS","#0ff","#002")),h=e(new f.Panel("MS","#0f0","#020"));if(self.performance&&self.performance.memory)var t=e(new f.Panel("MB","#f08","#201"));u(0);return{REVISION:16,dom:c,addPanel:e,showPanel:u,begin:function(){k=(performance||Date).now()},end:function(){a++;var c=(performance||Date).now();h.update(c-k,200);if(c>g+1E3&&(r.update(1E3*a/(c-g),100),g=c,a=0,t)){var d=performance.memory;t.update(d.usedJSHeapSize/
+1048576,d.jsHeapSizeLimit/1048576)}return c},update:function(){k=this.end()},domElement:c,setMode:u}};f.Panel=function(e,f,l){var c=Infinity,k=0,g=Math.round,a=g(window.devicePixelRatio||1),r=80*a,h=48*a,t=3*a,v=2*a,d=3*a,m=15*a,n=74*a,p=30*a,q=document.createElement("canvas");q.width=r;q.height=h;q.style.cssText="width:80px;height:48px";var b=q.getContext("2d");b.font="bold "+9*a+"px Helvetica,Arial,sans-serif";b.textBaseline="top";b.fillStyle=l;b.fillRect(0,0,r,h);b.fillStyle=f;b.fillText(e,t,v);
+b.fillRect(d,m,n,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d,m,n,p);return{dom:q,update:function(h,w){c=Math.min(c,h);k=Math.max(k,h);b.fillStyle=l;b.globalAlpha=1;b.fillRect(0,0,r,m);b.fillStyle=f;b.fillText(g(h)+" "+e+" ("+g(c)+"-"+g(k)+")",t,v);b.drawImage(q,d+a,m,n-a,p,d,m,n-a,p);b.fillRect(d+n-a,m,a,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d+n-a,m,a,g((1-h/w)*p))}}};return f});
+
+
+/***/ }),
+/* 82 */
+/***/ (function(module, exports) {
+
+module.exports = function() {
+	throw new Error("define cannot be used indirect");
+};
+
+
+/***/ }),
+/* 83 */
+/***/ (function(module, exports) {
+
+/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
+module.exports = __webpack_amd_options__;
+
+/* WEBPACK VAR INJECTION */}.call(exports, {}))
+
+/***/ }),
+/* 84 */,
+/* 85 */,
+/* 86 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(11);
 
 
 /***/ })
