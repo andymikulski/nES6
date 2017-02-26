@@ -10,3 +10,5 @@
 /tools/buildShaderManifest/*.log
 /src/roms
 npm-debug.log.*
+/app/nes6-demo.js
+/app/nes6.js

@@ -28,9 +28,11 @@ module.exports = [
     context: __dirname,
     entry: {
       nes6: [
+        'babel-polyfill',
         './src/nES6.js'
       ],
       'nes6-demo': [
+        'babel-polyfill',
         './src/main.js'
       ]
     },
