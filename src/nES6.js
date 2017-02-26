@@ -13,10 +13,9 @@ import WebGlRenderSurface from './gui/webgl/WebGlRenderSurface';
 import { webGlSupported } from './gui/webgl/utils';
 import CanvasRenderSurface from './gui/canvas/CanvasRenderSurface';
 
-import Input from './gui/input/Input';
-
 import {
   COLOUR_ENCODING_REFRESHRATE,
+  JOYPAD_NAME_TO_ID,
 } from './config/consts.js';
 
 export default class nES6 {
@@ -31,7 +30,6 @@ export default class nES6 {
     this._spriteDisplay = null;
     this._paletteDisplay = null;
     this._logWindow = null;
-    this._input = null;
     this._encodingTypeToSet = '';
     this._newRomWaiting = false;
     this._newRomLoaded = {
@@ -102,7 +100,6 @@ export default class nES6 {
 
     this._mainboard = new Mainboard(this._renderSurface);
     this._mainboard.connect('reset', ::this._onReset);
-    this._input = new Input(this._mainboard);
 
     // disable audio for headless rendering
     if (this._options['render'] === 'headless') {
@@ -261,10 +258,6 @@ export default class nES6 {
       return;
     }
 
-    if (this._input) {
-      this._input.poll();
-    }
-
     var bgColour = this._mainboard.renderBuffer.pickColour(this._mainboard.ppu.getBackgroundPaletteIndex());
     this._renderSurface.clearBuffers(bgColour);
     this._mainboard.renderBuffer.clearBuffer();
@@ -340,6 +333,24 @@ export default class nES6 {
   loadShaderFromUrl(url) {
     if (this._renderSurface.loadShaderFromUrl) {
       this._renderSurface.loadShaderFromUrl(url);
+    }
+  }
+
+  pressControllerButton(playerNum, button) {
+    var joypad = this._mainboard.inputdevicebus.getJoypad(playerNum);
+    const buttonIdPressed = JOYPAD_NAME_TO_ID(button);
+
+    if (typeof buttonIdPressed !== 'undefined') {
+      joypad.pressButton( buttonIdPressed, true );
+    }
+  }
+
+  depressControllerButton(playerNum, button) {
+    var joypad = this._mainboard.inputdevicebus.getJoypad(playerNum);
+    const buttonIdPressed = JOYPAD_NAME_TO_ID(button);
+
+    if (typeof buttonIdPressed !== 'undefined') {
+      joypad.pressButton( buttonIdPressed, false );
     }
   }
 }
