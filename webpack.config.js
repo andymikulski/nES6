@@ -33,7 +33,7 @@ module.exports = [
       ],
       'nes6-demo': [
         'babel-polyfill',
-        './src/main.js'
+        './src/demo.js'
       ]
     },
 

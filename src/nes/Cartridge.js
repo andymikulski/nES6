@@ -105,8 +105,6 @@ export default class Cartridge {
 
 			// calculate SHA1 on PRG and CHR data, look it up in the db, then load it
 			this._sha1 = sha1(binaryString, stringIndex);
-			console.log("SHA1: " + this._sha1);
-
 			this.memoryMapper = mapperFactory(mapperId, this.mainboard, mirroringMethod);
 
 			// read in program code
@@ -125,7 +123,7 @@ export default class Cartridge {
 			this._determineColourEncodingType(name);
 			setColourEncodingType(this._colourEncodingType);
 			var prgKb = prg8kChunkCount * 8;
-			console.log(`Cartridge '${name}' loaded. \nFile Size: \t${fileSize} KB \nMapper:\t\t${mapperId} \nMirroring:\t${mirroringMethodToString(mirroringMethod)} \nPRG:\t\t${prgKb}kb \nCHR:\t\t${chr1kChunkCount}kb \nEncoding:\t${this._colourEncodingType}`);
+			console.log(`Cartridge '${name}' loaded. \n\nSHA1: \t\t${this._sha1} \nFile Size: \t${fileSize} KB \nMapper:\t\t${mapperId} \nMirroring:\t${mirroringMethodToString(mirroringMethod)} \nPRG:\t\t${prgKb}kb \nCHR:\t\t${chr1kChunkCount}kb \nEncoding:\t${this._colourEncodingType}`);
 
 			resolve();
 		});

@@ -78,8 +78,8 @@ export default class nES6 {
     this._newRomWaiting = true;
     this._newRomLoaded = {
       name,
-      binaryString,
-      fileSize: binaryString.length / 1000 // in KB
+      binaryString: binaryString instanceof Uint8Array
+        ? binaryString : new Uint8Array(binaryString),
     };
   }
 
@@ -298,14 +298,13 @@ export default class nES6 {
 
   _doRomLoad({
     name,
-    binaryString,
-    fileSize
+    binaryString
   }) {
     this._cart = new Cartridge(this._mainboard);
     this._cart.loadRom({
       name,
       binaryString,
-      fileSize
+      fileSize: binaryString.length / 1000 // in KB
     })
     .catch(::this._showError)
     .then(()=>{
@@ -322,6 +321,19 @@ export default class nES6 {
         that._showError(err);
       }
     });
+  }
+
+  /**
+   * Given a Binary string (and an optional ROM name), loads the ROM into
+   * this nES6 instance's memory. Manages casting the string to the proper
+   * format for end developer.
+   *
+   * @param  {String} binaryString  ROM file as a binary string
+   * @param  {String} name?         Optional ROM name (default: 'Game')
+   * @return {void}
+   */
+  loadRomFromBinary(binaryString, name = 'Game') {
+    this._loadRomCallback(name, binaryString);
   }
 
   _showError(err) {
