@@ -62,68 +62,73 @@ export default class Cartridge {
 		return a;
 	}
 
-	loadRom(name, binaryString, completeCallback) {
-		this._name = name;
+	loadRom({
+		name,
+		binaryString,
+		fileSize,
+	}) {
+		return new Promise((resolve, reject)=>{
+			this._name = name;
+			var stringIndex = 0;
+			var correctHeader = [78, 69, 83, 26];
 
-		var stringIndex = 0;
-		var correctHeader = [78, 69, 83, 26];
-
-		for (var i = 0; i < correctHeader.length; ++i) {
-			if (correctHeader[i] !== binaryString[stringIndex++]) {
-				throw new Error('Invalid NES header for file!');
+			for (var i = 0; i < correctHeader.length; ++i) {
+				if (correctHeader[i] !== binaryString[stringIndex++]) {
+					throw new Error('Invalid NES header for file!');
+				}
 			}
-		}
 
-		var prgPageCount = binaryString[stringIndex++] || 1;
-		var chrPageCount = binaryString[stringIndex++];
-		var controlByte1 = binaryString[stringIndex++];
-		var controlByte2 = binaryString[stringIndex++];
+			var prgPageCount = binaryString[stringIndex++] || 1;
+			var chrPageCount = binaryString[stringIndex++];
+			var controlByte1 = binaryString[stringIndex++];
+			var controlByte2 = binaryString[stringIndex++];
 
-		var horizontalMirroring = (controlByte1 & 0x01) === 0;
-		var sramEnabled = (controlByte1 & 0x02) > 0;
-		var hasTrainer = (controlByte1 & 0x04) > 0;
-		var fourScreenRamLayout = (controlByte1 & 0x08) > 0;
+			var horizontalMirroring = (controlByte1 & 0x01) === 0;
+			var sramEnabled = (controlByte1 & 0x02) > 0;
+			var hasTrainer = (controlByte1 & 0x04) > 0;
+			var fourScreenRamLayout = (controlByte1 & 0x08) > 0;
 
-		var mirroringMethod = 0;
-		if (fourScreenRamLayout) {
-			mirroringMethod = PPU_MIRRORING_FOURSCREEN;
-		} else if (!horizontalMirroring) {
-			mirroringMethod = PPU_MIRRORING_VERTICAL;
-		} else {
-			mirroringMethod = PPU_MIRRORING_HORIZONTAL;
-		}
+			var mirroringMethod = 0;
+			if (fourScreenRamLayout) {
+				mirroringMethod = PPU_MIRRORING_FOURSCREEN;
+			} else if (!horizontalMirroring) {
+				mirroringMethod = PPU_MIRRORING_VERTICAL;
+			} else {
+				mirroringMethod = PPU_MIRRORING_HORIZONTAL;
+			}
 
-		var mapperId = ((controlByte1 & 0xF0) >> 4) | (controlByte2 & 0xF0);
+			var mapperId = ((controlByte1 & 0xF0) >> 4) | (controlByte2 & 0xF0);
 
-		stringIndex = 16;
-		if (hasTrainer)
-			stringIndex += 512;
+			stringIndex = 16;
+			if (hasTrainer)
+				stringIndex += 512;
 
-		// calculate SHA1 on PRG and CHR data, look it up in the db, then load it
-		this._sha1 = sha1(binaryString, stringIndex);
-		console.log("SHA1: " + this._sha1);
+			// calculate SHA1 on PRG and CHR data, look it up in the db, then load it
+			this._sha1 = sha1(binaryString, stringIndex);
+			console.log("SHA1: " + this._sha1);
 
-		this.memoryMapper = mapperFactory(mapperId, this.mainboard, mirroringMethod);
+			this.memoryMapper = mapperFactory(mapperId, this.mainboard, mirroringMethod);
 
-		// read in program code
-		var prg8kChunkCount = prgPageCount * 2; // read in 8k chunks, prgPageCount is 16k chunks
-		var prgSize = 0x2000 * prg8kChunkCount;
-		this.memoryMapper.setPrgData(this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + prgSize), prgSize), prg8kChunkCount);
-		stringIndex += prgSize;
+			// read in program code
+			var prg8kChunkCount = prgPageCount * 2; // read in 8k chunks, prgPageCount is 16k chunks
+			var prgSize = 0x2000 * prg8kChunkCount;
+			this.memoryMapper.setPrgData(this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + prgSize), prgSize), prg8kChunkCount);
+			stringIndex += prgSize;
 
-		// read in character maps
-		var chr1kChunkCount = chrPageCount * 8; // 1kb per pattern table, chrPageCount is the 8kb count
-		var chrSize = 0x400 * chr1kChunkCount;
-		this.memoryMapper.setChrData(this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + chrSize), chrSize), chr1kChunkCount);
-		stringIndex += chrSize;
+			// read in character maps
+			var chr1kChunkCount = chrPageCount * 8; // 1kb per pattern table, chrPageCount is the 8kb count
+			var chrSize = 0x400 * chr1kChunkCount;
+			this.memoryMapper.setChrData(this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + chrSize), chrSize), chr1kChunkCount);
+			stringIndex += chrSize;
 
-		// determine NTSC or PAL
-		this._determineColourEncodingType(name);
-		setColourEncodingType(this._colourEncodingType);
-		var prgKb = prg8kChunkCount * 8;
-		console.log(`Cartridge '${name}' loaded. \nMapper:\t\t${mapperId} \nMirroring:\t${mirroringMethodToString(mirroringMethod)} \nPRG:\t\t${prgKb}kb \nCHR:\t\t${chr1kChunkCount}kb \nEncoding:\t${this._colourEncodingType}`);
+			// determine NTSC or PAL
+			this._determineColourEncodingType(name);
+			setColourEncodingType(this._colourEncodingType);
+			var prgKb = prg8kChunkCount * 8;
+			console.log(`Cartridge '${name}' loaded. \nFile Size: \t${fileSize} KB \nMapper:\t\t${mapperId} \nMirroring:\t${mirroringMethodToString(mirroringMethod)} \nPRG:\t\t${prgKb}kb \nCHR:\t\t${chr1kChunkCount}kb \nEncoding:\t${this._colourEncodingType}`);
 
-		completeCallback();
+			resolve();
+		});
 	}
 
 	reset() {
