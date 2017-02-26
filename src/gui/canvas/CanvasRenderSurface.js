@@ -1,4 +1,5 @@
 import { saveAs } from 'file-saver';
+import { rusha } from '../../utils/serialisation';
 import {
 	g_ClearScreenArray,
 	SCREEN_WIDTH,
@@ -44,8 +45,6 @@ export default class CanvasRenderSurface {
 
 
 	getRenderBufferHash() {
-
-		var rusha = new Rusha();
 		return rusha.digestFromArrayBuffer( this._offscreen32BitView ).toUpperCase();
 	}
 

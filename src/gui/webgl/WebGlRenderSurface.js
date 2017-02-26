@@ -1,7 +1,12 @@
-import { SCREEN_WIDTH, SCREEN_HEIGHT } from '../../config/consts';
-import { g_ClearScreenArray } from '../../config/consts';
+import {
+	SCREEN_WIDTH,
+	SCREEN_HEIGHT,
+	g_ClearScreenArray
+} from '../../config/consts';
 
 import { saveAs } from 'file-saver';
+
+import { rusha } from '../../utils/serialisation';
 
 import {
 	getGlContext,
@@ -122,7 +127,6 @@ export default class WebGlRenderSurface {
 
 
 	getRenderBufferHash() {
-		var rusha = new Rusha();
 		return rusha.digestFromArrayBuffer( this._offscreen32BitView ).toUpperCase();
 	}
 

@@ -1,3 +1,6 @@
+import Rusha from 'rusha';
+export const rusha = new Rusha();
+
 const uintArrayCache = {};
 export function uintArrayToString(uintArray) {
   if (!(uintArray instanceof Int32Array)) {
