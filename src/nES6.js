@@ -6,6 +6,7 @@ import Cartridge from './nes/Cartridge';
 import Trace from './utils/Trace';
 import { loadRomFromUrl } from './utils/loadRom';
 import { processGenieCode } from './utils/gameGenie';
+import validateObject from './utils/validateObject';
 
 import CanvasParent from './gui/CanvasParent';
 import HeadlessRenderSurface from './gui/headless/HeadlessRenderSurface';
@@ -20,6 +21,14 @@ import {
 
 export default class nES6 {
   constructor(options) {
+    // validate the options object before doing anything
+    validateObject({
+      plugins: { is: Array, with: Function },
+      render: ['auto', 'canvas', 'webgl', 'headless'],
+      audio: { is: Boolean },
+    }, options);
+    // if we're still here, then the options are all good
+
     this._options = options || {};
 
     this._cart = null;
@@ -112,7 +121,8 @@ export default class nES6 {
     this._mainboard.connect('reset', ::this._onReset);
 
     // disable audio for headless rendering
-    if (this._options['render'] === 'headless') {
+    if (this._options['render'] === 'headless'
+      || this._options['audio'] === false) {
       this._mainboard.enableSound(false);
     }
 
