@@ -1011,7 +1011,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 exports.getGlContext = getGlContext;
 exports.webGlSupported = webGlSupported;
 
-var _glMat = __webpack_require__(62);
+var _glMat = __webpack_require__(61);
 
 var _glMat2 = _interopRequireDefault(_glMat);
 
@@ -1510,187 +1510,6 @@ exports.default = BlipSynth;
 
 /***/ }),
 /* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-exports.getCartName = getCartName;
-exports.getMetaName = getMetaName;
-exports.getMetaObject = getMetaObject;
-exports.setMetaObject = setMetaObject;
-exports.saveState = saveState;
-exports.loadState = loadState;
-exports.getStateMetaData = getStateMetaData;
-exports.renameState = renameState;
-exports.renameQuickSaveStates = renameQuickSaveStates;
-exports.saveStateSupported = saveStateSupported;
-exports.saveToLocalStorage = saveToLocalStorage;
-exports.loadFromLocalStorage = loadFromLocalStorage;
-
-var _lzString = __webpack_require__(89);
-
-var _lzString2 = _interopRequireDefault(_lzString);
-
-var _consts = __webpack_require__(0);
-
-var _serialisation = __webpack_require__(1);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var compressCache = {};
-function compress(rawString) {
-	if (!compressCache[rawString]) {
-		compressCache[rawString] = _lzString2.default.compress(rawString);
-	}
-	return compressCache[rawString];
-}
-
-var decompressCache = {};
-function decompress(rawString) {
-	if (!decompressCache[rawString]) {
-		compressCache[rawString] = _lzString2.default.decompress(rawString);
-	}
-	return compressCache[rawString];
-}
-
-function getCartName(slotName, cartName) {
-	return slotName + ":" + cartName;
-}
-
-function getMetaName(cartName) {
-	return "meta:" + cartName;
-}
-
-function getMetaObject(cartName) {
-	var obj = loadFromLocalStorage(getMetaName(cartName));
-	if (!obj) {
-		obj = {
-			slots: {}
-		};
-	}
-	return obj;
-}
-
-function setMetaObject(cartName, obj) {
-	return saveToLocalStorage(getMetaName(cartName), obj);
-}
-
-function saveState(slotName, cartName, data, screenData) {
-	// add to meta data object
-	var meta = getMetaObject(cartName);
-	var slotMeta = {};
-	if (screenData) {
-		slotMeta.screen = compress(screenData);
-	}
-	slotMeta.date = Date.now();
-	meta.slots[slotName] = slotMeta;
-	return setMetaObject(cartName, meta);
-}
-
-function loadState(slotName, cartName) {
-
-	if (localStorage) {
-		var compressed = localStorage.getItem(getCartName(slotName, cartName));
-		if (compressed) {
-			var compressedLength = compressed.length;
-			var decompressed = decompress(compressed);
-			var obj = JSON.parse(decompressed);
-			console.log("Loaded data size: " + compressedLength + " (uncompressed: " + decompressed.length + ")");
-			return obj;
-		}
-	} else {
-		//( 'Browser does not support local storage' );
-	}
-	return null;
-}
-
-function getStateMetaData(cartName, decompressScreenData) {
-	var meta = getMetaObject(cartName);
-	// decompress all image data before passing it back
-	if (decompressScreenData) {
-		var keyNames = Object.keys(meta.slots);
-		for (var keyIndex = 0; keyIndex < keyNames.length; ++keyIndex) {
-			var slotName = keyNames[keyIndex];
-			var slot = meta.slots[slotName];
-			if (slot.screen) {
-				slot.screen = decompress(slot.screen);
-			}
-		}
-	}
-	return meta;
-}
-
-function renameState(meta, slotName, newSlotName, cartName) {
-
-	// rename data object
-	var itemName = getCartName(slotName, cartName);
-	var data = localStorage.getItem(itemName);
-	if (data) {
-		localStorage.removeItem(itemName);
-
-		if (newSlotName) {
-			var newItemName = getCartName(newSlotName, cartName);
-			localStorage.setItem(newItemName, data);
-		}
-
-		// rename it in meta object
-		if (newSlotName) {
-			meta.slots[newSlotName] = meta.slots[slotName];
-		}
-		delete meta.slots[slotName];
-	}
-}
-
-function renameQuickSaveStates(slotName, cartName, limitCount) {
-
-	var meta = getMetaObject(cartName);
-
-	// remove last quicksave.
-	renameState(meta, slotName + (0, _consts.ZERO_PAD)(limitCount - 1, 2, 0), null, cartName);
-
-	// rename any others, moving each one down. We go backwards so we don't overwrite
-	for (var i = limitCount - 2; i > 0; --i) {
-		renameState(meta, slotName + (0, _consts.ZERO_PAD)(i, 2, 0), slotName + (0, _consts.ZERO_PAD)(i + 1, 2, 0), cartName);
-	}
-
-	// rename main 'quicksave' slot
-	renameState(meta, slotName, slotName + (0, _consts.ZERO_PAD)(1, 2, 0), cartName);
-
-	setMetaObject(cartName, meta);
-}
-
-function saveStateSupported() {
-
-	return !!localStorage;
-}
-
-function saveToLocalStorage(name, data) {
-	var raw = JSON.stringify(data);
-	var compressed = compress(raw);
-	localStorage.setItem(name, compressed);
-
-	return compressed;
-}
-
-function loadFromLocalStorage(name) {
-	if (localStorage) {
-		var compressed = localStorage.getItem(name);
-		if (compressed) {
-			var compressedLength = compressed.length;
-			var decompressed = decompress(compressed);
-			var obj = JSON.parse(decompressed);
-			return obj;
-		}
-	}
-	return null;
-}
-
-/***/ }),
-/* 9 */
 /***/ (function(module, exports) {
 
 var charenc = {
@@ -1729,7 +1548,7 @@ module.exports = charenc;
 
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports) {
 
 module.exports = identity;
@@ -1761,7 +1580,7 @@ function identity(out) {
 };
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports) {
 
 var g;
@@ -1788,7 +1607,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1820,15 +1639,15 @@ var _Trace = __webpack_require__(3);
 
 var _Trace2 = _interopRequireDefault(_Trace);
 
-var _loadRom = __webpack_require__(50);
+var _loadRom = __webpack_require__(49);
 
-var _gameGenie = __webpack_require__(49);
+var _gameGenie = __webpack_require__(48);
 
-var _CanvasParent = __webpack_require__(13);
+var _CanvasParent = __webpack_require__(12);
 
 var _CanvasParent2 = _interopRequireDefault(_CanvasParent);
 
-var _HeadlessRenderSurface = __webpack_require__(88);
+var _HeadlessRenderSurface = __webpack_require__(16);
 
 var _HeadlessRenderSurface2 = _interopRequireDefault(_HeadlessRenderSurface);
 
@@ -1838,13 +1657,9 @@ var _WebGlRenderSurface2 = _interopRequireDefault(_WebGlRenderSurface);
 
 var _utils = __webpack_require__(6);
 
-var _CanvasRenderSurface = __webpack_require__(16);
+var _CanvasRenderSurface = __webpack_require__(15);
 
 var _CanvasRenderSurface2 = _interopRequireDefault(_CanvasRenderSurface);
-
-var _Input = __webpack_require__(18);
-
-var _Input2 = _interopRequireDefault(_Input);
 
 var _consts = __webpack_require__(0);
 
@@ -1854,6 +1669,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var nES6 = function () {
   function nES6(options) {
+    var _this = this;
+
     _classCallCheck(this, nES6);
 
     this._options = options || {};
@@ -1866,7 +1683,6 @@ var nES6 = function () {
     this._spriteDisplay = null;
     this._paletteDisplay = null;
     this._logWindow = null;
-    this._input = null;
     this._encodingTypeToSet = '';
     this._newRomWaiting = false;
     this._newRomLoaded = {
@@ -1886,6 +1702,18 @@ var nES6 = function () {
     this.animate = this._animate.bind(this);
 
     window.onerror = this._showError.bind(this);
+
+    // Apply plugins
+    if (this._options.plugins) {
+      if (!(this._options.plugins instanceof Array)) {
+        throw new Error('nES6 plugins must be an array!');
+      }
+
+      // Pass this nES6 instance to each plugin
+      this._options.plugins.map(function (plugin) {
+        return plugin(_this);
+      });
+    }
   }
 
   _createClass(nES6, [{
@@ -1942,7 +1770,6 @@ var nES6 = function () {
 
       this._mainboard = new _Mainboard2.default(this._renderSurface);
       this._mainboard.connect('reset', this._onReset.bind(this));
-      this._input = new _Input2.default(this._mainboard);
 
       // disable audio for headless rendering
       if (this._options['render'] === 'headless') {
@@ -2103,10 +1930,6 @@ var nES6 = function () {
         return;
       }
 
-      if (this._input) {
-        this._input.poll();
-      }
-
       var bgColour = this._mainboard.renderBuffer.pickColour(this._mainboard.ppu.getBackgroundPaletteIndex());
       this._renderSurface.clearBuffers(bgColour);
       this._mainboard.renderBuffer.clearBuffer();
@@ -2133,7 +1956,7 @@ var nES6 = function () {
   }, {
     key: '_doRomLoad',
     value: function _doRomLoad(_ref) {
-      var _this = this;
+      var _this2 = this;
 
       var name = _ref.name,
           binaryString = _ref.binaryString,
@@ -2145,7 +1968,7 @@ var nES6 = function () {
         binaryString: binaryString,
         fileSize: fileSize
       }).catch(this._showError.bind(this)).then(function () {
-        _this._romLoaded = true;
+        _this2._romLoaded = true;
       });
     }
   }, {
@@ -2191,6 +2014,26 @@ var nES6 = function () {
         this._renderSurface.loadShaderFromUrl(url);
       }
     }
+  }, {
+    key: 'pressControllerButton',
+    value: function pressControllerButton(playerNum, button) {
+      var joypad = this._mainboard.inputdevicebus.getJoypad(playerNum);
+      var buttonIdPressed = (0, _consts.JOYPAD_NAME_TO_ID)(button);
+
+      if (typeof buttonIdPressed !== 'undefined') {
+        joypad.pressButton(buttonIdPressed, true);
+      }
+    }
+  }, {
+    key: 'depressControllerButton',
+    value: function depressControllerButton(playerNum, button) {
+      var joypad = this._mainboard.inputdevicebus.getJoypad(playerNum);
+      var buttonIdPressed = (0, _consts.JOYPAD_NAME_TO_ID)(button);
+
+      if (typeof buttonIdPressed !== 'undefined') {
+        joypad.pressButton(buttonIdPressed, false);
+      }
+    }
   }]);
 
   return nES6;
@@ -2199,7 +2042,7 @@ var nES6 = function () {
 exports.default = nES6;
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2290,7 +2133,7 @@ var CanvasParent = function () {
 exports.default = CanvasParent;
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2348,7 +2191,7 @@ var WebAudioBuffer = function () {
 exports.default = WebAudioBuffer;
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2360,7 +2203,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _WebAudioBuffer = __webpack_require__(14);
+var _WebAudioBuffer = __webpack_require__(13);
 
 var _WebAudioBuffer2 = _interopRequireDefault(_WebAudioBuffer);
 
@@ -2406,7 +2249,7 @@ var WebAudioRenderer = function () {
 exports.default = WebAudioRenderer;
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2519,7 +2362,7 @@ var CanvasRenderSurface = function () {
 exports.default = CanvasRenderSurface;
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2531,325 +2374,57 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var GamePad = function () {
-	function GamePad(rawPad) {
-		_classCallCheck(this, GamePad);
-
-		this._axisThreshold = 0.5;
-		this._buttonStates = new Int32Array(rawPad['buttons'].length);
-		this._axesStates = new Int32Array(rawPad['axes'].length);
-	}
-
-	_createClass(GamePad, [{
-		key: 'getButtonCount',
-		value: function getButtonCount() {
-			return this._buttonStates.length;
-		}
-
-		// Returns 0 for not changed, 1 for pressed, 2 for not pressed
-
-	}, {
-		key: 'getButtonState',
-		value: function getButtonState(rawPad, buttonIndex) {
-			var isPressed = rawPad['buttons'][buttonIndex]['pressed'];
-			var intState = isPressed ? 1 : 0;
-			if (this._buttonStates[buttonIndex] !== intState) {
-				this._buttonStates[buttonIndex] = intState;
-				return isPressed ? 1 : 2;
-			}
-			return 0;
-		}
-	}, {
-		key: 'getAxisCount',
-		value: function getAxisCount() {
-			return this._axesStates.length;
-		}
-
-		// Returns 0 for not changed, 1 for pressed, 2 for not pressed
-
-	}, {
-		key: 'getAxisState',
-		value: function getAxisState(rawPad, axisIndex) {
-
-			var isPressed = rawPad['axes'][axisIndex] >= this._axisThreshold || rawPad['axes'][axisIndex] <= -this._axisThreshold;
-			var intState = isPressed ? 1 : 0;
-			if (this._axesStates[axisIndex] !== intState) {
-				this._axesStates[axisIndex] = intState;
-				return isPressed ? 1 : 2;
-			}
-			return 0;
-		}
-	}]);
-
-	return GamePad;
-}();
-
-exports.default = GamePad;
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _GamePad = __webpack_require__(17);
-
-var _GamePad2 = _interopRequireDefault(_GamePad);
-
-var _utils = __webpack_require__(8);
+var _serialisation = __webpack_require__(1);
 
 var _consts = __webpack_require__(0);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var gamepad_consts = {
-	top1: 0, // Top button 1 ("A" on the Xbox 360 controller; cross on the PS3 controller)
-	top2: 1, // Top button 2 ("B" on the Xbox 360 controller; circle on the PS3 controller)
-	bottom3: 2, // gp_face3	Top button 3 ("X" on the Xbox 360 controller; square on the PS3 controller)
-	bottom4: 3, // gp_face4	Top button 4 ("Y" on the Xbox 360 controller; triangle on the PS3 controller)
-	shoulderLeft: 4, // gp_shoulderlb	Left shoulder button (digital)
-	shoulderRight: 5, // gp_shoulderrb	Right shoulder button (digital)
-	shoulderLeftTrigger: 6, // gp_shoulderl	Left shoulder trigger (analogue)
-	shoulderRightTrigger: 7, // gp_shoulderr	Right shoulder trigger (analogue)
-	select: 8, // gp_select	The select button on PlayStation 3 and the back button on Xbox 360
-	start: 9, // gp_start	The start button
-	leftStickButton: 10, // gp_stickl	The left stick pressed (as a button)
-	rightStickButton: 11, // gp_stickr	The right stick pressed (as a button)
-	dpadUp: 12, // gp_padu	D-pad up (digital)
-	dpadDown: 13, // gp_padd	D-pad down (digital)
-	dpadLeft: 14, // gp_padl	D-pad left (digital)
-	dpadRight: 15, // gp_padr	D-pad right (digital)
-	leftStickHoriz: 0, // gp_axislh	Left stick horizontal axis (analogue)
-	leftStickVert: 1, // gp_axislv	Left stick vertical axis (analogue)
-	rightStickHoriz: 2, // gp_axisrh	Right stick horizontal axis (analogue)
-	rightStickVert: 3 // gp_axisrv	Right stick vertical axis (analogue)
-};
+var HeadlessRenderSurface = function () {
+	function HeadlessRenderSurface() {
+		_classCallCheck(this, HeadlessRenderSurface);
 
-var Input = function () {
-	function Input(mainboard) {
-		_classCallCheck(this, Input);
-
-		this._mainboard = mainboard;
-		this._pads = [];
-
-		this._loadKeyBindingsFromLocalStorage();
-
-		// these values are guessed - need testing
-		this._gamepadButtonMap = {
-			'UP': [gamepad_consts.dpadUp],
-			'DOWN': [gamepad_consts.dpadDown],
-			'LEFT': [gamepad_consts.dpadLeft],
-			'RIGHT': [gamepad_consts.dpadRight],
-			'A': [gamepad_consts.top1, gamepad_consts.top2, gamepad_consts.shoulderLeft],
-			'B': [gamepad_consts.bottom3, gamepad_consts.bottom4, gamepad_consts.shoulderRight],
-			'SELECT': [gamepad_consts.select],
-			'START': [gamepad_consts.start]
-		};
-
-		this._gamepadAxisMap = {
-			'UP': [{ axis: gamepad_consts.leftStickVert, type: 'positive' }, { axis: gamepad_consts.rightStickVert, type: 'positive' }],
-			'DOWN': [{ axis: gamepad_consts.leftStickVert, type: 'negative' }, { axis: gamepad_consts.rightStickVert, type: 'negative' }],
-			'LEFT': [{ axis: gamepad_consts.leftStickHoriz, type: 'negative' }, { axis: gamepad_consts.rightStickHoriz, type: 'negative' }],
-			'RIGHT': [{ axis: gamepad_consts.leftStickHoriz, type: 'positive' }, { axis: gamepad_consts.rightStickHoriz, type: 'positive' }],
-			'A': [{ axis: gamepad_consts.shoulderLeftTrigger, type: 'positive' }],
-			'B': [{ axis: gamepad_consts.shoulderRightTrigger, type: 'positive' }]
-		};
-
-		var that = this;
-
-		// keyboard support
-		window.addEventListener('keydown', function (event) {
-			if (that._doKeyboardButtonPress(Number(event.keyCode), true)) {
-				event.preventDefault();
-			}
-		}, false);
-		window.addEventListener('keyup', function (event) {
-			if (that._doKeyboardButtonPress(Number(event.keyCode), false)) {
-				event.preventDefault();
-			}
-		}, false);
-
-		this._gamepadsSupported = navigator['getGamepads'] !== undefined;
-
-		if (this._gamepadsSupported) {
-			this._populateGamepads();
-
-			window.addEventListener('gamepadconnected', this._populateGamepads.bind(this), true);
-			window.addEventListener('gamepaddisconnected', this._populateGamepads.bind(this), true);
-		}
+		this._buffer = new Uint32Array(_consts.SCREEN_WIDTH * _consts.SCREEN_HEIGHT);
 	}
 
-	_createClass(Input, [{
-		key: '_populateGamepads',
-		value: function _populateGamepads() {
-
-			this._pads.length = 0;
-			if (this._gamepadsSupported) {
-				var gamepads = navigator['getGamepads']();
-				for (var i = 0; i < gamepads.length; ++i) {
-					if (gamepads[i]) {
-						var pad = gamepads[i];
-						this._pads.push(new _GamePad2.default(pad));
-					}
-				}
+	_createClass(HeadlessRenderSurface, [{
+		key: 'writeToBuffer',
+		value: function writeToBuffer(bufferIndex, insertIndex, colour) {
+			this._buffer[insertIndex] = 0xFF000000 | colour;
+		}
+	}, {
+		key: 'clearBuffers',
+		value: function clearBuffers(backgroundColour) {
+			for (var i = 0; i < this._buffer.length; ++i) {
+				this._buffer[i] = 0xFF000000 | backgroundColour;
 			}
 		}
 	}, {
-		key: 'poll',
-		value: function poll() {
-
-			if (this._gamepadsSupported) {
-				this._pollGamepads();
-			}
+		key: 'getRenderBufferHash',
+		value: function getRenderBufferHash() {
+			return _serialisation.rusha.digestFromArrayBuffer(this._buffer).toUpperCase();
 		}
 	}, {
-		key: '_pollGamepads',
-		value: function _pollGamepads() {
-
-			var pads = navigator['getGamepads']();
-			for (var i = 0; i < this._pads.length; ++i) {
-				var pad = this._pads[i];
-
-				// do buttons
-				for (var buttonIndex = 0; buttonIndex < pad.getButtonCount(); ++buttonIndex) {
-					var buttonState = pad.getButtonState(pads[i], buttonIndex);
-					if (buttonState > 0) {
-						//console.log( "Pressed button " + buttonIndex );
-						this._doGamepadButton(i, buttonIndex, buttonState === 1);
-					}
-				}
-
-				// do axes
-				for (var axisIndex = 0; axisIndex < pad.getAxisCount(); ++axisIndex) {
-					var axisState = pad.getAxisState(pads[i], axisIndex);
-					if (axisState > 0) {
-						//					this._doGamepadAxis( i, axisIndex, axisState === 1, pads[ i ].axes[ axisIndex ] > 0 ? 'positive' : 'negative' );
-					}
-				}
-			}
-		}
+		key: 'render',
+		value: function render() {}
 	}, {
-		key: '_doGamepadAxis',
-		value: function _doGamepadAxis(gamepadIndex, axisIndex, isPressed, axisType) {
-			var joypad = this._mainboard.inputdevicebus.getJoypad(gamepadIndex);
-
-			if (joypad) {
-				for (var buttonName in this._gamepadButtonMap) {
-					if (this._gamepadButtonMap.hasOwnProperty(buttonName)) {
-
-						var buttonArray = this._gamepadButtonMap[buttonName];
-						for (var i = 0; i < buttonArray.length; ++i) {
-
-							var but = buttonArray[i];
-							if (but.axis === axisIndex && but.type === axisType) {
-								joypad.pressButton(Number((0, _consts.JOYPAD_NAME_TO_ID)(buttonName)), isPressed);
-							}
-						}
-					}
-				}
-			}
-		}
+		key: 'screenshot',
+		value: function screenshot() {}
 	}, {
-		key: '_doGamepadButton',
-		value: function _doGamepadButton(gamepadIndex, buttonIndex, isPressed) {
-			var joypad = this._mainboard.inputdevicebus.getJoypad(gamepadIndex);
-
-			if (joypad) {
-				for (var buttonName in this._gamepadButtonMap) {
-					if (this._gamepadButtonMap.hasOwnProperty(buttonName)) {
-						var buttonArray = this._gamepadButtonMap[buttonName];
-						for (var i = 0; i < buttonArray.length; ++i) {
-							if (buttonIndex === buttonArray[i]) {
-								joypad.pressButton(Number((0, _consts.JOYPAD_NAME_TO_ID)(buttonName)), isPressed);
-							}
-						}
-					}
-				}
-			}
-		}
-	}, {
-		key: '_doKeyboardButtonPress',
-		value: function _doKeyboardButtonPress(keyCode, pressed) {
-
-			var len = Math.min(2, this._playerKeyboardMaps.length);
-			var wasPressed = false;
-
-			for (var playerIndex = 0; playerIndex < len; ++playerIndex) {
-
-				var joypad = this._mainboard.inputdevicebus.getJoypad(playerIndex);
-				var map = this._playerKeyboardMaps[playerIndex];
-
-				if (map && joypad) {
-					for (var buttonIndex = 0; buttonIndex < map.length; ++buttonIndex) {
-						var buttonArray = map[buttonIndex];
-						for (var i = 0; i < buttonArray.length; ++i) {
-							if (buttonArray[i] === keyCode) {
-								joypad.pressButton(buttonIndex, pressed);
-								wasPressed = true;
-							}
-						}
-					}
-				}
-			}
-			return wasPressed;
-		}
-	}, {
-		key: 'saveKeyBindings',
-		value: function saveKeyBindings(playerId, key, keysAssigned) {
-
-			this._playerKeyboardMaps[playerId][key] = keysAssigned.slice(0);
-			this._saveKeyBindingsToLocalStorage();
-		}
-	}, {
-		key: 'getKeyBindings',
-		value: function getKeyBindings(playerId, key) {
-
-			return this._playerKeyboardMaps[playerId][key].slice(0);
-		}
-	}, {
-		key: '_loadKeyBindingsFromLocalStorage',
-		value: function _loadKeyBindingsFromLocalStorage() {
-			this._playerKeyboardMaps = (0, _utils.loadFromLocalStorage)("webnes_keybindings");
-
-			// Load defaults if no local storage found
-			if (!this._playerKeyboardMaps) {
-				this._playerKeyboardMaps = [[
-				// defaults for player 1
-				[88], // X // var JOYPAD_A = 0;
-				[90], // Z // var JOYPAD_B = 1;
-				[16, 160, 161, 67], // shift, left shift, right shift, C // var JOYPAD_SELECT = 2;
-				[13, 32, 86], // enter, space, V // var JOYPAD_START = 3;
-				[38, 87, 104], // up, W, numpad 8 // var JOYPAD_UP = 4;
-				[40, 83, 101, 98], // down, S, numpad 5, numpad 2 // var JOYPAD_DOWN = 5;
-				[37, 65, 100], // left, A, numpad 4 // var JOYPAD_LEFT = 6;
-				[39, 68, 102] // right, D, numpad 6 // var JOYPAD_RIGHT = 7;
-				], [[], [], [], [], [], [], [], []], [[], [], [], [], [], [], [], []], [[], [], [], [], [], [], [], []]];
-			}
-		}
-	}, {
-		key: '_saveKeyBindingsToLocalStorage',
-		value: function _saveKeyBindingsToLocalStorage() {
-			(0, _utils.saveToLocalStorage)("webnes_keybindings", this._playerKeyboardMaps);
+		key: 'screenshotToString',
+		value: function screenshotToString() {
+			return '';
 		}
 	}]);
 
-	return Input;
+	return HeadlessRenderSurface;
 }();
 
-exports.default = Input;
+exports.default = HeadlessRenderSurface;
 
 /***/ }),
+/* 17 */,
+/* 18 */,
 /* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3513,7 +3088,7 @@ var _BlipBuffer = __webpack_require__(22);
 
 var _BlipBuffer2 = _interopRequireDefault(_BlipBuffer);
 
-var _WebAudioRenderer = __webpack_require__(15);
+var _WebAudioRenderer = __webpack_require__(14);
 
 var _WebAudioRenderer2 = _interopRequireDefault(_WebAudioRenderer);
 
@@ -23716,8 +23291,7 @@ function mapperFactory(mapperId, mainboard, mirroringMethod) {
 
 /***/ }),
 /* 47 */,
-/* 48 */,
-/* 49 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23821,7 +23395,7 @@ function processGenieCode(mainboard, codeString, enable) {
 }
 
 /***/ }),
-/* 50 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23873,7 +23447,7 @@ function loadRomFromUrl(url, callback) {
 }
 
 /***/ }),
-/* 51 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23994,7 +23568,7 @@ function fromByteArray (uint8) {
 
 
 /***/ }),
-/* 52 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24008,9 +23582,9 @@ function fromByteArray (uint8) {
 
 
 
-var base64 = __webpack_require__(51)
-var ieee754 = __webpack_require__(77)
-var isArray = __webpack_require__(78)
+var base64 = __webpack_require__(50)
+var ieee754 = __webpack_require__(76)
+var isArray = __webpack_require__(77)
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
@@ -25788,10 +25362,10 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
 
 /***/ }),
-/* 53 */
+/* 52 */
 /***/ (function(module, exports) {
 
 (function() {
@@ -25893,7 +25467,7 @@ function isnan (val) {
 
 
 /***/ }),
-/* 54 */
+/* 53 */
 /***/ (function(module, exports) {
 
 module.exports = adjoint;
@@ -25931,7 +25505,7 @@ function adjoint(out, a) {
 };
 
 /***/ }),
-/* 55 */
+/* 54 */
 /***/ (function(module, exports) {
 
 module.exports = clone;
@@ -25964,7 +25538,7 @@ function clone(a) {
 };
 
 /***/ }),
-/* 56 */
+/* 55 */
 /***/ (function(module, exports) {
 
 module.exports = copy;
@@ -25997,7 +25571,7 @@ function copy(out, a) {
 };
 
 /***/ }),
-/* 57 */
+/* 56 */
 /***/ (function(module, exports) {
 
 module.exports = create;
@@ -26029,7 +25603,7 @@ function create() {
 };
 
 /***/ }),
-/* 58 */
+/* 57 */
 /***/ (function(module, exports) {
 
 module.exports = determinant;
@@ -26064,7 +25638,7 @@ function determinant(a) {
 };
 
 /***/ }),
-/* 59 */
+/* 58 */
 /***/ (function(module, exports) {
 
 module.exports = fromQuat;
@@ -26116,7 +25690,7 @@ function fromQuat(out, q) {
 };
 
 /***/ }),
-/* 60 */
+/* 59 */
 /***/ (function(module, exports) {
 
 module.exports = fromRotationTranslation;
@@ -26174,7 +25748,7 @@ function fromRotationTranslation(out, q, v) {
 };
 
 /***/ }),
-/* 61 */
+/* 60 */
 /***/ (function(module, exports) {
 
 module.exports = frustum;
@@ -26215,37 +25789,37 @@ function frustum(out, left, right, bottom, top, near, far) {
 };
 
 /***/ }),
-/* 62 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = {
-  create: __webpack_require__(57)
-  , clone: __webpack_require__(55)
-  , copy: __webpack_require__(56)
-  , identity: __webpack_require__(10)
-  , transpose: __webpack_require__(76)
-  , invert: __webpack_require__(63)
-  , adjoint: __webpack_require__(54)
-  , determinant: __webpack_require__(58)
-  , multiply: __webpack_require__(65)
-  , translate: __webpack_require__(75)
-  , scale: __webpack_require__(73)
-  , rotate: __webpack_require__(69)
-  , rotateX: __webpack_require__(70)
-  , rotateY: __webpack_require__(71)
-  , rotateZ: __webpack_require__(72)
-  , fromRotationTranslation: __webpack_require__(60)
-  , fromQuat: __webpack_require__(59)
-  , frustum: __webpack_require__(61)
-  , perspective: __webpack_require__(67)
-  , perspectiveFromFieldOfView: __webpack_require__(68)
-  , ortho: __webpack_require__(66)
-  , lookAt: __webpack_require__(64)
-  , str: __webpack_require__(74)
+  create: __webpack_require__(56)
+  , clone: __webpack_require__(54)
+  , copy: __webpack_require__(55)
+  , identity: __webpack_require__(9)
+  , transpose: __webpack_require__(75)
+  , invert: __webpack_require__(62)
+  , adjoint: __webpack_require__(53)
+  , determinant: __webpack_require__(57)
+  , multiply: __webpack_require__(64)
+  , translate: __webpack_require__(74)
+  , scale: __webpack_require__(72)
+  , rotate: __webpack_require__(68)
+  , rotateX: __webpack_require__(69)
+  , rotateY: __webpack_require__(70)
+  , rotateZ: __webpack_require__(71)
+  , fromRotationTranslation: __webpack_require__(59)
+  , fromQuat: __webpack_require__(58)
+  , frustum: __webpack_require__(60)
+  , perspective: __webpack_require__(66)
+  , perspectiveFromFieldOfView: __webpack_require__(67)
+  , ortho: __webpack_require__(65)
+  , lookAt: __webpack_require__(63)
+  , str: __webpack_require__(73)
 }
 
 /***/ }),
-/* 63 */
+/* 62 */
 /***/ (function(module, exports) {
 
 module.exports = invert;
@@ -26305,10 +25879,10 @@ function invert(out, a) {
 };
 
 /***/ }),
-/* 64 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var identity = __webpack_require__(10);
+var identity = __webpack_require__(9);
 
 module.exports = lookAt;
 
@@ -26400,7 +25974,7 @@ function lookAt(out, eye, center, up) {
 };
 
 /***/ }),
-/* 65 */
+/* 64 */
 /***/ (function(module, exports) {
 
 module.exports = multiply;
@@ -26447,7 +26021,7 @@ function multiply(out, a, b) {
 };
 
 /***/ }),
-/* 66 */
+/* 65 */
 /***/ (function(module, exports) {
 
 module.exports = ortho;
@@ -26488,7 +26062,7 @@ function ortho(out, left, right, bottom, top, near, far) {
 };
 
 /***/ }),
-/* 67 */
+/* 66 */
 /***/ (function(module, exports) {
 
 module.exports = perspective;
@@ -26526,7 +26100,7 @@ function perspective(out, fovy, aspect, near, far) {
 };
 
 /***/ }),
-/* 68 */
+/* 67 */
 /***/ (function(module, exports) {
 
 module.exports = perspectiveFromFieldOfView;
@@ -26572,7 +26146,7 @@ function perspectiveFromFieldOfView(out, fov, near, far) {
 
 
 /***/ }),
-/* 69 */
+/* 68 */
 /***/ (function(module, exports) {
 
 module.exports = rotate;
@@ -26641,7 +26215,7 @@ function rotate(out, a, rad, axis) {
 };
 
 /***/ }),
-/* 70 */
+/* 69 */
 /***/ (function(module, exports) {
 
 module.exports = rotateX;
@@ -26690,7 +26264,7 @@ function rotateX(out, a, rad) {
 };
 
 /***/ }),
-/* 71 */
+/* 70 */
 /***/ (function(module, exports) {
 
 module.exports = rotateY;
@@ -26739,7 +26313,7 @@ function rotateY(out, a, rad) {
 };
 
 /***/ }),
-/* 72 */
+/* 71 */
 /***/ (function(module, exports) {
 
 module.exports = rotateZ;
@@ -26788,7 +26362,7 @@ function rotateZ(out, a, rad) {
 };
 
 /***/ }),
-/* 73 */
+/* 72 */
 /***/ (function(module, exports) {
 
 module.exports = scale;
@@ -26824,7 +26398,7 @@ function scale(out, a, v) {
 };
 
 /***/ }),
-/* 74 */
+/* 73 */
 /***/ (function(module, exports) {
 
 module.exports = str;
@@ -26843,7 +26417,7 @@ function str(a) {
 };
 
 /***/ }),
-/* 75 */
+/* 74 */
 /***/ (function(module, exports) {
 
 module.exports = translate;
@@ -26886,7 +26460,7 @@ function translate(out, a, v) {
 };
 
 /***/ }),
-/* 76 */
+/* 75 */
 /***/ (function(module, exports) {
 
 module.exports = transpose;
@@ -26940,7 +26514,7 @@ function transpose(out, a) {
 };
 
 /***/ }),
-/* 77 */
+/* 76 */
 /***/ (function(module, exports) {
 
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -27030,7 +26604,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 
 /***/ }),
-/* 78 */
+/* 77 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -27041,6 +26615,7 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
+/* 78 */,
 /* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -27538,16 +27113,16 @@ module.exports = Array.isArray || function (arr) {
         };
     }
 }());
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
 
 /***/ }),
 /* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer) {(function() {
-  var crypt = __webpack_require__(53),
-      utf8 = __webpack_require__(9).utf8,
-      bin = __webpack_require__(9).bin,
+  var crypt = __webpack_require__(52),
+      utf8 = __webpack_require__(8).utf8,
+      bin = __webpack_require__(8).bin,
 
   // The core
   sha1 = function (message) {
@@ -27627,7 +27202,7 @@ module.exports = Array.isArray || function (arr) {
   module.exports = api;
 })();
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(52).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(51).Buffer))
 
 /***/ }),
 /* 81 */
@@ -27665,19 +27240,24 @@ module.exports = __webpack_amd_options__;
 "use strict";
 
 
-var _nES = __webpack_require__(12);
+var _nES = __webpack_require__(11);
 
 var _nES2 = _interopRequireDefault(_nES);
+
+var _bindKeyboard = __webpack_require__(88);
+
+var _bindKeyboard2 = _interopRequireDefault(_bindKeyboard);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var App = new _nES2.default({
-	render: 'auto' });
+	render: 'auto', // 'auto', 'canvas', 'webgl', 'headless'
+	plugins: [_bindKeyboard2.default]
+});
 App.start();
 
-// ROM courtesy of TecmoBowl.org
+// ROM courtesy of TecmoBowl.org!
 var romToLoad = 'TecmoSuperBowl2k17';
-
 App.loadRomFromUrl('/roms/' + romToLoad + '.nes');
 
 /***/ }),
@@ -27700,563 +27280,58 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _serialisation = __webpack_require__(1);
-
-var _consts = __webpack_require__(0);
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var HeadlessRenderSurface = function () {
-	function HeadlessRenderSurface() {
-		_classCallCheck(this, HeadlessRenderSurface);
-
-		this._buffer = new Uint32Array(_consts.SCREEN_WIDTH * _consts.SCREEN_HEIGHT);
-	}
-
-	_createClass(HeadlessRenderSurface, [{
-		key: 'writeToBuffer',
-		value: function writeToBuffer(bufferIndex, insertIndex, colour) {
-			this._buffer[insertIndex] = 0xFF000000 | colour;
+exports.default = function (nesInstance) {
+	window.addEventListener('keydown', function (event) {
+		if (keyMap[event.keyCode]) {
+			event.preventDefault();
+			nesInstance.pressControllerButton(event.shiftKey ? 1 : 0, keyMap[event.keyCode]);
 		}
-	}, {
-		key: 'clearBuffers',
-		value: function clearBuffers(backgroundColour) {
-			for (var i = 0; i < this._buffer.length; ++i) {
-				this._buffer[i] = 0xFF000000 | backgroundColour;
-			}
+	}, false);
+
+	window.addEventListener('keyup', function (_ref) {
+		var keyCode = _ref.keyCode;
+
+		if (keyMap[keyCode]) {
+			event.preventDefault();
+			nesInstance.depressControllerButton(event.shiftKey ? 1 : 0, keyMap[keyCode]);
 		}
-	}, {
-		key: 'getRenderBufferHash',
-		value: function getRenderBufferHash() {
-			return _serialisation.rusha.digestFromArrayBuffer(this._buffer).toUpperCase();
-		}
-	}, {
-		key: 'render',
-		value: function render() {}
-	}, {
-		key: 'screenshot',
-		value: function screenshot() {}
-	}, {
-		key: 'screenshotToString',
-		value: function screenshotToString() {
-			return '';
-		}
-	}]);
+	}, false);
 
-	return HeadlessRenderSurface;
-}();
-
-exports.default = HeadlessRenderSurface;
-
-/***/ }),
-/* 89 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c) 2013 Pieroxy <pieroxy@pieroxy.net>
-// This work is free. You can redistribute it and/or modify it
-// under the terms of the WTFPL, Version 2
-// For more information see LICENSE.txt or http://www.wtfpl.net/
-//
-// For more information, the home page:
-// http://pieroxy.net/blog/pages/lz-string/testing.html
-//
-// LZ-based compression algorithm, version 1.4.4
-var LZString = (function() {
-
-// private property
-var f = String.fromCharCode;
-var keyStrBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-var keyStrUriSafe = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$";
-var baseReverseDic = {};
-
-function getBaseValue(alphabet, character) {
-  if (!baseReverseDic[alphabet]) {
-    baseReverseDic[alphabet] = {};
-    for (var i=0 ; i<alphabet.length ; i++) {
-      baseReverseDic[alphabet][alphabet.charAt(i)] = i;
-    }
-  }
-  return baseReverseDic[alphabet][character];
-}
-
-var LZString = {
-  compressToBase64 : function (input) {
-    if (input == null) return "";
-    var res = LZString._compress(input, 6, function(a){return keyStrBase64.charAt(a);});
-    switch (res.length % 4) { // To produce valid Base64
-    default: // When could this happen ?
-    case 0 : return res;
-    case 1 : return res+"===";
-    case 2 : return res+"==";
-    case 3 : return res+"=";
-    }
-  },
-
-  decompressFromBase64 : function (input) {
-    if (input == null) return "";
-    if (input == "") return null;
-    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrBase64, input.charAt(index)); });
-  },
-
-  compressToUTF16 : function (input) {
-    if (input == null) return "";
-    return LZString._compress(input, 15, function(a){return f(a+32);}) + " ";
-  },
-
-  decompressFromUTF16: function (compressed) {
-    if (compressed == null) return "";
-    if (compressed == "") return null;
-    return LZString._decompress(compressed.length, 16384, function(index) { return compressed.charCodeAt(index) - 32; });
-  },
-
-  //compress into uint8array (UCS-2 big endian format)
-  compressToUint8Array: function (uncompressed) {
-    var compressed = LZString.compress(uncompressed);
-    var buf=new Uint8Array(compressed.length*2); // 2 bytes per character
-
-    for (var i=0, TotalLen=compressed.length; i<TotalLen; i++) {
-      var current_value = compressed.charCodeAt(i);
-      buf[i*2] = current_value >>> 8;
-      buf[i*2+1] = current_value % 256;
-    }
-    return buf;
-  },
-
-  //decompress from uint8array (UCS-2 big endian format)
-  decompressFromUint8Array:function (compressed) {
-    if (compressed===null || compressed===undefined){
-        return LZString.decompress(compressed);
-    } else {
-        var buf=new Array(compressed.length/2); // 2 bytes per character
-        for (var i=0, TotalLen=buf.length; i<TotalLen; i++) {
-          buf[i]=compressed[i*2]*256+compressed[i*2+1];
-        }
-
-        var result = [];
-        buf.forEach(function (c) {
-          result.push(f(c));
-        });
-        return LZString.decompress(result.join(''));
-
-    }
-
-  },
-
-
-  //compress into a string that is already URI encoded
-  compressToEncodedURIComponent: function (input) {
-    if (input == null) return "";
-    return LZString._compress(input, 6, function(a){return keyStrUriSafe.charAt(a);});
-  },
-
-  //decompress from an output of compressToEncodedURIComponent
-  decompressFromEncodedURIComponent:function (input) {
-    if (input == null) return "";
-    if (input == "") return null;
-    input = input.replace(/ /g, "+");
-    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrUriSafe, input.charAt(index)); });
-  },
-
-  compress: function (uncompressed) {
-    return LZString._compress(uncompressed, 16, function(a){return f(a);});
-  },
-  _compress: function (uncompressed, bitsPerChar, getCharFromInt) {
-    if (uncompressed == null) return "";
-    var i, value,
-        context_dictionary= {},
-        context_dictionaryToCreate= {},
-        context_c="",
-        context_wc="",
-        context_w="",
-        context_enlargeIn= 2, // Compensate for the first entry which should not count
-        context_dictSize= 3,
-        context_numBits= 2,
-        context_data=[],
-        context_data_val=0,
-        context_data_position=0,
-        ii;
-
-    for (ii = 0; ii < uncompressed.length; ii += 1) {
-      context_c = uncompressed.charAt(ii);
-      if (!Object.prototype.hasOwnProperty.call(context_dictionary,context_c)) {
-        context_dictionary[context_c] = context_dictSize++;
-        context_dictionaryToCreate[context_c] = true;
-      }
-
-      context_wc = context_w + context_c;
-      if (Object.prototype.hasOwnProperty.call(context_dictionary,context_wc)) {
-        context_w = context_wc;
-      } else {
-        if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
-          if (context_w.charCodeAt(0)<256) {
-            for (i=0 ; i<context_numBits ; i++) {
-              context_data_val = (context_data_val << 1);
-              if (context_data_position == bitsPerChar-1) {
-                context_data_position = 0;
-                context_data.push(getCharFromInt(context_data_val));
-                context_data_val = 0;
-              } else {
-                context_data_position++;
-              }
-            }
-            value = context_w.charCodeAt(0);
-            for (i=0 ; i<8 ; i++) {
-              context_data_val = (context_data_val << 1) | (value&1);
-              if (context_data_position == bitsPerChar-1) {
-                context_data_position = 0;
-                context_data.push(getCharFromInt(context_data_val));
-                context_data_val = 0;
-              } else {
-                context_data_position++;
-              }
-              value = value >> 1;
-            }
-          } else {
-            value = 1;
-            for (i=0 ; i<context_numBits ; i++) {
-              context_data_val = (context_data_val << 1) | value;
-              if (context_data_position ==bitsPerChar-1) {
-                context_data_position = 0;
-                context_data.push(getCharFromInt(context_data_val));
-                context_data_val = 0;
-              } else {
-                context_data_position++;
-              }
-              value = 0;
-            }
-            value = context_w.charCodeAt(0);
-            for (i=0 ; i<16 ; i++) {
-              context_data_val = (context_data_val << 1) | (value&1);
-              if (context_data_position == bitsPerChar-1) {
-                context_data_position = 0;
-                context_data.push(getCharFromInt(context_data_val));
-                context_data_val = 0;
-              } else {
-                context_data_position++;
-              }
-              value = value >> 1;
-            }
-          }
-          context_enlargeIn--;
-          if (context_enlargeIn == 0) {
-            context_enlargeIn = Math.pow(2, context_numBits);
-            context_numBits++;
-          }
-          delete context_dictionaryToCreate[context_w];
-        } else {
-          value = context_dictionary[context_w];
-          for (i=0 ; i<context_numBits ; i++) {
-            context_data_val = (context_data_val << 1) | (value&1);
-            if (context_data_position == bitsPerChar-1) {
-              context_data_position = 0;
-              context_data.push(getCharFromInt(context_data_val));
-              context_data_val = 0;
-            } else {
-              context_data_position++;
-            }
-            value = value >> 1;
-          }
-
-
-        }
-        context_enlargeIn--;
-        if (context_enlargeIn == 0) {
-          context_enlargeIn = Math.pow(2, context_numBits);
-          context_numBits++;
-        }
-        // Add wc to the dictionary.
-        context_dictionary[context_wc] = context_dictSize++;
-        context_w = String(context_c);
-      }
-    }
-
-    // Output the code for w.
-    if (context_w !== "") {
-      if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
-        if (context_w.charCodeAt(0)<256) {
-          for (i=0 ; i<context_numBits ; i++) {
-            context_data_val = (context_data_val << 1);
-            if (context_data_position == bitsPerChar-1) {
-              context_data_position = 0;
-              context_data.push(getCharFromInt(context_data_val));
-              context_data_val = 0;
-            } else {
-              context_data_position++;
-            }
-          }
-          value = context_w.charCodeAt(0);
-          for (i=0 ; i<8 ; i++) {
-            context_data_val = (context_data_val << 1) | (value&1);
-            if (context_data_position == bitsPerChar-1) {
-              context_data_position = 0;
-              context_data.push(getCharFromInt(context_data_val));
-              context_data_val = 0;
-            } else {
-              context_data_position++;
-            }
-            value = value >> 1;
-          }
-        } else {
-          value = 1;
-          for (i=0 ; i<context_numBits ; i++) {
-            context_data_val = (context_data_val << 1) | value;
-            if (context_data_position == bitsPerChar-1) {
-              context_data_position = 0;
-              context_data.push(getCharFromInt(context_data_val));
-              context_data_val = 0;
-            } else {
-              context_data_position++;
-            }
-            value = 0;
-          }
-          value = context_w.charCodeAt(0);
-          for (i=0 ; i<16 ; i++) {
-            context_data_val = (context_data_val << 1) | (value&1);
-            if (context_data_position == bitsPerChar-1) {
-              context_data_position = 0;
-              context_data.push(getCharFromInt(context_data_val));
-              context_data_val = 0;
-            } else {
-              context_data_position++;
-            }
-            value = value >> 1;
-          }
-        }
-        context_enlargeIn--;
-        if (context_enlargeIn == 0) {
-          context_enlargeIn = Math.pow(2, context_numBits);
-          context_numBits++;
-        }
-        delete context_dictionaryToCreate[context_w];
-      } else {
-        value = context_dictionary[context_w];
-        for (i=0 ; i<context_numBits ; i++) {
-          context_data_val = (context_data_val << 1) | (value&1);
-          if (context_data_position == bitsPerChar-1) {
-            context_data_position = 0;
-            context_data.push(getCharFromInt(context_data_val));
-            context_data_val = 0;
-          } else {
-            context_data_position++;
-          }
-          value = value >> 1;
-        }
-
-
-      }
-      context_enlargeIn--;
-      if (context_enlargeIn == 0) {
-        context_enlargeIn = Math.pow(2, context_numBits);
-        context_numBits++;
-      }
-    }
-
-    // Mark the end of the stream
-    value = 2;
-    for (i=0 ; i<context_numBits ; i++) {
-      context_data_val = (context_data_val << 1) | (value&1);
-      if (context_data_position == bitsPerChar-1) {
-        context_data_position = 0;
-        context_data.push(getCharFromInt(context_data_val));
-        context_data_val = 0;
-      } else {
-        context_data_position++;
-      }
-      value = value >> 1;
-    }
-
-    // Flush the last char
-    while (true) {
-      context_data_val = (context_data_val << 1);
-      if (context_data_position == bitsPerChar-1) {
-        context_data.push(getCharFromInt(context_data_val));
-        break;
-      }
-      else context_data_position++;
-    }
-    return context_data.join('');
-  },
-
-  decompress: function (compressed) {
-    if (compressed == null) return "";
-    if (compressed == "") return null;
-    return LZString._decompress(compressed.length, 32768, function(index) { return compressed.charCodeAt(index); });
-  },
-
-  _decompress: function (length, resetValue, getNextValue) {
-    var dictionary = [],
-        next,
-        enlargeIn = 4,
-        dictSize = 4,
-        numBits = 3,
-        entry = "",
-        result = [],
-        i,
-        w,
-        bits, resb, maxpower, power,
-        c,
-        data = {val:getNextValue(0), position:resetValue, index:1};
-
-    for (i = 0; i < 3; i += 1) {
-      dictionary[i] = i;
-    }
-
-    bits = 0;
-    maxpower = Math.pow(2,2);
-    power=1;
-    while (power!=maxpower) {
-      resb = data.val & data.position;
-      data.position >>= 1;
-      if (data.position == 0) {
-        data.position = resetValue;
-        data.val = getNextValue(data.index++);
-      }
-      bits |= (resb>0 ? 1 : 0) * power;
-      power <<= 1;
-    }
-
-    switch (next = bits) {
-      case 0:
-          bits = 0;
-          maxpower = Math.pow(2,8);
-          power=1;
-          while (power!=maxpower) {
-            resb = data.val & data.position;
-            data.position >>= 1;
-            if (data.position == 0) {
-              data.position = resetValue;
-              data.val = getNextValue(data.index++);
-            }
-            bits |= (resb>0 ? 1 : 0) * power;
-            power <<= 1;
-          }
-        c = f(bits);
-        break;
-      case 1:
-          bits = 0;
-          maxpower = Math.pow(2,16);
-          power=1;
-          while (power!=maxpower) {
-            resb = data.val & data.position;
-            data.position >>= 1;
-            if (data.position == 0) {
-              data.position = resetValue;
-              data.val = getNextValue(data.index++);
-            }
-            bits |= (resb>0 ? 1 : 0) * power;
-            power <<= 1;
-          }
-        c = f(bits);
-        break;
-      case 2:
-        return "";
-    }
-    dictionary[3] = c;
-    w = c;
-    result.push(c);
-    while (true) {
-      if (data.index > length) {
-        return "";
-      }
-
-      bits = 0;
-      maxpower = Math.pow(2,numBits);
-      power=1;
-      while (power!=maxpower) {
-        resb = data.val & data.position;
-        data.position >>= 1;
-        if (data.position == 0) {
-          data.position = resetValue;
-          data.val = getNextValue(data.index++);
-        }
-        bits |= (resb>0 ? 1 : 0) * power;
-        power <<= 1;
-      }
-
-      switch (c = bits) {
-        case 0:
-          bits = 0;
-          maxpower = Math.pow(2,8);
-          power=1;
-          while (power!=maxpower) {
-            resb = data.val & data.position;
-            data.position >>= 1;
-            if (data.position == 0) {
-              data.position = resetValue;
-              data.val = getNextValue(data.index++);
-            }
-            bits |= (resb>0 ? 1 : 0) * power;
-            power <<= 1;
-          }
-
-          dictionary[dictSize++] = f(bits);
-          c = dictSize-1;
-          enlargeIn--;
-          break;
-        case 1:
-          bits = 0;
-          maxpower = Math.pow(2,16);
-          power=1;
-          while (power!=maxpower) {
-            resb = data.val & data.position;
-            data.position >>= 1;
-            if (data.position == 0) {
-              data.position = resetValue;
-              data.val = getNextValue(data.index++);
-            }
-            bits |= (resb>0 ? 1 : 0) * power;
-            power <<= 1;
-          }
-          dictionary[dictSize++] = f(bits);
-          c = dictSize-1;
-          enlargeIn--;
-          break;
-        case 2:
-          return result.join('');
-      }
-
-      if (enlargeIn == 0) {
-        enlargeIn = Math.pow(2, numBits);
-        numBits++;
-      }
-
-      if (dictionary[c]) {
-        entry = dictionary[c];
-      } else {
-        if (c === dictSize) {
-          entry = w + w.charAt(0);
-        } else {
-          return null;
-        }
-      }
-      result.push(entry);
-
-      // Add w+entry[0] to the dictionary.
-      dictionary[dictSize++] = w + entry.charAt(0);
-      enlargeIn--;
-
-      w = entry;
-
-      if (enlargeIn == 0) {
-        enlargeIn = Math.pow(2, numBits);
-        numBits++;
-      }
-
-    }
-  }
+	// Return the nES6 instance for chaining.
+	return nesInstance;
 };
-  return LZString;
-})();
 
-if (true) {
-  !(__WEBPACK_AMD_DEFINE_RESULT__ = function () { return LZString; }.call(exports, __webpack_require__, exports, module),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-} else if( typeof module !== 'undefined' && module != null ) {
-  module.exports = LZString
-}
+/**
+ * KeyboardEvent keyCodes and their corresponding gamepad button.
+ * @type {Object}
+ */
+var keyMapDefaults = exports.keyMapDefaults = {
+	90: 'A', // Z
+	88: 'B', // X
+	67: 'SELECT', // C
+	13: 'START', // Enter
+	37: 'LEFT',
+	38: 'UP',
+	39: 'RIGHT',
+	40: 'DOWN'
+};
 
+/**
+ * Configurable keyboard mapping object, based on keyMapDefaults.
+ * @type {Object}
+ */
+var keyMap = exports.keyMap = _extends({}, keyMapDefaults);
+
+/**
+ * Binding function for bindKeyboard plugin. Given an nES6 instance,
+ * event bindings are added to the window, which 'presses' a gamepad controller
+ * inside of nES6. Refers to `keyMap` for bindings - which can be overridden.
+ *
+ * @param  {nES6} 	nesInstance 	Active nES6 instance to bind to.
+ * @return {void}
+ */
 
 /***/ })
 /******/ ]);
