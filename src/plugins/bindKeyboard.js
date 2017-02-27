@@ -73,7 +73,7 @@ const checkMapCompleteness = (map)=>{
 
 /**
  * Binding function for bindKeyboard plugin. Given an nES6 instance,
- * event bindings are added to the window, which 'presses' a gamepad controller
+ * event bindings are added to the window, which 'presses' a joypad controller
  * inside of nES6. Refers to `keyMap` for bindings - which can be overridden.
  *
  * @param  {nES6}   nesInstance   Active nES6 instance to bind to.
