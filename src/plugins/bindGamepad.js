@@ -85,6 +85,10 @@ let lastPressedButtons = [];
  * @return {Boolean}  Were any gamepads found?
  */
 const registerGamepads = () => {
+  if (!navigator.getGamepads) {
+    return false;
+  }
+
   gamePads = Array.from(navigator.getGamepads()).filter(x => x);
   return gamePads.length > 0;
 };

@@ -5,7 +5,7 @@ import dragDropPlugin from './plugins/dragDropLoader';
 
 const App = new nES6({
 	render: 'auto',
-	audio: false,
+	// audio: false,
 	plugins: [
 		bindGamepadPlugin(),
 		bindKeyboardPlugin(),
@@ -15,5 +15,6 @@ const App = new nES6({
 App.start();
 
 // ROM courtesy of TecmoBowl.org!
-const romToLoad = 'TecmoSuperBowl2k17';
+// const romToLoad = 'TecmoSuperBowl2k17';
+const romToLoad = 'SuperMarioBros';
 App.loadRomFromUrl(`/roms/${romToLoad}.nes`);
