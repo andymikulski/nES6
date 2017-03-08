@@ -98,12 +98,13 @@ export default class Mainboard {
   saveState() {
     var data = {};
     data.memory = this.memory.saveState();
-    data.ppu = this.ppu.saveState();
-    data.apu = this.apu.saveState();
-    //  data.joypad1 = this.joypad1.saveState();
     data.cpu = this.cpu.saveState();
-    data.synchroniser = this.synchroniser.saveState();
-    data.renderBuffer = this.renderBuffer.saveState();
+    data.ppu = this.ppu.saveState();
+    // data.apu = this.apu.saveState();
+    // data.joypad1 = this.joypad1.saveState();
+    // data.synchroniser = this.synchroniser.saveState();
+    // data.renderBuffer = this.renderBuffer.saveState();
+
     if (this.cart && this.cart.memoryMapper) {
       data.memoryMapper = this.cart.memoryMapper.saveState();
     }
@@ -111,14 +112,13 @@ export default class Mainboard {
   }
 
   loadState(data) {
-    this.memory.loadState(data.memory);
-    this.ppu.loadState(data.ppu);
-    this.apu.loadState(data.apu);
-    //  this.joypad1.loadState( data.joypad1 );
-    this.cpu.loadState(data.cpu);
-    this.renderBuffer.loadState(data.renderBuffer);
-    this.synchroniser.loadState(data.synchroniser);
-    if (this.cart && this.cart.memoryMapper) {
+    for(const prop in data) {
+      if(this[prop] && this[prop].loadState){
+        this[prop].loadState(data[prop]);
+      }
+    }
+
+    if (data.memoryMapper && this.cart && this.cart.memoryMapper) {
       this.cart.memoryMapper.loadState(data.memoryMapper);
     }
   }

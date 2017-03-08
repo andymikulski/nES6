@@ -12,6 +12,7 @@ export default class CanvasParent {
 		this._parent.appendChild( this._element );
 
 		this._canvasElement = document.createElement('canvas');
+		this._canvasElement.classList.add('nes6-player');
 		this._element.appendChild( this._canvasElement );
 
 		document.body.appendChild(this._parent);
@@ -42,18 +43,13 @@ export default class CanvasParent {
 		var parentWidth = parentBounds.width;
 		var parentHeight = parentBounds.height;
 
-		var resizeType = 'keepAspectRatio';
+		var aspectRatio = SCREEN_WIDTH / SCREEN_HEIGHT;
+		var newWidth = aspectRatio * parentHeight;
 
-		if ( resizeType === 'keepAspectRatio' ) {
+		this._canvasElement.width = Math.floor( newWidth );
+		this._canvasElement.height = parentHeight;
 
-			var aspectRatio = SCREEN_WIDTH / SCREEN_HEIGHT;
-			var newWidth = aspectRatio * parentHeight;
-
-			this._canvasElement.width = Math.floor( newWidth );
-			this._canvasElement.height = parentHeight;
-
-			this._eventBus.invoke( 'resize' );
-		}
+		this._eventBus.invoke( 'resize' );
 	}
 
 	_setPosition() {

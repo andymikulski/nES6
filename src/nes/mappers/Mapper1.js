@@ -3,6 +3,9 @@ import {
   COLOUR_ENCODING_MTC_PER_CPU,
   PPU_MIRRORING_FOURSCREEN,
   PPU_MIRRORING_VERTICAL,
+  PPU_MIRRORING_HORIZONTAL,
+  PPU_MIRRORING_SINGLESCREEN_NT0,
+  PPU_MIRRORING_SINGLESCREEN_NT1,
 } from '../../config/consts.js';
 
 export default class Mapper1 extends BaseMapper {

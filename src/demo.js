@@ -15,6 +15,5 @@ const App = new nES6({
 App.start();
 
 // ROM courtesy of TecmoBowl.org!
-// const romToLoad = 'TecmoSuperBowl2k17';
-const romToLoad = 'SuperMarioBros';
+const romToLoad = 'TecmoSuperBowl2k17';
 App.loadRomFromUrl(`/roms/${romToLoad}.nes`);

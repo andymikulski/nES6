@@ -9,51 +9,58 @@ var plugins = [
 if (prod) {
   var ClosureCompilerPlugin = require('webpack-closure-compiler');
   plugins = plugins.concat([
-    new ClosureCompilerPlugin({
-      compiler: {
-        language_in: 'ECMASCRIPT6',
-        language_out: 'ECMASCRIPT5',
-        compilation_level: 'SIMPLE'
+    // new ClosureCompilerPlugin({
+    //   compiler: {
+    //     language_in: 'ECMASCRIPT6',
+    //     language_out: 'ECMASCRIPT5',
+    //     compilation_level: 'SIMPLE'
+    //   },
+    //   concurrency: 4,
+    //   // use JS compiler - waaaay slower but doesn't require any java
+    //   jsCompiler: false,
+    // })
+    new webpack.optimize.UglifyJsPlugin({
+      compress: {
+        warnings: false
       },
-      concurrency: 4,
-      // use JS compiler - waaaay slower but doesn't require any java
-      jsCompiler: false,
+      mangle: true,
     })
   ]);
 }
 
-module.exports = [
-  {
-    plugins,
-    context: __dirname,
-    entry: {
-      nes6: [
-        'babel-polyfill',
-        './src/nES6.js'
-      ],
-      'nes6-demo': [
-        'babel-polyfill',
-        './src/demo.js'
-      ]
-    },
+module.exports = [{
+  plugins,
+  context: __dirname,
+  entry: {
+    nes6: [
+      'babel-polyfill',
+      './src/nES6.js'
+    ],
+    'nes6-demo': [
+      'babel-polyfill',
+      './src/demo.js'
+    ]
+  },
 
-    output: {
-      path: path.resolve('./app/'),
-      filename: '[name].js',
-      chunkFilename: '[id].bundle.js',
-    },
-    module: {
-      loaders: [
-        {
-          test: /\.js$/,
-          exclude: /(node_modules|bower_components)/,
-          loader: 'babel-loader',
-          query: {
-            presets: ['stage-0', 'es2015'],
-            plugins: ['transform-class-properties', 'transform-es2015-classes']
-          }
-        }
-      ]
-    }
+  output: {
+    path: path.resolve('./app/'),
+    filename: '[name].js',
+    chunkFilename: '[id].bundle.js',
+  },
+  module: {
+    loaders: [{
+      test: /\.js$/,
+      exclude: /(node_modules|bower_components)/,
+      loader: 'babel-loader',
+      query: {
+        presets: ['stage-0', 'es2015'],
+        plugins: ['transform-class-properties', 'transform-es2015-classes']
+      }
+    }]
+  },
+  node: {
+    fs: 'empty',
+    net: 'empty',
+    tls: 'empty'
   }
-];
+}];

@@ -26,6 +26,7 @@ export default class nES6 {
       plugins: { is: Array, with: Function },
       render: ['auto', 'canvas', 'webgl', 'headless'],
       audio: { is: Boolean },
+      fps: { is: Boolean },
     }, options);
     // if we're still here, then the options are all good
 
@@ -84,9 +85,12 @@ export default class nES6 {
   }
 
   start() {
-    this._fpsMeter = new Stats();
-    this._fpsMeter.showPanel( 1 );
-    document.body.appendChild( this._fpsMeter.dom );
+    if (this._options['fps']) {
+      this._fpsMeter = new Stats();
+      this._fpsMeter.showPanel( 1 );
+      document.body.appendChild( this._fpsMeter.dom );
+    }
+
 
     this._canvasParent = new CanvasParent();
     this._renderSurface = null;
@@ -216,15 +220,6 @@ export default class nES6 {
   }
 
 
-  showFpsMeter(show) {
-    if (show) {
-      // this._fpsMeter.show();
-    } else {
-      // this._fpsMeter.hide();
-    }
-  }
-
-
   startTrace() {
     this._eventBus.invoke('traceRunning', true);
     // if ( traceType === 'cpuInstructions' ) {
@@ -293,7 +288,7 @@ export default class nES6 {
   }
 
   importState(loadedData){
-    return this._mainboard.importState(loadedData);
+    return this._mainboard.loadState(loadedData);
   }
 
   _doRomLoad({
