@@ -3,12 +3,12 @@ export const rusha = new Rusha();
 
 const uintArrayCache = {};
 export function uintArrayToString(uintArray) {
-  if (!(uintArray instanceof Int32Array)) {
-    throw new Error('uintArrayToString: Only accepts Int32Array parameter');
-  }
-  const cacheKey = uintArray.toString();
+  // if (!(uintArray instanceof Int32Array)) {
+    // throw new Error('uintArrayToString: Only accepts Int32Array parameter');
+  // }
+  // const cacheKey = uintArray.toString();
 
-  if (!uintArrayCache[cacheKey]){
+  // if (!uintArrayCache[cacheKey]){
     var str = '';
     for (var i = 0, strLen = uintArray.length; i < strLen; i++) {
       var saveValue = uintArray[i];
@@ -18,24 +18,25 @@ export function uintArrayToString(uintArray) {
       str += String.fromCharCode(saveValue);
     }
 
-    uintArrayCache[cacheKey] = str;
-  }
+    // uintArrayCache[cacheKey] = str;
+  // }
+  return str;
 
-  return uintArrayCache[cacheKey];
+  // return uintArrayCache[cacheKey];
 };
 
 
-const stringCache = {};
+// const stringCache = {};
 export function stringToUintArray(str) {
-  if (!stringCache[stringCache]) {
+  // if (!stringCache[stringCache]) {
     var buf = new Int32Array(str.length);
     for (var i = 0, strLen = str.length; i < strLen; i++) {
       buf[i] = str.charCodeAt(i) | 0;
     }
-    stringCache[stringCache] = buf;
-  }
-
-  return stringCache[stringCache];
+    // stringCache[stringCache] = buf;
+  // }
+  return buf;
+  // return stringCache[stringCache];
 };
 
 export function blobToString(blob) {

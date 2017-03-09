@@ -1,7 +1,7 @@
 {
   "name": "nES6",
   "version": "0.0.1",
-  "description": "",
+  "description": "NES emulator written in ES6.",
   "main": "index.js",
   "dependencies": {
     "file-saver": "1.3.3",
@@ -35,6 +35,6 @@
     "type": "git",
     "url": "git@github.com:andymikulski/nES6.git"
   },
-  "author": "",
-  "license": "GPL-3.0"
+  "author": "Andy Mikulski",
+  "license": "MIT"
 }

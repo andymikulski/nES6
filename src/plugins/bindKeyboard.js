@@ -8,11 +8,13 @@ import bindKeyboardPlugin, { KEYMAP_DEFAULTS } from './plugins/bindKeyboard';
 const App = new nES6({
   plugins: [
     bindKeyboardPlugin({
-      ...KEYMAP_DEFAULTS,
-      // assign custom keys - here, we swap the left/right arrows
-      // keyCode: 'BUTTON',
-      39: 'LEFT',
-      37: 'RIGHT',
+      customKeyMap: {
+        ...KEYMAP_DEFAULTS,
+        // assign custom keys - here, we swap the left/right arrows
+        // keyCode: 'BUTTON',
+        39: 'LEFT',
+        37: 'RIGHT',
+      },
     })
   ],
 });
@@ -79,24 +81,36 @@ const checkMapCompleteness = (map)=>{
  * @param  {nES6}   nesInstance   Active nES6 instance to bind to.
  * @return {void}
  */
-export default function(customKeyMap){
-  if (customKeyMap) {
-    checkMapCompleteness(customKeyMap);
-    keyMap = { ...customKeyMap };
+export default function(options = {}){
+  if (options.customKeyMap) {
+    checkMapCompleteness(options.customKeyMap);
+    keyMap = { ...options.customKeyMap };
   }
 
   return (nesInstance)=>{
     window.addEventListener('keydown', (event) => {
       if (keyMap[event.keyCode]) {
         event.preventDefault();
-        nesInstance.pressControllerButton(event.shiftKey ? 1 : 0, keyMap[event.keyCode]);
+        const playerNum = event.shiftKey ? 1 : 0;
+        const joypadButton = keyMap[event.keyCode];
+
+        if(options.onPress){
+          options.onPress({ playerNum, joypadButton })
+        }
+        nesInstance.pressControllerButton(playerNum, joypadButton);
       }
     }, false);
 
-    window.addEventListener('keyup', ({keyCode}) => {
-      if (keyMap[keyCode]) {
+    window.addEventListener('keyup', (event) => {
+      if (keyMap[event.keyCode]) {
         event.preventDefault();
-        nesInstance.depressControllerButton(event.shiftKey ? 1 : 0, keyMap[keyCode]);
+        const playerNum = event.shiftKey ? 1 : 0;
+        const joypadButton = keyMap[event.keyCode];
+
+        if(options.onDepress){
+          options.onDepress({ playerNum, joypadButton })
+        }
+        nesInstance.depressControllerButton(playerNum, joypadButton);
       }
     }, false);
 
