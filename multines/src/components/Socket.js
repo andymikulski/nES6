@@ -20,7 +20,11 @@ class Socket extends React.Component {
 
   componentWillMount() {
     if (!window.io) {
-      throw new Error('No socket.io found');
+        if (this.props.onBrokenSocket){
+          this.props.onBrokenSocket(`No sockets available to connect to server!`);
+        }
+
+        return;
     }
 
     const io = window.io;
