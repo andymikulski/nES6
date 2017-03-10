@@ -106,7 +106,6 @@ module.exports = {
           /\.css$/,
           /\.json$/,
           /\.svg$/
-          /\.gif$/
         ],
         loader: 'url',
         query: {

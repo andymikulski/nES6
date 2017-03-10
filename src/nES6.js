@@ -26,6 +26,7 @@ export default class nES6 {
       plugins: { is: Array, with: Function },
       render: ['auto', 'canvas', 'webgl', 'headless'],
       audio: { is: Boolean },
+      forceTimeSync: { is: Boolean },
       fps: { is: Boolean },
     }, options);
     // if we're still here, then the options are all good
@@ -63,11 +64,11 @@ export default class nES6 {
 
     // Apply plugins
     if (this.options.plugins) {
-      this.addPlugin(this.options.plugins);
+      this.addPlugins(this.options.plugins);
     }
   }
 
-  addPlugin(plugs) {
+  addPlugins(plugs) {
     const plugins = plugs instanceof Array ? plugs : [plugs];
     // Pass this nES6 instance to each plugin
     plugins.map(plugin=>plugin(this));
@@ -97,31 +98,7 @@ export default class nES6 {
       document.body.appendChild( this._fpsMeter.dom );
     }
 
-
-    this._canvasParent = new CanvasParent();
-    this._renderSurface = null;
-
-    switch (this.options.render) {
-      // headless render
-      case 'headless':
-        this._renderSurface = new HeadlessRenderSurface();
-        break;
-      // canvas render
-      case 'canvas':
-        this._renderSurface = new CanvasRenderSurface(this._canvasParent);
-        break;
-      // webgl is the same as auto - webgl will run if possible but will
-      // fallback to canvas automatically
-      case 'webgl':
-      case 'auto':
-      default:
-        if (webGlSupported()) {
-          this._renderSurface = new WebGlRenderSurface(this._canvasParent);
-        } else {
-          this._renderSurface = new CanvasRenderSurface(this._canvasParent);
-        }
-        break;
-    }
+    this._renderSurface = this.createRenderSurface();
 
     this._mainboard = new Mainboard(this._renderSurface);
     this._mainboard.connect('reset', ::this._onReset);
@@ -247,7 +224,7 @@ export default class nES6 {
   }
 
   _animate() {
-    if (this._gameSpeed !== 100 && !this._readyToRender()) {
+    if ((this.options.forceTimeSync || this._gameSpeed !== 100) && !this._readyToRender()) {
       requestAnimationFrame(this.animate);
       return;
     }
@@ -381,5 +358,42 @@ export default class nES6 {
     if (typeof buttonIdPressed !== 'undefined') {
       joypad.pressButton( buttonIdPressed, false );
     }
+  }
+
+  createRenderSurface(type = this.options.render) {
+    let surface;
+
+    this.canvasParent = this.canvasParent || new CanvasParent();
+
+    switch (type) {
+      // headless render
+      case 'headless':
+        surface = new HeadlessRenderSurface();
+        break;
+      // canvas render
+      case 'canvas':
+        surface = new CanvasRenderSurface(this.canvasParent);
+        break;
+      // webgl is the same as auto - webgl will run if possible but will
+      // fallback to canvas automatically
+      case 'webgl':
+      case 'auto':
+      default:
+        if (webGlSupported()) {
+          surface = new WebGlRenderSurface(this.canvasParent);
+        } else {
+          surface = new CanvasRenderSurface(this.canvasParent);
+        }
+        break;
+    }
+
+    return surface;
+  }
+
+  setRenderer(type) {
+    this._renderSurface = this.createRenderSurface(type);
+    this._mainboard.renderBuffer._renderSurface = this._renderSurface;
+    // this will come back to haunt me
+    this._mainboard.enableSound(type !== 'headless');
   }
 }

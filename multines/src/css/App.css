@@ -45,9 +45,8 @@ body {
   max-width: 20em;
   width: 40vmin;
 
+  image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
-  image-rendering: -webkit-crisp-edges;
-  image-rendering: crisp-edges;
 
   -webkit-filter: drop-shadow(1px 1px 0px #5C7080);
   -moz-filter: drop-shadow(1px 1px 0px #5C7080);
