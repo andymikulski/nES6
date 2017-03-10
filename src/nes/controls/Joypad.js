@@ -7,7 +7,7 @@ export default class Joypad {
   }
 
 
-  writeToRegister(offset, data) {
+  writeToRegister(data) {
     const firstBit = data & 1;
     if (this._strobeByte === 1 || firstBit === 1) {
       this._strobeByte = firstBit | 0;
@@ -16,7 +16,7 @@ export default class Joypad {
     }
   }
 
-  readFromRegister(offset) {
+  readFromRegister() {
 
     var ret = 0;
     if (this._strobeByte === 1) {
