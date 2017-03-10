@@ -13,6 +13,7 @@ import {
 import Socket from './Socket';
 
 import logo from '../assets/nes.png';
+import kingHippo from '../assets/king-hippo.gif';
 import '../css/App.css';
 
 class App extends Component {
@@ -23,11 +24,16 @@ class App extends Component {
       hasTechInfo: false,
       hasHelpOverlay: false,
       hasDibs: false,
+
+      ioBroken: false,
+      brokenReason: null,
     };
 
     this.togglePlayerOverlay = this.toggleFactory('PlayerOverlay');
     this.toggleTechInfo = this.toggleFactory('TechInfo');
     this.toggleHelpOverlay = this.toggleFactory('HelpOverlay');
+
+    this.handleBrokenSocket = ::this.handleBrokenSocket;
   }
 
   toggleFactory(prop) {
@@ -38,6 +44,13 @@ class App extends Component {
         [key]: !this.state[key],
       });
     };
+  }
+
+  handleBrokenSocket(reason) {
+    this.setState({
+      ioBroken: true,
+      brokenReason: reason,
+    });
   }
 
   render() {
@@ -96,6 +109,17 @@ class App extends Component {
             </Tooltip>
           </div>
         </nav>
+
+        {
+          this.state.ioBroken &&
+          <div className="broken-io">
+            <img role="presentation" src={kingHippo} className="king-hippo" />
+            <h3>Oh no!</h3>
+            { this.state.brokenReason }<br /><br />
+            <span>You can still drag-n-drop ROMs onto the page to play single-player, though.</span>
+          </div>
+        }
+
         <Dialog
             iconName="inbox"
             isOpen={this.state.hasPlayerOverlay}
@@ -147,7 +171,7 @@ class App extends Component {
                 </div>
             </div>
         </Dialog>
-        <Socket />
+        <Socket onBrokenSocket={this.handleBrokenSocket} />
       </div>
     );
   }

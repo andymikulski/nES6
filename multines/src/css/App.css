@@ -38,6 +38,33 @@ body {
   to { transform: rotate(360deg); }
 }
 
+.king-hippo {
+  display: block;
+  margin: 10vh auto 2em;
+  /*max-height: 50vh;*/
+  max-width: 20em;
+  width: 40vmin;
+
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: crisp-edges;
+
+  -webkit-filter: drop-shadow(1px 1px 0px #5C7080);
+  -moz-filter: drop-shadow(1px 1px 0px #5C7080);
+  filter: drop-shadow(1px 1px 0px #5C7080);
+}
+
+.broken-io {
+  color: #BFCCD6;
+}
+
+.broken-io h3 {
+  color: #fff;
+  margin-bottom: calc(1em + 2vmin);
+}
+.broken-io span {
+  color: #5C7080;
+}
 
 .nes6-player {
   position: fixed;
