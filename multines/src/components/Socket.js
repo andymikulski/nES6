@@ -4,6 +4,7 @@ import LZString from 'lz-string';
 import nES6 from '../../../src/nES6';
 import bindKeyboardPlugin from '../../../src/plugins/bindKeyboard';
 import dragDropLoader from '../../../src/plugins/dragDropLoader';
+import blurPausePlugin from '../../../src/plugins/blurPausePlugin';
 
 class Socket extends React.Component {
 
@@ -37,6 +38,7 @@ class Socket extends React.Component {
             socket.emit('input:up', joypadButton),
         }),
         dragDropLoader(),
+        blurPausePlugin(),
       ],
     });
 
