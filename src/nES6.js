@@ -289,8 +289,8 @@ export default class nES6 {
     requestAnimationFrame(this.animate);
   }
 
-  exportState(){
-    return this._mainboard.saveState();
+  exportState(fullSave){
+    return this._mainboard.saveState(fullSave);
   }
 
   importState(loadedData){

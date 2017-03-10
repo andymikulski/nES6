@@ -95,15 +95,18 @@ export default class Mainboard {
     this._eventBus.invoke('reset', cold);
   }
 
-  saveState() {
+  saveState(fullSave) {
     var data = {};
     data.memory = this.memory.saveState();
     data.cpu = this.cpu.saveState();
     data.ppu = this.ppu.saveState();
-    // data.apu = this.apu.saveState();
-    // data.joypad1 = this.joypad1.saveState();
-    // data.synchroniser = this.synchroniser.saveState();
-    // data.renderBuffer = this.renderBuffer.saveState();
+
+    if (fullSave) {
+      data.apu = this.apu.saveState();
+      data.joypad1 = this.joypad1.saveState();
+      data.synchroniser = this.synchroniser.saveState();
+      data.renderBuffer = this.renderBuffer.saveState();
+    }
 
     if (this.cart && this.cart.memoryMapper) {
       data.memoryMapper = this.cart.memoryMapper.saveState();
