@@ -2,6 +2,12 @@
 
 Thanks for your interest on contributing to nES6! Here are a few general guidelines on contributing and reporting bugs to nES6 that we ask you to take a look first.
 
+## Picking issues to work on
+
+Existing issues are tracked in Github, marked with appropriate labels and grouped by milestone. **Currently, we are working towards MVP - please focus issues/tasks tagged with the `MVP` milestone.** If an issue is unassigned, or has little discussion, chime in and mention you'd like to take a stab at it.
+
+If you have a feature idea or bug that has no issue, feel free to report it.
+
 ## Reporting Issues
 
 Before reporting a new issue, please be sure that the issue wasn't already reported or fixed by searching on GitHub through our [issues](https://github.com/andymikulski/nES6/issues).
