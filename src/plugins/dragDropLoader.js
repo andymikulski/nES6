@@ -116,6 +116,9 @@ export default function dragDropLoader(options = {}) {
       const reader = new FileReader();
       reader.onload = () => {
         nesInstance.loadRomFromBinary(reader.result, requestedRom.name);
+        if (options.onRomLoad) {
+          options.onRomLoad();
+        }
       };
       reader.readAsArrayBuffer(requestedRom);
     }, false);
