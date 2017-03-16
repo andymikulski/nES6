@@ -1,8 +1,8 @@
 /* Estimated number of games with mapper (other mappers had <10 games)
-Mapper 004: 569
-Mapper 001: 481
-Mapper 000: 260
-Mapper 002: 200
+✓ Mapper 004: 569
+✓ Mapper 001: 481
+✓ Mapper 000: 260
+✓ Mapper 002: 200
 Mapper 003: 145
 Mapper 007: 56
 Mapper 011: 35
@@ -22,30 +22,38 @@ Mapper 023: 11
 Mapper 069: 11
 */
 
-import Mapper0 from './Mapper0';
-import Mapper1 from './Mapper1';
-import Mapper2 from './Mapper2';
-import Mapper4 from './Mapper4';
-import Mapper5 from './Mapper5';
-import Mapper9 from './Mapper9';
 
-const mapperDict = {
-	0: Mapper0,
-	1: Mapper1,
-	2: Mapper2,
-	4: Mapper4,
-	5: Mapper5,
-	9: Mapper9,
-};
+const loadedMappers = {};
 
 export default function mapperFactory( mapperId, mainboard, mirroringMethod ) {
-	var MapperClass = mapperDict[mapperId];
-	if ( !mapperDict.hasOwnProperty(mapperId) || !MapperClass ) {
-		throw new Error( 'Mapper id ' + mapperId + ' is not supported' );
-	}
-	var mapper = new MapperClass(mainboard, mirroringMethod);
-	if (mapper.init) {
-		mapper.init();
-	}
-	return mapper;
+	return new Promise((resolve, reject) => {
+		var MapperClass = loadedMappers[mapperId];
+
+		if (!MapperClass) {
+			import(`./Mapper${mapperId}`).then(Mapper => {
+				if (!Mapper){
+					return reject();
+				}
+
+				loadedMappers[mapperId] = Mapper.default;
+
+				var mapper = new loadedMappers[mapperId](mainboard, mirroringMethod);
+				if (mapper.init) {
+					mapper.init();
+				}
+
+				resolve(mapper);
+			}).catch(err => {
+				reject();
+				throw new Error(err);
+			});
+		} else {
+			var mapper = new MapperClass(mainboard, mirroringMethod);
+			if (mapper.init) {
+				mapper.init();
+			}
+
+			resolve(mapper);
+		}
+	});
 }

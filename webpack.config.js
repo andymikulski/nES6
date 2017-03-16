@@ -9,16 +9,6 @@ var plugins = [
 if (prod) {
   var ClosureCompilerPlugin = require('webpack-closure-compiler');
   plugins = plugins.concat([
-    // new ClosureCompilerPlugin({
-    //   compiler: {
-    //     language_in: 'ECMASCRIPT6',
-    //     language_out: 'ECMASCRIPT5',
-    //     compilation_level: 'SIMPLE'
-    //   },
-    //   concurrency: 4,
-    //   // use JS compiler - waaaay slower but doesn't require any java
-    //   jsCompiler: false,
-    // })
     new webpack.optimize.UglifyJsPlugin({
       compress: {
         warnings: false
