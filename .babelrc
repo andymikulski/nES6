@@ -1,4 +1,4 @@
 {
   "presets": ["stage-0", "es2015"],
-  "plugins": ["transform-class-properties", "transform-es2015-classes"]
+  "plugins": ["transform-async-functions", "transform-class-properties", "transform-es2015-classes"]
 }
