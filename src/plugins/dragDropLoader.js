@@ -115,9 +115,15 @@ export default function dragDropLoader(options = {}) {
       // nES6 instance through its binary string.
       const reader = new FileReader();
       reader.onload = () => {
+        const formatName = (name)=>
+          name
+            .replace('.nes', '')
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, str => str.toUpperCase());
+
         nesInstance.loadRomFromBinary(reader.result, requestedRom.name);
         if (options.onRomLoad) {
-          options.onRomLoad();
+          options.onRomLoad(formatName(requestedRom.name), reader.result);
         }
       };
       reader.readAsArrayBuffer(requestedRom);
