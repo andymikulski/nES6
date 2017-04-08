@@ -97,7 +97,15 @@ export default function(options = {}){
         if(options.onPress){
           options.onPress({ playerNum, joypadButton })
         }
-        nesInstance.pressControllerButton(playerNum, joypadButton);
+
+        const next = ()=>
+          nesInstance.pressControllerButton(playerNum, joypadButton);
+
+        if (options.onInterruptedPress) {
+          options.onInterruptedPress({ playerNum, joypadButton, next });
+        } else {
+          next();
+        }
       }
     }, false);
 
@@ -107,10 +115,14 @@ export default function(options = {}){
         const playerNum = event.shiftKey ? 1 : 0;
         const joypadButton = keyMap[event.keyCode];
 
-        if(options.onDepress){
-          options.onDepress({ playerNum, joypadButton })
+        const next = ()=>
+          nesInstance.depressControllerButton(playerNum, joypadButton);
+
+        if (options.onInterruptedDepress) {
+          options.onInterruptedDepress({ playerNum, joypadButton, next });
+        } else {
+          next();
         }
-        nesInstance.depressControllerButton(playerNum, joypadButton);
       }
     }, false);
 
