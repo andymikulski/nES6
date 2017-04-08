@@ -48,6 +48,11 @@ module.exports = [{
       }
     }]
   },
+  resolve: {
+    alias: {
+      'constants': path.resolve(__dirname, './src/config/consts.js')
+    }
+  },
   node: {
     fs: 'empty',
     net: 'empty',

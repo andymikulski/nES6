@@ -1,6 +1,5 @@
 import { stringToUintArray, uintArrayToString } from '../../utils/serialisation';
 import { writeLine, trace_ppu } from '../../utils/Trace';
-import { TRACE_ENABLED } from '../../config/consts';
 
 import {
 	MASTER_CYCLES_PER_PPU,
@@ -14,7 +13,11 @@ import {
 	PPU_TICKS_PER_SCANLINE,
 	COLOUR_ENCODING_NAME,
 	IS_INT_BETWEEN,
-} from '../../config/consts';
+	PPU_MIRRORING_FOURSCREEN,
+	PPU_MIRRORING_SINGLESCREEN_NT0,
+	PPU_MIRRORING_SINGLESCREEN_NT1,
+	TRACE_ENABLED,
+} from '../../config/consts.js';
 
 import PPURenderBG from './PPURenderBG';
 import PPURenderSprites from './PPURenderSprites';

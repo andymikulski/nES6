@@ -28,6 +28,7 @@ import Mapper1 from './Mapper1';
 import Mapper2 from './Mapper2';
 import Mapper4 from './Mapper4';
 import Mapper5 from './Mapper5';
+import Mapper7 from './Mapper7';
 import Mapper9 from './Mapper9';
 
 const mapperDict = {
@@ -36,6 +37,7 @@ const mapperDict = {
 	2: Mapper2,
 	4: Mapper4,
 	5: Mapper5,
+	7: Mapper7,
 	9: Mapper9,
 };
 

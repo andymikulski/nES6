@@ -6,7 +6,8 @@ import {
 	PPU_MIRRORING_HORIZONTAL,
 	setColourEncodingType,
 	mirroringMethodToString,
-} from '../config/consts';
+	PPU_MIRRORING_FOURSCREEN,
+} from '../config/consts.js';
 
 import mapperFactory from './mappers/mapperFactory';
 

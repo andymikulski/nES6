@@ -72,7 +72,7 @@ export const PPU_MIRRORING_FOURSCREEN = 2;
 export const PPU_MIRRORING_SINGLESCREEN_NT0 = 3;
 export const PPU_MIRRORING_SINGLESCREEN_NT1 = 4;
 
-const mirroMethods = {
+const mirrorMethods = {
 	[PPU_MIRRORING_HORIZONTAL]: 'horizontal',
 	[PPU_MIRRORING_VERTICAL]: 'vertical',
 	[PPU_MIRRORING_FOURSCREEN]: 'fourscreen',
@@ -81,7 +81,7 @@ const mirroMethods = {
 };
 
 export function mirroringMethodToString( method ) {
-	return mirroMethods[method] || '';
+	return mirrorMethods[method] || '';
 };
 
 
