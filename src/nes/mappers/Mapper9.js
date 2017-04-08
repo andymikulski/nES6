@@ -21,13 +21,13 @@ export default class Mapper9 extends BaseMapper {
 
 	mapperSaveState( state ) {
 
-		state._banks = Nes.uintArrayToString( this._banks );
+		state._banks = uintArrayToString( this._banks );
 		state._latches = this._latches.slice( 0 );
 	}
 
 	mapperLoadState( state ) {
 
-		this._banks = Nes.stringToUintArray( state._banks );
+		this._banks = stringToUintArray( state._banks );
 		this._latches = state._latches.slice( 0 );
 	}
 

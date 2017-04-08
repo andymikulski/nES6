@@ -8,6 +8,11 @@ import {
   PPU_MIRRORING_SINGLESCREEN_NT1,
 } from '../../config/consts.js';
 
+import {
+  uintArrayToString,
+  stringToUintArray
+} from '../../utils/serialisation';
+
 export default class Mapper1 extends BaseMapper {
   constructor( mainboard, mirroringMethod ) {
     super(mainboard, mirroringMethod);
@@ -30,7 +35,7 @@ export default class Mapper1 extends BaseMapper {
   	state.val = this.val;
   	state.count = this.count;
   	state.lastWriteMTC = this.lastWriteMTC;
-  	state.registers = Nes.uintArrayToString( this.registers );
+  	state.registers = uintArrayToString( this.registers );
   	state.wRamEnabled = this.wRamEnabled;
   	state.soromlatch = this.soromlatch;
   }
@@ -39,7 +44,7 @@ export default class Mapper1 extends BaseMapper {
   	this.val = state.val;
   	this.count = state.count;
   	this.lastWriteMTC = state.lastWriteMTC;
-  	this.registers = Nes.stringToUintArray( state.registers );
+  	this.registers = stringToUintArray( state.registers );
   	this.wRamEnabled = state.wRamEnabled;
   	this.soromlatch = state.soromlatch;
   }
