@@ -5,17 +5,17 @@ NES emulator in ES6, rendered via WebGL or Canvas.
 
 Out of the box, nES6 does _not_ implement everything for you. Instead, it exposes APIs to directly manipulate the emulator. Devs can implement controllers, ROM loading, volume control, and more, all as needed for their own application.
 
-#Credit
+# Credit
 
 nES6 was initially forked from [Pete Ward](https://github.com/peteward44)'s [WebNES](https://github.com/peteward44/WebNES) project. This project wouldn't be possible without Pete's incredible emulator work - go give him some stars!
 
-##Features
+## Features
 
 - Exposed API for manipulating inputs, ROMs, system settings, etc.
 - Headless rendering
 - Plugins (see below)
 
-####Inherited WebNES Features
+#### Inherited WebNES Features
 
 Some awesome features were inherited from [WebNES](https://github.com/peteward44/WebNES), such as:
 
@@ -64,7 +64,7 @@ const App = new nES6({
 });
 ```
 
-####Available Plugins
+#### Available Plugins
 - bindKeyboard
   - Binds keyboard inputs to joypad inputs. Keys can be remapped, but use sensible defaults.
 - bindGamepad
@@ -77,7 +77,7 @@ const App = new nES6({
 
 --
 
-##Getting Started with Development
+## Getting Started with Development
 ```
 npm install
 ```
@@ -93,7 +93,7 @@ Runs a server at `http://localhost:8000` and begins webpack compilation.
 ```
 Entry point - work in the `/src/` folder!
 
-##Build
+## Build
 ```
 npm run build
 ```
@@ -101,7 +101,7 @@ This will compile the nES6 library using Google's Closure Compiler and output to
 
 --
 
-###License
+### License
 MIT
 
 [WebNES](https://github.com/peteward44/WebNES) Copyright (c) 2015 [peteward44](https://github.com/peteward44)
