@@ -123,7 +123,6 @@ export default class RenderBuffer {
 
 
 	saveState() {
-
 		return {
 			priorityBuffer: uintArrayToString(this.priorityBuffer)
 		};

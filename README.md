@@ -71,6 +71,8 @@ const App = new nES6({
   - Utilizes the Gamepad API in browsers to support using a USB controller for nES6. Remappable, and joystick support on the way.
 - dragDropLoader
   - Gives users the ability to load ROM files into nES6 via drag-n-dropping onto the page (or a given DOM target).
+- blurPausePlugin
+  - Automatically un/pauses the nES6 instance when user focuses/blurs the containing window (switches tabs, etc).
 
 
 --
