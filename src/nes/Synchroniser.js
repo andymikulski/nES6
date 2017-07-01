@@ -15,8 +15,10 @@ class SyncEvent {
 	}
 }
 
-export default class Synchroniser {
+export default class Synchroniser extends EventBus {
 	constructor( mainboard ) {
+		super();
+
 		this.mainboard = mainboard;
 		this.mainboard.connect( 'reset', ::this.reset);
 		this.cpu = mainboard.cpu;
@@ -24,7 +26,6 @@ export default class Synchroniser {
 		this._lastSynchronisedMtc = 0;
 		this._isSynchronising = false;
 		this._newEventInserted = false;
-		this._eventBus = new EventBus();
 		this._cpuMTCatEndOfInstruction = new Int32Array( 8 ); // Array of ppu MTC counts which the last X instructions have ended on.
 		this._cpuMTCatEndOfInstructionIndex = 0; // This is for determining if an NMI trigger should delay by an instruction or not.
 
@@ -40,12 +41,6 @@ export default class Synchroniser {
 		this._isSynchronising = false;
 		this._newEventInserted = false;
 	}
-
-
-	connect( name, callback ) {
-		this._eventBus.connect( name, callback );
-	}
-
 
 	changeEventTime( eventId, tickCount ) {
 
@@ -155,7 +150,7 @@ export default class Synchroniser {
 
 				this.cpuMtc -= frameEnd;
 				this._lastSynchronisedMtc = 0;
-				this._eventBus.invoke( 'frameEnd' );
+				this.invoke( 'frameEnd' );
 			}
 		}
 	}

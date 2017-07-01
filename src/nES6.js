@@ -19,8 +19,10 @@ import {
   JOYPAD_NAME_TO_ID,
 } from './config/consts.js';
 
-export default class nES6 {
+export default class nES6 extends EventBus {
   constructor(options) {
+    super();
+
     // validate the options object before doing anything
     validateObject({
       plugins: { is: Array, with: Function },
@@ -47,7 +49,6 @@ export default class nES6 {
       name: '',
       binaryString: null
     };
-    this._eventBus = new EventBus();
 
     this._frameTimeTarget = 0;
     this._lastFrameTime = 0;
@@ -75,7 +76,7 @@ export default class nES6 {
   }
 
   connect(name, cb) {
-    this._eventBus.connect(name, cb);
+    this.connect(name, cb);
   }
 
   setColourEncodingType(encodingType) {
@@ -118,7 +119,7 @@ export default class nES6 {
     this._isPaused = isPaused;
 
     if (changed) {
-      this._eventBus.invoke('isPausedChange', isPaused);
+      this.invoke('isPausedChange', isPaused);
     }
   }
 
@@ -204,7 +205,7 @@ export default class nES6 {
 
 
   startTrace() {
-    this._eventBus.invoke('traceRunning', true);
+    this.invoke('traceRunning', true);
     // if ( traceType === 'cpuInstructions' ) {
     this._mainboard.cpu.enableTrace(true);
     // }
@@ -215,7 +216,7 @@ export default class nES6 {
   stopTrace() {
     Trace.stop();
     this._mainboard.cpu.enableTrace(false);
-    this._eventBus.invoke('traceRunning', false);
+    this.invoke('traceRunning', false);
   }
 
 
@@ -241,7 +242,7 @@ export default class nES6 {
     if (this._romLoaded) {
       this._romLoaded = false;
       this._mainboard.loadCartridge(this._cart);
-      this._eventBus.invoke('cartLoaded', this._cart);
+      this.invoke('cartLoaded', this._cart);
     }
 
     if (this._isPaused) {
@@ -329,7 +330,7 @@ export default class nES6 {
     } else {
       msg = err.toString();
     }
-    this._eventBus.invoke('romLoadFailure', msg);
+    this.invoke('romLoadFailure', msg);
   }
 
   enterGameGenieCode(code) {

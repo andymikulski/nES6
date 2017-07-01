@@ -1,9 +1,9 @@
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from '../config/consts';
 import { EventBus } from '../nes/Event';
 
-export default class CanvasParent {
+export default class CanvasParent extends EventBus {
 	constructor( renderSurface ) {
-		this._eventBus = new EventBus();
+    	super();
 
 		this._canvasElement = document.createElement('canvas');
 		this._canvasElement.classList.add('nes6-player');
@@ -15,11 +15,6 @@ export default class CanvasParent {
 		window.addEventListener('resize', ()=>{
 			this._setSize();
 		}, true);
-	}
-
-
-	connect( name, cb ) {
-		this._eventBus.connect( name, cb );
 	}
 
 
@@ -38,6 +33,6 @@ export default class CanvasParent {
 		this._canvasElement.width = Math.floor( newWidth );
 		this._canvasElement.height = parentHeight;
 
-		this._eventBus.invoke( 'resize' );
+		this.invoke( 'resize' );
 	}
 }

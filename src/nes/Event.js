@@ -9,8 +9,11 @@ export class Event {
 
   invoke() {
     const eventArgs = Array.prototype.slice.call(arguments, 0);
-    for (let i = 0; i < this._callbacks.length; ++i) {
-      this._callbacks[i].apply(this, eventArgs);
+    const callbacks = this._callbacks;
+    const numCalls = callbacks.length;
+    let i = numCalls;
+    for (i; i > 0; i--) {
+      callbacks[i].apply(this, eventArgs);
     }
   }
 }

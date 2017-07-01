@@ -9,11 +9,12 @@ import CPU from './CPU/Cpu6502';
 
 import { enableType, trace_all, trace_cpuInstructions } from '../utils/Trace';
 
-export default class Mainboard {
+export default class Mainboard extends EventBus {
   constructor(renderSurface) {
+    super();
+
     this.running = false;
     this.cart = null;
-    this._eventBus = new EventBus();
 
     this.memory = new Memory(this);
     this.ppu = new PPU(this);
@@ -34,14 +35,9 @@ export default class Mainboard {
   }
 
 
-  connect(name, cb) {
-    this._eventBus.connect(name, cb);
-  }
-
-
   enableSound(enable) {
     this.apu.enableSound(enable);
-    this._eventBus.invoke('soundEnabled', this.apu.soundEnabled(), this.apu.soundSupported());
+    this.invoke('soundEnabled', this.apu.soundEnabled(), this.apu.soundSupported());
   }
 
   setVolume(val) {
@@ -57,7 +53,7 @@ export default class Mainboard {
 
   _onFrameEnd() {
     this.running = false;
-    this._eventBus.invoke('frameEnd');
+    this.invoke('frameEnd');
   }
 
   doFrame() {
@@ -74,7 +70,7 @@ export default class Mainboard {
     this.synchroniser.addObject('mapper', this.cart.memoryMapper);
 
     this.reset(true);
-    this._eventBus.invoke('romLoaded', this.cart);
+    this.invoke('romLoaded', this.cart);
   }
 
   powerButton(on) {
@@ -85,14 +81,15 @@ export default class Mainboard {
       this.running = false;
       this.cart = null;
     }
-    this._eventBus.invoke('power', isOn);
+    this.invoke('power', isOn);
   }
 
   reset(cold) {
     cold = cold === undefined ? true : cold;
-    if (this.cart)
+    if (this.cart) {
       this.cart.reset(cold);
-    this._eventBus.invoke('reset', cold);
+    }
+    this.invoke('reset', cold);
   }
 
   saveState(fullSave) {
