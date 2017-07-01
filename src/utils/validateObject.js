@@ -18,17 +18,17 @@ export default function validateObject(schema, object) {
 
         // not passing = dont bother checking contents
         if (passing && typeWanted.with) {
-          givenValue.forEach(val => {
+          givenValue.forEach((val) => {
             if (!(val instanceof typeWanted.with)) {
               passing = false;
-              reason = `- Expected "${typeWanted.with.name}" inside array`
+              reason = `- Expected "${typeWanted.with.name}" inside array`;
             }
           });
         }
         // if the validation is an array, they are a list acceptable values
       } else if (typeWanted instanceof Array) {
         passing = !!typeWanted.find(requiredValue => givenValue === requiredValue);
-        reason = `- Expected a value of: ["${typeWanted.join('", "')}"]`
+        reason = `- Expected a value of: ["${typeWanted.join('", "')}"]`;
           // if the validation is a function, it's a custom deal that we just test
           // against the given value
       } else if (typeWanted instanceof Function) {
@@ -39,9 +39,8 @@ export default function validateObject(schema, object) {
       }
 
       if (!passing) {
-        throw new Error(`Invalid value for nES6 option "${prop}" ${ reason }`);
+        throw new Error(`Invalid value for nES6 option "${prop}" ${reason}`);
       }
-
     } else if (!schema.hasOwnProperty(prop)) {
       throw new Error(`Unrecognized nES6 option "${prop}"`);
     }

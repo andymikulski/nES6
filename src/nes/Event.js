@@ -43,7 +43,7 @@ export class EventBus {
         eventArgs = Array.prototype.slice.call(arguments, 1);
       }
 
-      event.invoke.apply(event, eventArgs);
+      event.invoke(...eventArgs);
     }
   }
 }

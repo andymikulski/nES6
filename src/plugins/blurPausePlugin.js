@@ -40,5 +40,5 @@ export default function blurPausePlugin(options = {}) {
         options.onFocus();
       }
     }, false);
-  }
+  };
 }

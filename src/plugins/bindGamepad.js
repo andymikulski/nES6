@@ -52,7 +52,7 @@ export const GAMEPAD_KEY_DEFAULTS = {
  * Configurable keyboard mapping object, based on GAMEPAD_KEY_DEFAULTS.
  * @type {Object}
  */
-export let keyMap = {...GAMEPAD_KEY_DEFAULTS};
+export let keyMap = { ...GAMEPAD_KEY_DEFAULTS };
 
 /**
  * Checks given key map and determines if there are keys left unbound.
@@ -62,21 +62,19 @@ export let keyMap = {...GAMEPAD_KEY_DEFAULTS};
  * @return {void}
  */
 const checkMapCompleteness = (map) => {
-  const values = Object.keys(map).map((binding) => {
-    return map[binding];
-  });
+  const values = Object.keys(map).map(binding => map[binding]);
 
   joypadButtons.forEach((button) => {
     if (values.indexOf(button) === -1) {
       console && console.warn(`"${button}" button missing on given gamepad keymap.`);
     }
-  })
-}
+  });
+};
 
 // Track the response from navigator.getGamepads() internally
 let gamePads = [];
 // Track the buttons that were pressed during the previous frame
-let lastPressedButtons = [];
+const lastPressedButtons = [];
 
 /**
  * Gamepad dis/connection event handler. Basically just reads navigator.getGamepads(),
@@ -111,19 +109,19 @@ const registerGamepads = () => {
  * @return {function}             Function that polls gamepads and applies to the
  *                                given nES6 instance.
  */
-const pollGamepads = (nesInstance) =>
+const pollGamepads = nesInstance =>
   () => {
     // We need to poll registerGamepads each frame to get an accurate gamepad
     // button state - otherwise, Chrome will return one button as always pressed.
     if (!registerGamepads()) {
       return;
     }
-    let registeredChanges = [];
+    const registeredChanges = [];
 
     // For each gamepad hooked up, we have to check each button's `pressed` state
     gamePads.forEach((pad, padIndex) => {
       // Get a list of the currently pressed buttons based on `pressed`
-      let currentlyPressed = [];
+      const currentlyPressed = [];
       const buttons = pad.buttons.map((butt, idx) => {
         if (butt.pressed) {
           currentlyPressed.push({
@@ -139,7 +137,7 @@ const pollGamepads = (nesInstance) =>
       (lastPressedButtons[padIndex] || []).forEach((oldButton) => {
         const newButton = currentlyPressed
           .find(({
-            idx
+            idx,
           }) => idx === oldButton.idx);
 
         // If the old button was pressed and the new one is not, it's depressed :(
@@ -157,7 +155,7 @@ const pollGamepads = (nesInstance) =>
       currentlyPressed.forEach((newButton) => {
         const oldButton = (lastPressedButtons[padIndex] || [])
           .find(({
-            idx
+            idx,
           }) => idx === newButton.idx);
 
         // If there is no "old button", that means this button was freshly pressed
@@ -173,17 +171,16 @@ const pollGamepads = (nesInstance) =>
 
       // Save this frame's state
       lastPressedButtons[padIndex] = currentlyPressed;
-
     }); // End gamepad loop
 
     // For each change (button was pressed, button was released, etc), loop through
     // and notify the nES6 instance accordingly. Reads from `keyMap` to determine
     // what joypad button the gamepad input maps to.
-    registeredChanges.forEach(change => {
+    registeredChanges.forEach((change) => {
       const {
         pad,
         button,
-        pressed
+        pressed,
       } = change;
 
       const method = pressed ? 'pressControllerButton' : 'depressControllerButton';
@@ -208,10 +205,10 @@ const pollGamepads = (nesInstance) =>
  * @param  {nES6}   nesInstance   Active nES6 instance to bind to.
  * @return {void}
  */
-export default function(customKeyMap) {
+export default function (customKeyMap) {
   if (customKeyMap) {
     checkMapCompleteness(customKeyMap);
-    keyMap = {...customKeyMap};
+    keyMap = { ...customKeyMap };
   }
 
   return (nesInstance) => {
@@ -224,5 +221,5 @@ export default function(customKeyMap) {
 
     // Return the nES6 instance for chaining.
     return nesInstance;
-  }
+  };
 }

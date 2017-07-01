@@ -61,17 +61,15 @@ export let keyMap = { ...KEYMAP_DEFAULTS };
  * @param  {Object} map   Key map to inspect
  * @return {void}
  */
-const checkMapCompleteness = (map)=>{
-  const values = Object.keys(map).map((binding)=>{
-    return map[binding];
-  });
+const checkMapCompleteness = (map) => {
+  const values = Object.keys(map).map(binding => map[binding]);
 
-  joypadButtons.forEach((button)=>{
-    if (values.indexOf(button) === -1){
+  joypadButtons.forEach((button) => {
+    if (values.indexOf(button) === -1) {
       console && console.warn(`"${button}" button missing on given keymap.`);
     }
-  })
-}
+  });
+};
 
 /**
  * Binding function for bindKeyboard plugin. Given an nES6 instance,
@@ -81,24 +79,24 @@ const checkMapCompleteness = (map)=>{
  * @param  {nES6}   nesInstance   Active nES6 instance to bind to.
  * @return {void}
  */
-export default function(options = {}){
+export default function (options = {}) {
   if (options.customKeyMap) {
     checkMapCompleteness(options.customKeyMap);
     keyMap = { ...options.customKeyMap };
   }
 
-  return (nesInstance)=>{
+  return (nesInstance) => {
     window.addEventListener('keydown', (event) => {
       if (keyMap[event.keyCode]) {
         event.preventDefault();
         const playerNum = event.shiftKey ? 1 : 0;
         const joypadButton = keyMap[event.keyCode];
 
-        if(options.onPress){
-          options.onPress({ playerNum, joypadButton })
+        if (options.onPress) {
+          options.onPress({ playerNum, joypadButton });
         }
 
-        const next = ()=>
+        const next = () =>
           nesInstance.pressControllerButton(playerNum, joypadButton);
 
         if (options.onInterruptedPress) {
@@ -115,7 +113,7 @@ export default function(options = {}){
         const playerNum = event.shiftKey ? 1 : 0;
         const joypadButton = keyMap[event.keyCode];
 
-        const next = ()=>
+        const next = () =>
           nesInstance.depressControllerButton(playerNum, joypadButton);
 
         if (options.onInterruptedDepress) {
@@ -128,5 +126,5 @@ export default function(options = {}){
 
     // Return the nES6 instance for chaining.
     return nesInstance;
-  }
+  };
 }

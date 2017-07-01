@@ -59,7 +59,7 @@ const handleDragOver = (evt) => {
   evt.stopPropagation();
   evt.preventDefault();
   evt.dataTransfer.dropEffect = 'copy'; // maybe use 'link', idk
-}
+};
 
 /**
  * Binding function for bindKeyboard plugin. Given an nES6 instance,
@@ -74,7 +74,7 @@ export default function dragDropLoader(options = {}) {
     if (typeof window.FileReader !== 'function') {
       const warning = 'nES6 dragDrop: FileReader not supported by this browser!';
       if (options.throwCompatError) {
-        throw new Error(warning)
+        throw new Error(warning);
       } else {
         console && console.warn(warning);
       }
@@ -82,7 +82,7 @@ export default function dragDropLoader(options = {}) {
     }
 
     // If a zone is provided but it's not an Element, we can't/shouldn't continue
-    if (!!options.zone && !(options.zone instanceof Element)){
+    if (!!options.zone && !(options.zone instanceof Element)) {
       throw new Error('nES6 dragDrop: Provided `zone` is not a DOM element.');
     }
     const dropZone = options.zone || document.body;
@@ -115,7 +115,7 @@ export default function dragDropLoader(options = {}) {
       // nES6 instance through its binary string.
       const reader = new FileReader();
       reader.onload = () => {
-        const formatName = (name)=>
+        const formatName = name =>
           name
             .replace('.nes', '')
             .replace(/([A-Z])/g, ' $1')
@@ -128,5 +128,5 @@ export default function dragDropLoader(options = {}) {
       };
       reader.readAsArrayBuffer(requestedRom);
     }, false);
-  }
+  };
 }

@@ -32,27 +32,27 @@ import Mapper7 from './Mapper7';
 import Mapper9 from './Mapper9';
 
 const mapperDict = {
-	0: Mapper0,
-	1: Mapper1,
-	2: Mapper2,
-	4: Mapper4,
-	5: Mapper5,
-	7: Mapper7,
-	9: Mapper9,
+  0: Mapper0,
+  1: Mapper1,
+  2: Mapper2,
+  4: Mapper4,
+  5: Mapper5,
+  7: Mapper7,
+  9: Mapper9,
 };
 
-export default function mapperFactory( mapperId, mainboard, mirroringMethod ) {
-	return new Promise((resolve, reject) => {
-		var MapperClass = mapperDict[mapperId];
-		if (!mapperDict.hasOwnProperty(mapperId) || !MapperClass ) {
-			throw new Error( 'Mapper id ' + mapperId + ' is not supported' );
-		}
+export default function mapperFactory(mapperId, mainboard, mirroringMethod) {
+  return new Promise((resolve, reject) => {
+    const MapperClass = mapperDict[mapperId];
+    if (!mapperDict.hasOwnProperty(mapperId) || !MapperClass) {
+      throw new Error(`Mapper id ${mapperId} is not supported`);
+    }
 
-		var mapper = new MapperClass(mainboard, mirroringMethod);
-		if (mapper.init) {
-			mapper.init();
-		}
+    const mapper = new MapperClass(mainboard, mirroringMethod);
+    if (mapper.init) {
+      mapper.init();
+    }
 
-		resolve(mapper);
-	});
+    resolve(mapper);
+  });
 }

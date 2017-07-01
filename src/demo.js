@@ -4,13 +4,13 @@ import bindGamepadPlugin from './plugins/bindGamepad';
 import dragDropPlugin from './plugins/dragDropLoader';
 
 const App = new nES6({
-	render: 'auto',
+  render: 'auto',
 	// audio: false,
-	plugins: [
-		bindGamepadPlugin(),
-		bindKeyboardPlugin(),
-		dragDropPlugin(),
-	],
+  plugins: [
+    bindGamepadPlugin(),
+    bindKeyboardPlugin(),
+    dragDropPlugin(),
+  ],
 });
 App.start();
 

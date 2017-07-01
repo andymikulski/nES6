@@ -16,9 +16,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
 
 
 export default class BlipEqT {
-	constructor( treble, cutoff, samplerate ) {
-		this.treble = treble || 0;
-		this.cutoff = cutoff || 0;
-		this.sample_rate = samplerate || 44100;
-	}
+  constructor(treble, cutoff, samplerate) {
+    this.treble = treble || 0;
+    this.cutoff = cutoff || 0;
+    this.sample_rate = samplerate || 44100;
+  }
 }
