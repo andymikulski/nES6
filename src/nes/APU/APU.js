@@ -37,26 +37,26 @@ export default class APU {
     this.end_addr = end_addr;
     this.status_addr = 0x4015;
 
-    this._square1 = new Square();
-    this._square2 = new Square();
-    this._triangle = new Triangle();
-    this._noise = new Noise();
-    this._dmc = new Dmc();
-    this.osc = [this._square1, this._square2, this._triangle, this._noise, this._dmc];
+    this.square1 = new Square();
+    this.square2 = new Square();
+    this.triangle = new Triangle();
+    this.noise = new Noise();
+    this.dmc = new Dmc();
+    this.osc = [this.square1, this.square2, this.triangle, this.noise, this.dmc];
 
     this.last_time = 0; // has been run until this time in current frame
     this.earliest_irq_ = 0;
     this.next_irq = 0;
 
-    this._square_synth = new BlipSynth(BlipSynth.blip_good_quality, 15);
-    this._irqCallback = null;
+    this.square_synth = new BlipSynth(BlipSynth.blip_good_quality, 15);
+    this.irqCallback = null;
     this.frame_mode = 0;
     this.frame = 0;
 
-    this._dmc.apu = this;
-    this._dmc.rom_reader = null;
-    this._square1.synth = this._square_synth;
-    this._square2.synth = this._square_synth;
+    this.dmc.apu = this;
+    this.dmc.rom_reader = null;
+    this.square1.synth = this.square_synth;
+    this.square2.synth = this.square_synth;
 
     this.output(null);
     this.volume(1.0);
@@ -73,13 +73,13 @@ export default class APU {
 
 		// to do: time pal frame periods exactly
     this.frame_period = pal_mode ? 8314 : 7458;
-    this._dmc.pal_mode = pal_mode ? 1 : 0;
+    this.dmc.pal_mode = pal_mode ? 1 : 0;
 
-    this._square1.reset();
-    this._square2.reset();
-    this._triangle.reset();
-    this._noise.reset();
-    this._dmc.reset();
+    this.square1.reset();
+    this.square2.reset();
+    this.triangle.reset();
+    this.noise.reset();
+    this.dmc.reset();
 
     this.last_time = 0;
     this.osc_enables = 0;
@@ -93,9 +93,9 @@ export default class APU {
       this.write_register(0, addr, (addr & 3) ? 0x00 : 0x10);
     }
 
-    this._dmc.dac = initial_dmc_dac;
-    if (!this._dmc.nonlinear) {
-      this._dmc.last_amp = initial_dmc_dac; // prevent output transition
+    this.dmc.dac = initial_dmc_dac;
+    if (!this.dmc.nonlinear) {
+      this.dmc.last_amp = initial_dmc_dac; // prevent output transition
     }
   }
 
@@ -111,7 +111,7 @@ export default class APU {
 	// When callback is invoked, 'user_data' is passed unchanged as the
 	// first parameter.
   dmc_reader(dmcCallback) {
-    this._dmc.rom_reader = dmcCallback;
+    this.dmc.rom_reader = dmcCallback;
   }
 
 	// All time values are the number of CPU clock cycles relative to the
@@ -140,7 +140,7 @@ export default class APU {
 
       if (osc_index === 4) {
 				// handle DMC specially
-        this._dmc.write_register(reg, data);
+        this.dmc.write_register(reg, data);
       } else if (reg === 3) {
 				// load length counter
         if ((this.osc_enables >> osc_index) & 1) {
@@ -161,16 +161,16 @@ export default class APU {
         }
       }
 
-      let recalc_irq = this._dmc.irq_flag;
-      this._dmc.irq_flag = false;
+      let recalc_irq = this.dmc.irq_flag;
+      this.dmc.irq_flag = false;
 
       const old_enables = this.osc_enables;
       this.osc_enables = data;
       if (!(data & 0x10)) {
-        this._dmc.next_irq = no_irq;
+        this.dmc.next_irq = no_irq;
         recalc_irq = true;
       } else if (!(old_enables & 0x10)) {
-        this._dmc.start(); // dmc just enabled
+        this.dmc.start(); // dmc just enabled
       }
 
       if (recalc_irq) {
@@ -205,7 +205,7 @@ export default class APU {
   read_status(time) {
     this.run_until(time - 1);
 
-    let result = (this._dmc.irq_flag ? 0x80 : 0) | (this.irq_flag ? 0x40 : 0);
+    let result = (this.dmc.irq_flag ? 0x80 : 0) | (this.irq_flag ? 0x40 : 0);
 
     for (let i = 0; i < osc_count; i++) {
       if (this.osc[i].length_counter > 0) {
@@ -239,9 +239,9 @@ export default class APU {
       this.next_irq -= end_time;
 			// assert( this.next_irq >= 0 );
     }
-    if (this._dmc.next_irq !== no_irq) {
-      this._dmc.next_irq -= end_time;
-			// assert( this._dmc.next_irq >= 0 );
+    if (this.dmc.next_irq !== no_irq) {
+      this.dmc.next_irq -= end_time;
+			// assert( this.dmc.next_irq >= 0 );
     }
     if (this.earliest_irq_ !== no_irq) {
       this.earliest_irq_ -= end_time;
@@ -265,11 +265,11 @@ export default class APU {
 	// Set overall volume (default is 1.0)
   volume(v) {
     v = v || 1.0;
-    this._dmc.nonlinear = false;
-    this._square_synth.volume(0.1128 * v);
-    this._triangle.synth.volume(0.12765 * v);
-    this._noise.synth.volume(0.0741 * v);
-    this._dmc.synth.volume(0.42545 * v);
+    this.dmc.nonlinear = false;
+    this.square_synth.volume(0.1128 * v);
+    this.triangle.synth.volume(0.12765 * v);
+    this.noise.synth.volume(0.0741 * v);
+    this.dmc.synth.volume(0.42545 * v);
   }
 
 
@@ -277,7 +277,7 @@ export default class APU {
 	// may have changed, or NULL to disable. When callback is invoked,
 	// 'user_data' is passed unchanged as the first parameter.
   irq_notifier(irqCallback) {
-    this._irqCallback = irqCallback;
+    this.irqCallback = irqCallback;
   }
 
 
@@ -307,11 +307,11 @@ export default class APU {
       this.frame_delay -= time - this.last_time;
 
 			// run oscs to present
-      this._square1.run(this.last_time, time);
-      this._square2.run(this.last_time, time);
-      this._triangle.run(this.last_time, time);
-      this._noise.run(this.last_time, time);
-      this._dmc.run(this.last_time, time);
+      this.square1.run(this.last_time, time);
+      this.square2.run(this.last_time, time);
+      this.triangle.run(this.last_time, time);
+      this.noise.run(this.last_time, time);
+      this.dmc.run(this.last_time, time);
       this.last_time = time;
 
       if (time === end_time) {
@@ -329,13 +329,13 @@ export default class APU {
 					// fall through
         case 2:
 					// clock length and sweep on frames 0 and 2
-          this._square1.clock_length(0x20);
-          this._square2.clock_length(0x20);
-          this._noise.clock_length(0x20);
-          this._triangle.clock_length(0x80); // different bit for halt flag on triangle
+          this.square1.clock_length(0x20);
+          this.square2.clock_length(0x20);
+          this.noise.clock_length(0x20);
+          this.triangle.clock_length(0x80); // different bit for halt flag on triangle
 
-          this._square1.clock_sweep(-1);
-          this._square2.clock_sweep(0);
+          this.square1.clock_sweep(-1);
+          this.square2.clock_sweep(0);
           break;
 
         case 1:
@@ -354,17 +354,17 @@ export default class APU {
       }
 
 			// clock envelopes and linear counter every frame
-      this._triangle.clock_linear_counter();
-      this._square1.clock_envelope();
-      this._square2.clock_envelope();
-      this._noise.clock_envelope();
+      this.triangle.clock_linear_counter();
+      this.square1.clock_envelope();
+      this.square2.clock_envelope();
+      this.noise.clock_envelope();
     }
   }
 
 
   irq_changed() {
-    let new_irq = this._dmc.next_irq;
-    if (this._dmc.irq_flag || this.irq_flag) {
+    let new_irq = this.dmc.next_irq;
+    if (this.dmc.irq_flag || this.irq_flag) {
       new_irq = 0;
     } else if (new_irq > this.next_irq) {
       new_irq = this.next_irq;
@@ -372,8 +372,8 @@ export default class APU {
 
     if (new_irq !== this.earliest_irq_) {
       this.earliest_irq_ = new_irq;
-      if (this._irqCallback) {
-        this._irqCallback();
+      if (this.irqCallback) {
+        this.irqCallback();
       }
     }
   }

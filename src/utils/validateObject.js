@@ -1,3 +1,5 @@
+/* eslint valid-typeof: 0*/
+
 // There is almost definitely a better way/library to do this sort of validation.
 // But, it works for now!
 
@@ -5,16 +7,21 @@ export default function validateObject(schema, object) {
   let passing = true;
   let reason = '';
 
-  for (const prop in object) {
+  // for (const prop in object) {
+  Object.keys(object).forEach((prop) => {
     const givenValue = object[prop];
 
-    if (schema.hasOwnProperty(prop)) {
+    if (schema[prop]) {
       const typeWanted = schema[prop];
 
       // if the validation has `is/with` properties, we check that the given value
       // _IS_ an instance of the type given, filled _WITH_ instances of whatever we need
       if (typeWanted.is) {
-        passing = givenValue instanceof typeWanted.is || givenValue === typeWanted.is || typeof givenValue === (typeWanted.is.name || '').toLowerCase();
+        const stringType = (typeWanted.is.name || '').toLowerCase();
+        passing = givenValue instanceof typeWanted.is
+          || givenValue === typeWanted.is
+
+          || typeof givenValue === stringType;
 
         // not passing = dont bother checking contents
         if (passing && typeWanted.with) {
@@ -41,10 +48,10 @@ export default function validateObject(schema, object) {
       if (!passing) {
         throw new Error(`Invalid value for nES6 option "${prop}" ${reason}`);
       }
-    } else if (!schema.hasOwnProperty(prop)) {
+    } else if (!schema[prop]) {
       throw new Error(`Unrecognized nES6 option "${prop}"`);
     }
-  }
+  });
 
   return passing;
 }

@@ -9,15 +9,15 @@ import {
 } from '../../utils/serialisation';
 
 import {
-	g_ClearScreenArray,
+	gClearScreenArray,
 	COLOUR_ENCODING_NAME,
 } from '../../config/consts';
 
 
 export default class RenderBuffer {
   constructor(mainboard, renderSurface) {
-    this._mainboard = mainboard;
-    this._renderSurface = renderSurface;
+    this.mainboard = mainboard;
+    this.renderSurface = renderSurface;
 
     const paletteArray = [0x808080, 0xA63D00, 0xB01200, 0x960044,
       0x5E00A1, 0x2800C7, 0x0006BA, 0x00178C,
@@ -45,8 +45,8 @@ export default class RenderBuffer {
     }
 
     const that = this;
-    this._clipTopAndBottomY = false;
-    this._mainboard.connect('reset', (cold) => {
+    this.clipTopAndBottomY = false;
+    this.mainboard.connect('reset', (cold) => {
       that._reset(cold);
     });
     this.priorityBuffer = new Int32Array(SCREEN_WIDTH * SCREEN_HEIGHT);
@@ -55,12 +55,12 @@ export default class RenderBuffer {
 
 
   _reset(cold) {
-    this._clipTopAndBottomY = COLOUR_ENCODING_NAME === 'NTSC';
+    this.clipTopAndBottomY = COLOUR_ENCODING_NAME === 'NTSC';
   }
 
 
   clearBuffer() {
-    this.priorityBuffer.set(g_ClearScreenArray);
+    this.priorityBuffer.set(gClearScreenArray);
   }
 
   pickColour(paletteIndex) {
@@ -82,18 +82,18 @@ export default class RenderBuffer {
   }
 
   _renderPixel(bufferIndex, insertIndex, y, paletteIndex) {
-    if (this._clipTopAndBottomY && (y < 8 || y > 231)) {
+    if (this.clipTopAndBottomY && (y < 8 || y > 231)) {
       return;
     }
 
     const colour = this.pickColour(paletteIndex | 0);
-    this._renderSurface.writeToBuffer(bufferIndex, insertIndex, colour);
+    this.renderSurface.writeToBuffer(bufferIndex, insertIndex, colour);
   }
 
 
   renderSpritePixelDebug(spritenum, x, y) {
 
-		// this._renderSurface.writeToBuffer( 2, x, y, 0xFFE92BFF );
+		// this.renderSurface.writeToBuffer( 2, x, y, 0xFFE92BFF );
   }
 
 
@@ -102,7 +102,7 @@ export default class RenderBuffer {
     const bufferIndex = isBehind ? 0 : 2;
     if (this.priorityBuffer[index] === 0) {
       this.priorityBuffer[index] = spritenum + 1;
-      this._renderPixel(bufferIndex, index, y, paletteIndex);
+      this.renderPixel(bufferIndex, index, y, paletteIndex);
     }
   }
 
@@ -113,7 +113,7 @@ export default class RenderBuffer {
     if (this.priorityBuffer[index] === 1 && x < (SCREEN_WIDTH - 1)) {
       hitzero = true;
     }
-    this._renderPixel(1, index, y, paletteIndex);
+    this.renderPixel(1, index, y, paletteIndex);
     return hitzero;
   }
 

@@ -8,7 +8,7 @@ var mainboard = function( renderSurface ) {
 	var that = this;
 	this.running = false;
 	this.cart = null;
-	this._eventBus = new Nes.EventBus();
+	this.eventBus = new Nes.EventBus();
 
 	this.memory = new Nes.memory( this );
 	window.ppu = new Nes.ppu( this );
@@ -32,13 +32,13 @@ var mainboard = function( renderSurface ) {
 
 
 mainboard.prototype.connect = function( name, cb ) {
-	this._eventBus.connect( name, cb );
+	this.eventBus.connect( name, cb );
 };
 
 
 mainboard.prototype.enableSound = function( enable ) {
 	this.apu.enableSound( enable );
-	this._eventBus.invoke( 'soundEnabled', this.apu.soundEnabled(), this.apu.soundSupported() );
+	this.eventBus.invoke( 'soundEnabled', this.apu.soundEnabled(), this.apu.soundSupported() );
 };
 
 
@@ -49,7 +49,7 @@ mainboard.prototype.setVolume = function( val ) {
 
 mainboard.prototype.setTraceOption = function( traceType, checked ) {
 
-	if ( traceType === Nes.trace_all || traceType === Nes.trace_cpuInstructions ) {
+	if ( traceType === Nes.traceAll || traceType === Nes.traceCpuInstructions ) {
 		this.cpu.enableTrace( checked ); // cpu instructions require different code path, needs to be invoked seperately
 	}
 	Nes.Trace.enableType( traceType, checked );
@@ -58,7 +58,7 @@ mainboard.prototype.setTraceOption = function( traceType, checked ) {
 
 mainboard.prototype._onFrameEnd = function() {
 	this.running = false;
-	this._eventBus.invoke( 'frameEnd' );
+	this.eventBus.invoke( 'frameEnd' );
 };
 
 
@@ -80,7 +80,7 @@ mainboard.prototype.loadCartridge = function( cart ) {
 	this.synchroniser.addObject( 'mapper', this.cart.memoryMapper );
 
 	this.reset( true );
-	this._eventBus.invoke( 'romLoaded', this.cart );
+	this.eventBus.invoke( 'romLoaded', this.cart );
 };
 
 
@@ -93,7 +93,7 @@ mainboard.prototype.powerButton = function( on ) {
 		this.running = false;
 		this.cart = null;
 	}
-	this._eventBus.invoke( 'power', isOn );
+	this.eventBus.invoke( 'power', isOn );
 };
 
 
@@ -102,7 +102,7 @@ mainboard.prototype.reset = function( cold ) {
 	cold = cold === undefined ? true : cold;
 	if ( this.cart )
 		this.cart.reset( cold );
-	this._eventBus.invoke( 'reset', cold );
+	this.eventBus.invoke( 'reset', cold );
 };
 
 

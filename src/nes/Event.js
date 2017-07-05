@@ -1,15 +1,15 @@
 export class Event {
   constructor() {
-    this._callbacks = [];
+    this.callbacks = [];
   }
 
   addCallback(cb) {
-    this._callbacks.push(cb);
+    this.callbacks.push(cb);
   }
 
   invoke() {
     const eventArgs = Array.prototype.slice.call(arguments, 0);
-    const callbacks = this._callbacks;
+    const callbacks = this.callbacks;
     const numCalls = callbacks.length;
     let i = numCalls;
     for (i; i > 0; i--) {
@@ -20,14 +20,14 @@ export class Event {
 
 export class EventBus {
   constructor() {
-    this._map = {};
+    this.map = {};
   }
 
   getEvent(name) {
-    if (!this._map[name]) {
-      this._map[name] = new Event();
+    if (!this.map[name]) {
+      this.map[name] = new Event();
     }
-    return this._map[name];
+    return this.map[name];
   }
 
   connect(name, cb) {
@@ -35,7 +35,7 @@ export class EventBus {
   }
 
   invoke(name) {
-    const event = this._map[name];
+    const event = this.map[name];
     let eventArgs = [];
 
     if (event) {

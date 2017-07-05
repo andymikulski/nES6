@@ -1,30 +1,30 @@
 export default class Joypad {
   constructor() {
-    this._currentState = 0;
-    this._strobedState = 0;
-    this._strobeByte = 0;
-    this._readCount = 0;
+    this.currentState = 0;
+    this.strobedState = 0;
+    this.strobeByte = 0;
+    this.readCount = 0;
   }
 
 
   writeToRegister(data) {
     const firstBit = data & 1;
-    if (this._strobeByte === 1 || firstBit === 1) {
-      this._strobeByte = firstBit | 0;
-      this._strobedState = this._currentState;
-      this._readCount = 0;
+    if (this.strobeByte === 1 || firstBit === 1) {
+      this.strobeByte = firstBit | 0;
+      this.strobedState = this.currentState;
+      this.readCount = 0;
     }
   }
 
   readFromRegister() {
     let ret = 0;
-    if (this._strobeByte === 1) {
-      this._strobedState = this._currentState;
-      this._readCount = 0;
-      ret = (this._strobedState & 1) | 0;
+    if (this.strobeByte === 1) {
+      this.strobedState = this.currentState;
+      this.readCount = 0;
+      ret = (this.strobedState & 1) | 0;
     } else {
-      ret = ((this._strobedState >> this._readCount) & 1) | 0;
-      this._readCount++;
+      ret = ((this.strobedState >> this.readCount) & 1) | 0;
+      this.readCount++;
       ret |= 0x40;
     }
     return ret | 0;
@@ -49,28 +49,28 @@ export default class Joypad {
 
   pressButton(buttonIndex, pressed) {
     if (pressed) {
-      this._currentState |= (1 << buttonIndex);
-      this._currentState &= this._getDuplicateMask(buttonIndex); // this prevents up+down and left+right being pressed
+      this.currentState |= (1 << buttonIndex);
+      this.currentState &= this.getDuplicateMask(buttonIndex); // this prevents up+down and left+right being pressed
     } else {
-      this._currentState &= 0xFF ^ (1 << buttonIndex);
+      this.currentState &= 0xFF ^ (1 << buttonIndex);
     }
   }
 
 
   saveState() {
     return {
-      _currentState: this._currentState,
-      _strobedState: this._strobedState,
-      _strobeByte: this._strobeByte,
-      _readCount: this._readCount,
+      _currentState: this.currentState,
+      _strobedState: this.strobedState,
+      _strobeByte: this.strobeByte,
+      _readCount: this.readCount,
     };
   }
 
 
   loadState(state) {
-    this._currentState = state._currentState;
-    this._strobedState = state._strobedState;
-    this._readCount = state._readCount;
-    this._strobeByte = state._strobeByte;
+    this.currentState = state._currentState;
+    this.strobedState = state._strobedState;
+    this.readCount = state._readCount;
+    this.strobeByte = state._strobeByte;
   }
 }

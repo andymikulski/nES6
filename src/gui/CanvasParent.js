@@ -1,37 +1,37 @@
+import root from 'window-or-global';
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from '../config/consts';
 import { EventBus } from '../nes/Event';
 
 export default class CanvasParent extends EventBus {
-  constructor(renderSurface) {
-    	super();
+  constructor() {
+    super();
 
-    this._canvasElement = document.createElement('canvas');
-    this._canvasElement.classList.add('nes6-player');
+    this.canvasElement = root.document.createElement('canvas');
+    this.canvasElement.classList.add('nes6-player');
 
-    document.body.appendChild(this._canvasElement);
+    root.document.body.appendChild(this.canvasElement);
 
-    this._setSize();
+    this.setSize();
 
-    window.addEventListener('resize', () => {
-      this._setSize();
+    root.addEventListener('resize', () => {
+      this.setSize();
     }, true);
   }
 
 
   getCanvasElement() {
-    return this._canvasElement;
+    return this.canvasElement;
   }
 
   _setSize() {
-    const parentBounds = this._canvasElement.parentElement.getBoundingClientRect();
-    const parentWidth = parentBounds.width;
+    const parentBounds = this.canvasElement.parentElement.getBoundingClientRect();
     const parentHeight = parentBounds.height;
 
     const aspectRatio = SCREEN_WIDTH / SCREEN_HEIGHT;
     const newWidth = aspectRatio * parentHeight;
 
-    this._canvasElement.width = Math.floor(newWidth);
-    this._canvasElement.height = parentHeight;
+    this.canvasElement.width = Math.floor(newWidth);
+    this.canvasElement.height = parentHeight;
 
     this.invoke('resize');
   }

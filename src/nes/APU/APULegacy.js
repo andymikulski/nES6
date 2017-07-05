@@ -3,7 +3,7 @@ const APUBaseRate = 1789773;
 
 import {
 	writeLine,
-	trace_apu
+	traceApu
 } from '../../utils/Trace';
 import APU from './APU';
 import BlipBuffer from './BlipBuffer';
@@ -15,33 +15,33 @@ import {
 
 export default class APULegacy {
 	constructor(mainboard) {
-		this._outBufferSize = 4096;
-		this._soundRate = 44100;
+		this.outBufferSize = 4096;
+		this.soundRate = 44100;
 
 		this.mainboard = mainboard;
-		this.mainboard.connect('reset', ::this._onReset);
+		this.mainboard.connect('reset', ::this.onReset);
 		this.nextIrq = -1;
-		this._irqActive = false;
+		this.irqActive = false;
 		this.mLastCalculatedNextIrqTime = -1;
 
-		this._enabled = true;
-		this._justRenabled = 0;
+		this.enabled = true;
+		this.justRenabled = 0;
 		let soundRate = 44100;
 
 		this.apu = new APU();
 
 		try {
-			this._renderer = new WebAudioRenderer(APUOutBufferSize);
-			this._outBuffer = this._renderer.createBuffer(this._outBufferSize);
-			soundRate = this._renderer.getSampleRate();
+			this.renderer = new WebAudioRenderer(APUOutBufferSize);
+			this.outBuffer = this.renderer.createBuffer(this.outBufferSize);
+			soundRate = this.renderer.getSampleRate();
 			this.buf = new BlipBuffer();
 
 			this.buf.clock_rate(APUBaseRate);
 			this.apu.output(this.buf);
 			this.buf.sample_rate(soundRate);
 		} catch (err) {
-			this._renderer = null;
-			this._enabled = false;
+			this.renderer = null;
+			this.enabled = false;
 			console.log("WebAudio unsupported in this browser. Sound will be disabled...", err);
 		}
 
@@ -56,28 +56,28 @@ export default class APULegacy {
 
 	enableSound(enable) {
 		enable = enable === undefined ? true : enable;
-		if (enable !== this._enabled) {
+		if (enable !== this.enabled) {
 			if (enable) { // after re-enabling sound, fill audio buffer with zeroes to prevent static
-				this._justRenabled = 2;
+				this.justRenabled = 2;
 			}
-			this._enabled = enable;
+			this.enabled = enable;
 		}
 	}
 
 
 	soundEnabled() {
-		return this._enabled && this.soundSupported();
+		return this.enabled && this.soundSupported();
 	}
 
 
 	soundSupported() {
-		return !!this._renderer;
+		return !!this.renderer;
 	}
 
 
 	setVolume(val) {
-		if (this._renderer) {
-			this._renderer.setVolume(val);
+		if (this.renderer) {
+			this.renderer.setVolume(val);
 		}
 	}
 
@@ -94,9 +94,9 @@ export default class APULegacy {
 		if (offset === this.apu.status_addr) {
 			this.mainboard.synchroniser.synchronise();
 			var realTime = Math.floor(this.mainboard.synchroniser.getCpuMTC() / COLOUR_ENCODING_MTC_PER_CPU);
-			if (offset === 0x4015 && this._irqActive) {
+			if (offset === 0x4015 && this.irqActive) {
 				// irq acknowledge
-				this._irqActive = false;
+				this.irqActive = false;
 				//this.mainboard.cpu.holdIrqLineLow( false );
 			}
 			ret = this.apu.read_status(realTime);
@@ -119,7 +119,7 @@ export default class APULegacy {
 		this.apu.run_until(cpuClocks >= 0 ? cpuClocks : 0);
 
 		if (this.apu.earliest_irq() === APU.irq_waiting) {
-			this._irqActive = true;
+			this.irqActive = true;
 		}
 	}
 
@@ -128,7 +128,7 @@ export default class APULegacy {
 		var realTime = Math.floor(this.mainboard.synchroniser.getCpuMTC() / COLOUR_ENCODING_MTC_PER_CPU);
 		this.apu.end_frame(realTime);
 
-		if (this._renderer && this._enabled) {
+		if (this.renderer && this.enabled) {
 			// Read some samples out of BlipBuffer if there are enough to
 			// fill our output buffer
 			this.buf.end_frame(realTime);
@@ -138,9 +138,9 @@ export default class APULegacy {
 			//	if ( g_options->SoundEnabled && g_options->ApplicationSpeed == 0 ) // dont play sound if disabled or not running at normal speed
 			if (samplesAvailable >= APUOutBufferSize) {
 				//write samples directly to renderer's buffer
-				var floatArray = this._outBuffer.lockBuffer();
+				var floatArray = this.outBuffer.lockBuffer();
 				this.buf.read_samples(floatArray, APUOutBufferSize);
-				this._outBuffer.unlockBuffer();
+				this.outBuffer.unlockBuffer();
 			}
 		}
 
@@ -161,7 +161,7 @@ export default class APULegacy {
 		if (earliestIrq !== this.apu.no_irq) {
 			this.nextIrq = earliestIrq * COLOUR_ENCODING_MTC_PER_CPU;
 			if (this.nextIrq >= 0) {
-				writeLine(trace_apu, 'IRQ scheduled for: ' + this.nextIrq);
+				writeLine(traceApu, 'IRQ scheduled for: ' + this.nextIrq);
 				//this.mainboard.synchroniser.addEvent( 'apu irq', this.nextIrq, function( eventTime ) { that._eventIrqTrigger( eventTime ); } );
 			}
 		} else {

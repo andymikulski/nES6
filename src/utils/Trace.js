@@ -1,16 +1,18 @@
+/* global Blob */
 import { saveAs } from 'file-saver';
 
-export const trace_cpu = 0;
-export const trace_cpuInstructions = 1;
-export const trace_ppu = 2;
-export const trace_mapper = 3;
-export const trace_apu = 4;
-export const trace_all = 5;
+// #TODO make this an enum
+export const traceCpu = 0;
+export const traceCpuInstructions = 1;
+export const tracePpu = 2;
+export const traceMapper = 3;
+export const traceApu = 4;
+export const traceAll = 5;
 
 const tracer = {
   lines: [],
   running: false,
-  enabledTypes: (new Array(trace_all + 1)).fill(0),
+  enabledTypes: (new Array(traceAll + 1)).fill(0),
 };
 
 

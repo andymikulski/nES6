@@ -1,3 +1,7 @@
+/* eslint no-console: 0*/
+
+import root from 'window-or-global';
+
 /**
  * nES6 plugin to bind a piece of the DOM with drag-n-drop events, which load ROMs
  * into nES6 accordingly.
@@ -58,6 +62,7 @@ function containedIn(el, container) {
 const handleDragOver = (evt) => {
   evt.stopPropagation();
   evt.preventDefault();
+  /* eslint no-param-reassign: 0*/
   evt.dataTransfer.dropEffect = 'copy'; // maybe use 'link', idk
 };
 
@@ -71,28 +76,27 @@ const handleDragOver = (evt) => {
  */
 export default function dragDropLoader(options = {}) {
   return (nesInstance) => {
-    if (typeof window.FileReader !== 'function') {
+    if (typeof root.FileReader !== 'function') {
       const warning = 'nES6 dragDrop: FileReader not supported by this browser!';
       if (options.throwCompatError) {
         throw new Error(warning);
       } else {
-        console && console.warn(warning);
+        console.warn(warning);
       }
       return;
     }
 
     // If a zone is provided but it's not an Element, we can't/shouldn't continue
-    if (!!options.zone && !(options.zone instanceof Element)) {
+    if (!!options.zone && !(options.zone instanceof root.Element)) {
       throw new Error('nES6 dragDrop: Provided `zone` is not a DOM element.');
     }
-    const dropZone = options.zone || document.body;
+    const dropZone = options.zone || root.document.body;
 
     // Add the dragover/drop listeners to the drop zone
     dropZone.addEventListener('dragover', handleDragOver, false);
     dropZone.addEventListener('drop', (evt) => {
       // If the user dropped on something that ISN'T the dropzone, just ignore it.
       if (evt.target !== dropZone && !containedIn(evt.target, dropZone)) {
-        console && console.warn(`DragDropLoader: drop target not in zone (${evt.target})`);
         return;
       }
       // Otherwise, prevent the normal browser drop events (tries to open it, or
@@ -107,13 +111,13 @@ export default function dragDropLoader(options = {}) {
 
       // This shouldn't really happen, but hey.
       if (!requestedRom) {
-        console && console.warn('nES6 dragDrop: No ROM file uploaded!');
+        console.warn('nES6 dragDrop: No ROM file uploaded!');
         return;
       }
 
       // Actually read the file from disk, and then send the ROM into the given
       // nES6 instance through its binary string.
-      const reader = new FileReader();
+      const reader = new root.FileReader();
       reader.onload = () => {
         const formatName = name =>
           name

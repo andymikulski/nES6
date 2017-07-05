@@ -14,32 +14,32 @@ this.WebGl = this.WebGl || {};
 	var WebGlRenderSurface = function( canvasParent ) {
 
 		var that = this;
-		this._ready = false;
+		this.ready = false;
 
-		this._clearArray = new Uint32Array( SCREEN_WIDTH * SCREEN_HEIGHT );
-		this._clearArrayColour = this._clearArray[0];
+		this.clearArray = new Uint32Array( SCREEN_WIDTH * SCREEN_HEIGHT );
+		this.clearArrayColour = this.clearArray[0];
 
-		this._bufferIndexArray = new Int32Array( SCREEN_WIDTH * SCREEN_HEIGHT );
-		this._offscreen32BitView = new Uint32Array( TEXTURE_WIDTH * TEXTURE_HEIGHT );
-		this._offscreen8BitView = new Uint8Array( this._offscreen32BitView.buffer );
+		this.bufferIndexArray = new Int32Array( SCREEN_WIDTH * SCREEN_HEIGHT );
+		this.offscreen32BitView = new Uint32Array( TEXTURE_WIDTH * TEXTURE_HEIGHT );
+		this.offscreen8BitView = new Uint8Array( this.offscreen32BitView.buffer );
 
-		this._element = canvasParent.getCanvasElement();
-		this._glContext = WebGl.getGlContext( this._element );
+		this.element = canvasParent.getCanvasElement();
+		this.glContext = WebGl.getGlContext( this.element );
 
-		this._camera = new WebGl.OrthoCamera( this._glContext );
-		this._camera.setup( SCREEN_WIDTH, SCREEN_HEIGHT );
+		this.camera = new WebGl.OrthoCamera( this.glContext );
+		this.camera.setup( SCREEN_WIDTH, SCREEN_HEIGHT );
 
-		this._initBuffers();
+		this.initBuffers();
 
-		this._texture = new WebGl.FillableTexture( this._glContext, TEXTURE_WIDTH, TEXTURE_HEIGHT );
+		this.texture = new WebGl.FillableTexture( this.glContext, TEXTURE_WIDTH, TEXTURE_HEIGHT );
 
 		canvasParent.connect( 'resize', function() { that._onResize(); } );
 
-		this._inputSizeShaderArray = new Float32Array( [ SCREEN_WIDTH, SCREEN_HEIGHT ] );
-		this._outputSizeShaderArray = new Float32Array( [ SCREEN_WIDTH, SCREEN_HEIGHT ] );
-		this._textureSizeShaderArray = new Float32Array( [ TEXTURE_WIDTH, TEXTURE_HEIGHT ] );
+		this.inputSizeShaderArray = new Float32Array( [ SCREEN_WIDTH, SCREEN_HEIGHT ] );
+		this.outputSizeShaderArray = new Float32Array( [ SCREEN_WIDTH, SCREEN_HEIGHT ] );
+		this.textureSizeShaderArray = new Float32Array( [ TEXTURE_WIDTH, TEXTURE_HEIGHT ] );
 
-		this._shader = new WebGl.ShaderProgram( this._glContext );
+		this.shader = new WebGl.ShaderProgram( this.glContext );
 
 		this.loadShader( null, function() {
 			that._ready = true;
@@ -50,7 +50,7 @@ this.WebGl = this.WebGl || {};
 	WebGlRenderSurface.prototype.loadShader = function( shaderFilename, callback ) {
 
 		var that = this;
-		this._shader.loadAndLink( shaderFilename, function() {
+		this.shader.loadAndLink( shaderFilename, function() {
 			that._shader.use();
 
 			that._glContext.uniform2fv(that._shader.getUniformLocation("rubyInputSize"), that._inputSizeShaderArray );
@@ -89,30 +89,30 @@ this.WebGl = this.WebGl || {};
 			] );
 		var indices = new Uint16Array( [ 0, 1, 2,	0, 2, 3 ] );
 
-		this._vertexBuffer = new WebGl.VertexBuffer( this._glContext );
-		this._vertexBuffer.setData( vertices, 4, 4 );
+		this.vertexBuffer = new WebGl.VertexBuffer( this.glContext );
+		this.vertexBuffer.setData( vertices, 4, 4 );
 
-		this._textureCoordBuffer = new WebGl.VertexBuffer( this._glContext );
-		this._textureCoordBuffer.setData( texCoords, 2, 4 );
+		this.textureCoordBuffer = new WebGl.VertexBuffer( this.glContext );
+		this.textureCoordBuffer.setData( texCoords, 2, 4 );
 
-		this._indexBuffer = new WebGl.IndexBuffer( this._glContext );
-		this._indexBuffer.setData( indices, 6 );
+		this.indexBuffer = new WebGl.IndexBuffer( this.glContext );
+		this.indexBuffer.setData( indices, 6 );
 	};
 
 
 	WebGlRenderSurface.prototype._onResize = function() {
-		this._glContext.viewport(0, 0, this._element.width, this._element.height);
-		this._glContext.clearColor(0.0, 0.0, 0.0, 1.0);
+		this.glContext.viewport(0, 0, this.element.width, this.element.height);
+		this.glContext.clearColor(0.0, 0.0, 0.0, 1.0);
 	};
 
 
 	WebGlRenderSurface.prototype.writeToBuffer = function( bufferIndex, insertIndex, colour ) {
 
-		//if ( baseIndex < 0 || baseIndex >= this._offscreen32BitView.length ) { throw new Error( "WebGlRenderSurface.prototype.writeToBuffer: Invalid bounds" ); }
-		var existingIndex = TYPED_ARRAY_GET_INT32( this._bufferIndexArray, insertIndex );
+		//if ( baseIndex < 0 || baseIndex >= this.offscreen32BitView.length ) { throw new Error( "WebGlRenderSurface.prototype.writeToBuffer: Invalid bounds" ); }
+		var existingIndex = TYPED_ARRAY_GET_INT32( this.bufferIndexArray, insertIndex );
 		if ( existingIndex <= bufferIndex ) {
-			TYPED_ARRAY_SET_UINT32( this._offscreen32BitView, insertIndex, 0xFF000000 | colour );
-			TYPED_ARRAY_SET_INT32( this._bufferIndexArray, insertIndex, bufferIndex );
+			TYPED_ARRAY_SET_UINT32( this.offscreen32BitView, insertIndex, 0xFF000000 | colour );
+			TYPED_ARRAY_SET_INT32( this.bufferIndexArray, insertIndex, bufferIndex );
 		}
 	};
 
@@ -120,37 +120,37 @@ this.WebGl = this.WebGl || {};
 	WebGlRenderSurface.prototype.getRenderBufferHash = function() {
 
 		var rusha = new Rusha();
-		return rusha.digestFromArrayBuffer( this._offscreen32BitView ).toUpperCase();
+		return rusha.digestFromArrayBuffer( this.offscreen32BitView ).toUpperCase();
 	};
 
 
 	WebGlRenderSurface.prototype.clearBuffers = function( backgroundColour ) {
 
 		// update clear array if background colour changes
-		if ( backgroundColour !== this._clearArrayColour ) {
-			for ( var i=0; i<this._clearArray.length; ++i ) {
-				this._clearArray[ i ] = 0xFF000000 | backgroundColour;
+		if ( backgroundColour !== this.clearArrayColour ) {
+			for ( var i=0; i<this.clearArray.length; ++i ) {
+				this.clearArray[ i ] = 0xFF000000 | backgroundColour;
 			}
-			this._clearArrayColour = backgroundColour;
+			this.clearArrayColour = backgroundColour;
 		}
 
 		// set background colour
-		this._offscreen32BitView.set( this._clearArray );
+		this.offscreen32BitView.set( this.clearArray );
 
 		// Nes.ClearScreenArray is a quicker way of clearing this array
-		this._bufferIndexArray.set( g_ClearScreenArray );
+		this.bufferIndexArray.set( gClearScreenArray );
 	};
 
 
 	WebGlRenderSurface.prototype.render = function( mainboard ) {
 
-		if ( !this._ready ) {
+		if ( !this.ready ) {
 			return;
 		}
-		this._glContext.clear(this._glContext.COLOR_BUFFER_BIT);
-		this._texture.fill( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, this._offscreen8BitView );
-		this._glContext.uniform1i(this._shader.getUniformLocation("rubyFrameCount"), mainboard.ppu.frameCounter );
-		this._indexBuffer.draw();
+		this.glContext.clear(this.glContext.COLOR_BUFFER_BIT);
+		this.texture.fill( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, this.offscreen8BitView );
+		this.glContext.uniform1i(this.shader.getUniformLocation("rubyFrameCount"), mainboard.ppu.frameCounter );
+		this.indexBuffer.draw();
 	};
 
 
@@ -162,7 +162,7 @@ this.WebGl = this.WebGl || {};
 		element.height = SCREEN_HEIGHT;
 		var canvas = element.getContext( "2d" );
 		var imgData = canvas.getImageData( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT );
-		imgData.data.set( this._offscreen8BitView.subarray( 0, SCREEN_WIDTH * SCREEN_HEIGHT * 4 ) );
+		imgData.data.set( this.offscreen8BitView.subarray( 0, SCREEN_WIDTH * SCREEN_HEIGHT * 4 ) );
 		canvas.putImageData( imgData, 0, 0 );
 		return element;
 	};
@@ -170,7 +170,7 @@ this.WebGl = this.WebGl || {};
 
 	WebGlRenderSurface.prototype.screenshotToFile = function() {
 
-		var element = this._createCanvasWithScreenshotOn();
+		var element = this.createCanvasWithScreenshotOn();
 		element.toBlob( function( blob ) {
 			saveAs( blob, "screenshot.png" );
 		});
@@ -179,7 +179,7 @@ this.WebGl = this.WebGl || {};
 
 	WebGlRenderSurface.prototype.screenshotToString = function() {
 
-		var element = this._createCanvasWithScreenshotOn();
+		var element = this.createCanvasWithScreenshotOn();
 		return element.toDataURL("image/png");
 	};
 

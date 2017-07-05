@@ -1,4 +1,4 @@
-import { writeLine, trace_ppu } from '../../utils/Trace';
+import { writeLine, tracePpu } from '../../utils/Trace';
 
 import {
 	MASTER_CYCLES_PER_PPU,
@@ -30,8 +30,8 @@ const backgroundTileCount = 34;
 export default class PPURenderBG {
   constructor(ppu) {
     this.ppu = ppu;
-    this._spriteZeroHit = false;
-    this._useMMC2Latch = false;
+    this.spriteZeroHit = false;
+    this.useMMC2Latch = false;
   }
 
   reset() {
@@ -39,30 +39,30 @@ export default class PPURenderBG {
     backgroundRenderingEnd = this.ppu.screenCoordinatesToTicks(SecondLastTileReloadTime - 1, 239);
     backgroundScrollReloadTime = this.ppu.screenCoordinatesToTicks(ScrollReloadTime, -1);
 
-    this._bgTableAddress = 0;
-    this._spriteZeroHit = false;
-    this._renderBuffer = this.ppu.mainboard.renderBuffer;
-    this._useMMC2Latch = this.ppu.mainboard.cart.memoryMapper.MMC2Latch !== undefined;
+    this.bgTableAddress = 0;
+    this.spriteZeroHit = false;
+    this.renderBuffer = this.ppu.mainboard.renderBuffer;
+    this.useMMC2Latch = this.ppu.mainboard.cart.memoryMapper.MMC2Latch !== undefined;
   }
 
 
   onControl1Change(control1) {
-    this._bgTableAddress = (control1 & 0x10) > 0 ? 0x1000 : 0;
+    this.bgTableAddress = (control1 & 0x10) > 0 ? 0x1000 : 0;
   }
 
 
   onEndFrame() {
-    this._spriteZeroHit = false;
+    this.spriteZeroHit = false;
   }
 
 
   saveState(data) {
-    data._spriteZeroHit = this._spriteZeroHit;
+    data._spriteZeroHit = this.spriteZeroHit;
   }
 
 
   loadState(state) {
-    this._spriteZeroHit = state._spriteZeroHit;
+    this.spriteZeroHit = state._spriteZeroHit;
   }
 
 
@@ -80,7 +80,7 @@ export default class PPURenderBG {
     const tileNumber = this.ppu.readNameTable(nameTableAddress, 0);
 
 		// (screen address) + (tilenumber * 16) + finey
-    const tileAddress = this._bgTableAddress + tileNumber * 16 + ((ppuReadAddress & 0x7000) >> 12);
+    const tileAddress = this.bgTableAddress + tileNumber * 16 + ((ppuReadAddress & 0x7000) >> 12);
     const attributeByte = this.ppu.readNameTable(0x23C0 | (ppuReadAddress & 0x0C00) | ((vtile & 0x1C) << 1) | ((htile >> 2) & 0x7), 1);
 
     let mergeByte = 0;
@@ -100,7 +100,7 @@ export default class PPURenderBG {
     const firstByte = this.ppu.read8(tileAddress, false, 2);
     const secondByte = this.ppu.read8(tileAddress + 8, false, 3);
 
-    if (this._useMMC2Latch) {
+    if (this.useMMC2Latch) {
       this.ppu.mainboard.cart.memoryMapper.MMC2Latch(tileAddress + 8);
     }
 
@@ -126,12 +126,12 @@ export default class PPURenderBG {
 
           if ((paletteIndex & 0x3) === 0) { paletteIndex = 0; }
 
-          if (this._renderBuffer.renderPixel(x, renderScanline, this.ppu.paletteTables[0][paletteIndex & 0xF] | 0)) {
+          if (this.renderBuffer.renderPixel(x, renderScanline, this.ppu.paletteTables[0][paletteIndex & 0xF] | 0)) {
 									// Sprite zero hit - will happen in the future as this is the prefetch
-            if (!this._spriteZeroHit) {
+            if (!this.spriteZeroHit) {
               triggerTime = this.ppu.screenCoordinatesToTicks(x, renderScanline);
-              writeLine(trace_ppu, `[${this.ppu.frameCounter}] PPU sprite hit scheduled for @ ${x}x${renderScanline} (${triggerTime})`);
-              this._spriteZeroHit = true;
+              writeLine(tracePpu, `[${this.ppu.frameCounter}] PPU sprite hit scheduled for @ ${x}x${renderScanline} (${triggerTime})`);
+              this.spriteZeroHit = true;
               this.ppu.mainboard.synchroniser.changeEventTime(this.ppu._spriteZeroEventId, triggerTime);
             }
           }
@@ -207,7 +207,7 @@ export default class PPURenderBG {
 
 
   renderTo(startTicks, endTicks, ppuReadAddress, ppuLatchAddress) {
-    writeLine(trace_ppu, `sync: startTicks=${startTicks} endTicks=${endTicks}`);
+    writeLine(tracePpu, `sync: startTicks=${startTicks} endTicks=${endTicks}`);
 
     let ticksInFirstLine = 0;
     let ticksAtFirstScanline = 0;
@@ -268,14 +268,14 @@ export default class PPURenderBG {
         }
 
         if (backgroundRenderingEnabled) {
-          this._renderTile(ppuReadAddress, tilenum, scanline, clippingEnabled);
+          this.renderTile(ppuReadAddress, tilenum, scanline, clippingEnabled);
         }
-        ppuReadAddress = this._incrementX(ppuReadAddress);
+        ppuReadAddress = this.incrementX(ppuReadAddress);
       }
 
 			// render last tile on screen, increment Y
       if (incrementYTime < backgroundRenderingEnd && incrementYTime > startTicks && incrementYTime <= endTicks) {
-        ppuReadAddress = this._incrementY(ppuReadAddress);
+        ppuReadAddress = this.incrementY(ppuReadAddress);
       }
 
       if (reloadTime < backgroundRenderingEnd && reloadTime > startTicks && reloadTime <= endTicks) {

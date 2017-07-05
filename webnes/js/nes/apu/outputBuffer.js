@@ -7,11 +7,11 @@ this.Nes = this.Nes || {};
 
 var ApuOutputBuffer = function( webAudioBuffer, size, sampleRate ) {
 
-	this._buffer = webAudioBuffer;
-	this._array = new Float32Array( size );
-	this._sampleRate = sampleRate;
-	this._framesWorthOfDataSize = Math.floor( this._sampleRate / COLOUR_ENCODING_REFRESHRATE ); // sample rate is number of samples consumed in a second.
-	if ( this._array.length < this._framesWorthOfDataSize ) {
+	this.buffer = webAudioBuffer;
+	this.array = new Float32Array( size );
+	this.sampleRate = sampleRate;
+	this.framesWorthOfDataSize = Math.floor( this.sampleRate / COLOUR_ENCODING_REFRESHRATE ); // sample rate is number of samples consumed in a second.
+	if ( this.array.length < this.framesWorthOfDataSize ) {
 		throw new Error( "Could not contain a frames worth of audio data in the provided audio buffer!" );
 	}
 	this.clear();
@@ -20,25 +20,25 @@ var ApuOutputBuffer = function( webAudioBuffer, size, sampleRate ) {
 
 ApuOutputBuffer.prototype._ticksToBufferPosition = function( ticks ) {
 
-	var pos = Math.floor( ( ticks / COLOUR_ENCODING_FRAME_MTC ) * this._framesWorthOfDataSize );
+	var pos = Math.floor( ( ticks / COLOUR_ENCODING_FRAME_MTC ) * this.framesWorthOfDataSize );
 	return pos;
 };
 
 
 ApuOutputBuffer.prototype.clear = function() {
 
-	for ( var i=0; i<this._array.length; ++i ) {
-		this._array[i] = 0;
+	for ( var i=0; i<this.array.length; ++i ) {
+		this.array[i] = 0;
 	}
 };
 
 
 ApuOutputBuffer.prototype.write = function( startTicks, lengthTicks, val ) {
 
-	var startBytes = this._ticksToBufferPosition( startTicks );
-	var endBytes = Math.min( this._array.length, this._ticksToBufferPosition( startTicks + lengthTicks ) );
+	var startBytes = this.ticksToBufferPosition( startTicks );
+	var endBytes = Math.min( this.array.length, this.ticksToBufferPosition( startTicks + lengthTicks ) );
 	for ( var i=startBytes; i<endBytes; ++i ) {
-		this._array[ i ] = val;
+		this.array[ i ] = val;
 	}
 };
 
@@ -46,11 +46,11 @@ ApuOutputBuffer.prototype.write = function( startTicks, lengthTicks, val ) {
 ApuOutputBuffer.prototype.commit = function() {
 
 	// commit to web audio api
-	var dest = this._buffer.lockBuffer();
-	for ( var i=0; i<this._array.length; ++i ) {
-		dest[i] = this._array[i];
+	var dest = this.buffer.lockBuffer();
+	for ( var i=0; i<this.array.length; ++i ) {
+		dest[i] = this.array[i];
 	}
-	this._buffer.unlockBuffer();
+	this.buffer.unlockBuffer();
 };
 
 Nes.ApuOutputBuffer = ApuOutputBuffer;

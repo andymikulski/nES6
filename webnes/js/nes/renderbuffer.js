@@ -6,16 +6,16 @@ this.Nes = this.Nes || {};
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
-var g_ClearScreenArray = new Int32Array( SCREEN_WIDTH * SCREEN_HEIGHT );
-for ( var ii=0; ii<g_ClearScreenArray.length; ++ii ) {
-	g_ClearScreenArray[ ii ] = 0;
+var gClearScreenArray = new Int32Array( SCREEN_WIDTH * SCREEN_HEIGHT );
+for ( var ii=0; ii<gClearScreenArray.length; ++ii ) {
+	gClearScreenArray[ ii ] = 0;
 }
 
 
 var renderbuffer = function( mainboard, renderSurface ) {
 
-	this._mainboard = mainboard;
-	this._renderSurface = renderSurface;
+	this.mainboard = mainboard;
+	this.renderSurface = renderSurface;
 	// this.defaultPalette = [
 		// [ 0x80,0x80,0x80 ], [ 0x00,0x3D,0xA6 ], [ 0x00,0x12,0xB0 ], [ 0x44,0x00,0x96 ],
 		// [ 0xA1,0x00,0x5E ], [ 0xC7,0x00,0x28 ], [ 0xBA,0x06,0x00 ], [ 0x8C,0x17,0x00 ],
@@ -77,8 +77,8 @@ var renderbuffer = function( mainboard, renderSurface ) {
 	}
 
 	var that = this;
-	this._clipTopAndBottomY = false;
-	this._mainboard.connect( 'reset', function( cold ) { that._reset( cold ); } );
+	this.clipTopAndBottomY = false;
+	this.mainboard.connect( 'reset', function( cold ) { that._reset( cold ); } );
 	this.priorityBuffer = new Int32Array( SCREEN_WIDTH * SCREEN_HEIGHT );
 	this.clearBuffer();
 };
@@ -86,13 +86,13 @@ var renderbuffer = function( mainboard, renderSurface ) {
 
 renderbuffer.prototype._reset = function( cold ) {
 
-	this._clipTopAndBottomY = COLOUR_ENCODING_NAME === "NTSC";
+	this.clipTopAndBottomY = COLOUR_ENCODING_NAME === "NTSC";
 };
 
 
 renderbuffer.prototype.clearBuffer = function() {
 
-	this.priorityBuffer.set( g_ClearScreenArray );
+	this.priorityBuffer.set( gClearScreenArray );
 };
 
 renderbuffer.prototype.pickColour = function( paletteIndex ) {
@@ -108,18 +108,18 @@ renderbuffer.prototype.pickColour = function( paletteIndex ) {
 
 renderbuffer.prototype._renderPixel = function( bufferIndex, insertIndex, y, paletteIndex ) {
 
-	if ( this._clipTopAndBottomY && ( y < 8 || y > 231 ) ) {
+	if ( this.clipTopAndBottomY && ( y < 8 || y > 231 ) ) {
 		return;
 	}
 
 	var colour = this.pickColour( paletteIndex|0 );
-	this._renderSurface.writeToBuffer( bufferIndex, insertIndex, colour );
+	this.renderSurface.writeToBuffer( bufferIndex, insertIndex, colour );
 };
 
 
 renderbuffer.prototype.renderSpritePixelDebug = function( spritenum, x, y ) {
 
-	//this._renderSurface.writeToBuffer( 2, x, y, 0xFFE92BFF );
+	//this.renderSurface.writeToBuffer( 2, x, y, 0xFFE92BFF );
 };
 
 
@@ -128,7 +128,7 @@ renderbuffer.prototype.renderSpritePixel = function( spritenum, isBehind, x, y, 
 	var bufferIndex = isBehind ? 0 : 2;
 	if ( TYPED_ARRAY_GET_INT32( this.priorityBuffer, index ) === 0 ) {
 		TYPED_ARRAY_SET_INT32( this.priorityBuffer, index, spritenum + 1 );
-		this._renderPixel( bufferIndex, index, y, paletteIndex );
+		this.renderPixel( bufferIndex, index, y, paletteIndex );
 	}
 };
 
@@ -139,7 +139,7 @@ renderbuffer.prototype.renderPixel = function( x, y, paletteIndex ) {
 	if ( TYPED_ARRAY_GET_INT32( this.priorityBuffer, index ) === 1 && x < (SCREEN_WIDTH-1) ) {
 		hitzero = true;
 	}
-	this._renderPixel( 1, index, y, paletteIndex );
+	this.renderPixel( 1, index, y, paletteIndex );
 	return hitzero;
 };
 

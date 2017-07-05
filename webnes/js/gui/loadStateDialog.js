@@ -11,10 +11,10 @@ this.Gui = this.Gui || {};
 	var LoadStateDialog = function( app ) {
 
 		var that = this;
-		this._app = app;
-		this._contentsDiv = $( "#loadStateDialog_contents" );
+		this.app = app;
+		this.contentsDiv = $( "#loadStateDialog_contents" );
 
-		this._dialog = $( "#loadStateDialog" ).dialog({
+		this.dialog = $( "#loadStateDialog" ).dialog({
 			'autoOpen': false,
 			'height': 400,
 			'width': 900,
@@ -33,7 +33,7 @@ this.Gui = this.Gui || {};
 
 	LoadStateDialog.prototype._onClose = function() {
 
-		this._app.pause( false );
+		this.app.pause( false );
 	};
 
 
@@ -70,9 +70,9 @@ this.Gui = this.Gui || {};
 			html += "</button>";
 			html += "</div>";
 		}
-		this._contentsDiv[0].innerHTML = html;
-		this._app.pause( true );
-		this._dialog.dialog( "open" );
+		this.contentsDiv[0].innerHTML = html;
+		this.app.pause( true );
+		this.dialog.dialog( "open" );
 	};
 
 

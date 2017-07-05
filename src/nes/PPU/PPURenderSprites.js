@@ -9,25 +9,25 @@ import {
 export default class PPURenderSprites {
   constructor(ppu) {
     this.ppu = ppu;
-    this._overflowSet = false;
-    this._useMMC2Latch = false;
+    this.overflowSet = false;
+    this.useMMC2Latch = false;
   }
 
   reset() {
-    this._overflowSet = false;
-    this._useMMC2Latch = this.ppu.mainboard.cart.memoryMapper.MMC2Latch !== undefined;
+    this.overflowSet = false;
+    this.useMMC2Latch = this.ppu.mainboard.cart.memoryMapper.MMC2Latch !== undefined;
   }
 
   onEndFrame() {
-    this._overflowSet = false;
+    this.overflowSet = false;
   }
 
   saveState(data) {
-    data._overflowSet = this._overflowSet;
+    data._overflowSet = this.overflowSet;
   }
 
   loadState(state) {
-    this._overflowSet = state._overflowSet;
+    this.overflowSet = state._overflowSet;
   }
 
   isRangeOverlapping(a1, a2, b1, b2) {
@@ -79,7 +79,7 @@ export default class PPURenderSprites {
       secondByte = this.ppu.read8(ppuAddress + 8, true, 0);
       paletteMergeByte = (attribs & 3) << 2;
 
-      if (this._useMMC2Latch) {
+      if (this.useMMC2Latch) {
         this.ppu.mainboard.cart.memoryMapper.MMC2Latch(ppuAddress + 8);
       }
 
@@ -190,7 +190,7 @@ export default class PPURenderSprites {
 
       if (spritey > 0 && spritey < SCREEN_HEIGHT) {
         if (this.isRangeOverlapping(startline, endline, spritey, spritey + spriteHeight)) {
-          this._renderSprite(spriteHeight, spritenum, startline, endline, spritey);
+          this.renderSprite(spriteHeight, spritenum, startline, endline, spritey);
         }
       }
     }

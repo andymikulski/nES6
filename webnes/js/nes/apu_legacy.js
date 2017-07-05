@@ -11,36 +11,36 @@ var ApuLegacy = function( mainboard ) {
 
 	var that = this;
 
-	this._outBufferSize = 4096;
-	this._soundRate = 44100;
+	this.outBufferSize = 4096;
+	this.soundRate = 44100;
 
 	this.mainboard = mainboard;
 	this.mainboard.connect( 'reset', function( cold ) { that._onReset( cold ); } );
 	this.nextIrq = -1;
-	this._irqActive = false;
+	this.irqActive = false;
 	this.mLastCalculatedNextIrqTime = -1;
 
-	this._enabled = true;
-	this._justRenabled = 0;
+	this.enabled = true;
+	this.justRenabled = 0;
 	var soundRate = 44100;
 
 	this.apu = new Nes.Nes_Apu();
 
 	try {
-		this._renderer = new Gui.WebAudioRenderer( APUOutBufferSize );
-		this._outBuffer = this._renderer.createBuffer( this._outBufferSize );
-		soundRate = this._renderer.getSampleRate();
+		this.renderer = new Gui.WebAudioRenderer( APUOutBufferSize );
+		this.outBuffer = this.renderer.createBuffer( this.outBufferSize );
+		soundRate = this.renderer.getSampleRate();
 		this.buf = new Nes.Blip_Buffer();
-	//	this._writer = new Nes.Wave_Writer( soundRate );
-	//	this._writer.activate();
+	//	this.writer = new Nes.Wave_Writer( soundRate );
+	//	this.writer.activate();
 
 		this.buf.clock_rate( APUBaseRate );
 		this.apu.output( this.buf );
 		this.buf.sample_rate( soundRate );
 	}
 	catch ( err ) {
-		this._renderer = null;
-		this._enabled = false;
+		this.renderer = null;
+		this.enabled = false;
 		console.log( "WebAudio unsupported in this browser. Sound will be disabled..." );
 	}
 
@@ -57,28 +57,28 @@ var ApuLegacy = function( mainboard ) {
 
 ApuLegacy.prototype.enableSound = function( enable ) {
 	enable = enable === undefined ? true : enable;
-	if ( enable !== this._enabled ) {
+	if ( enable !== this.enabled ) {
 		if ( enable ) { // after re-enabling sound, fill audio buffer with zeroes to prevent static
-			this._justRenabled = 2;
+			this.justRenabled = 2;
 		}
-		this._enabled = enable;
+		this.enabled = enable;
 	}
 };
 
 
 ApuLegacy.prototype.soundEnabled = function() {
-	return this._enabled && this.soundSupported();
+	return this.enabled && this.soundSupported();
 };
 
 
 ApuLegacy.prototype.soundSupported = function() {
-	return !!this._renderer;
+	return !!this.renderer;
 };
 
 
 ApuLegacy.prototype.setVolume = function( val ) {
-	if ( this._renderer ) {
-		this._renderer.setVolume( val );
+	if ( this.renderer ) {
+		this.renderer.setVolume( val );
 	}
 };
 
@@ -95,9 +95,9 @@ ApuLegacy.prototype.readFromRegister = function( offset ) {
 	if ( offset === this.apu.status_addr ) {
 		this.mainboard.synchroniser.synchronise();
 		var realTime = Math.floor( this.mainboard.synchroniser.getCpuMTC() / COLOUR_ENCODING_MTC_PER_CPU );
-		if ( offset === 0x4015 && this._irqActive ) {
+		if ( offset === 0x4015 && this.irqActive ) {
 			// irq acknowledge
-			this._irqActive = false;
+			this.irqActive = false;
 			//this.mainboard.cpu.holdIrqLineLow( false );
 		}
 		ret = this.apu.read_status( realTime );
@@ -122,7 +122,7 @@ ApuLegacy.prototype.synchronise = function( startTicks, endTicks ) {
 	if ( this.apu.earliest_irq() === Nes.Nes_Apu.irq_waiting ) {
 		//console.log( "Triggering APU IRQ" );
 		//this.mainboard.cpu.holdIrqLineLow();
-		this._irqActive = true;
+		this.irqActive = true;
 	}
 };
 
@@ -131,7 +131,7 @@ ApuLegacy.prototype.onEndFrame = function( cpuMtc ) {
 	var realTime = Math.floor( this.mainboard.synchroniser.getCpuMTC() / COLOUR_ENCODING_MTC_PER_CPU );
 	this.apu.end_frame( realTime );
 
-	if ( this._renderer && this._enabled ) {
+	if ( this.renderer && this.enabled ) {
 		// Read some samples out of Blip_Buffer if there are enough to
 		// fill our output buffer
 		this.buf.end_frame( realTime );
@@ -141,10 +141,10 @@ ApuLegacy.prototype.onEndFrame = function( cpuMtc ) {
 		//	if ( g_options->SoundEnabled && g_options->ApplicationSpeed == 0 ) // dont play sound if disabled or not running at normal speed
 		if ( samplesAvailable >= APUOutBufferSize ) {
 			//write samples directly to renderer's buffer
-			var floatArray = this._outBuffer.lockBuffer();
+			var floatArray = this.outBuffer.lockBuffer();
 			this.buf.read_samples( floatArray, APUOutBufferSize );
-			this._outBuffer.unlockBuffer();
-		//	this._writer.write( buffer, count );
+			this.outBuffer.unlockBuffer();
+		//	this.writer.write( buffer, count );
 		}
 	}
 
@@ -166,7 +166,7 @@ ApuLegacy.prototype.CalculateWhenIrqDue = function() {
 	if ( earliestIrq !== this.apu.no_irq ) {
 		this.nextIrq = earliestIrq * COLOUR_ENCODING_MTC_PER_CPU;
 		if ( this.nextIrq >= 0 ) {
-			Nes.Trace.writeLine( Nes.trace_apu, 'IRQ scheduled for: ' + this.nextIrq );
+			Nes.Trace.writeLine( Nes.traceApu, 'IRQ scheduled for: ' + this.nextIrq );
 			//this.mainboard.synchroniser.addEvent( 'apu irq', this.nextIrq, function( eventTime ) { that._eventIrqTrigger( eventTime ); } );
 		}
 	} else {

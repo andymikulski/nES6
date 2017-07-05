@@ -37,7 +37,7 @@ memory.prototype.reset = function( cold ) {
 
 memory.prototype.read8 = function( offset ) {
 	//ASSERT_NUMBER( offset );
-	return this._properRead8( offset & 0xFFFF ) & 0xFF;
+	return this.properRead8( offset & 0xFFFF ) & 0xFF;
 };
 
 
@@ -70,7 +70,7 @@ memory.prototype._properRead8 = function( offset ) {
 		case 0x2000: // IS_INT_BETWEEN( offset, 0x2000, 0x4000 )
 			return gppu.readFromRegister( bot3 );
 		case 0x4000:
-			return this._readRegister4000( offset );
+			return this.readRegister4000( offset );
 		case 0x6000: // IS_INT_BETWEEN( offset, 0x6000, 0x8000 )
 			return gmapper.read8SRam( offset );
 		default: // IS_INT_BETWEEN( offset, 0x8000, 0x10000 )

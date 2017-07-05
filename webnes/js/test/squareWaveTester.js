@@ -9,53 +9,53 @@ var SquareWaveTester = function( mainboard ) {
 
 	var that = this;
 
-	this._enabled = true;
-	this._soundRate = 44100;
-	this._outBufferSize = 4096;
+	this.enabled = true;
+	this.soundRate = 44100;
+	this.outBufferSize = 4096;
 
 	try {
-		this._renderer = new Gui.WebAudioRenderer( this._outBufferSize );
-		this._soundRate = this._renderer.getSampleRate();
+		this.renderer = new Gui.WebAudioRenderer( this.outBufferSize );
+		this.soundRate = this.renderer.getSampleRate();
 	}
 	catch ( err ) {
-		this._renderer = null;
-		this._enabled = false;
+		this.renderer = null;
+		this.enabled = false;
 		console.log( "WebAudio unsupported in this browser. Sound will be disabled..." );
 	}
 
-	this._buffers = [];
-	this._square1 = new ApuSquareWaveOscillator( this._addBuffer() );
-	this._square1.enable( true );
+	this.buffers = [];
+	this.square1 = new ApuSquareWaveOscillator( this.addBuffer() );
+	this.square1.enable( true );
 
-	this._square1.writeTimer( 128 );
-	this._square1.writeLengthCounter( 0x20 );  // writes value of 4 to length counter
-	this._square1.writeEnvelope( 0x1F ); // constant volume mode, maximum volume
+	this.square1.writeTimer( 128 );
+	this.square1.writeLengthCounter( 0x20 );  // writes value of 4 to length counter
+	this.square1.writeEnvelope( 0x1F ); // constant volume mode, maximum volume
 };
 
 
 SquareWaveTester.prototype._addBuffer = function() {
-	var buffer = new ApuOutputBuffer( this._renderer.createBuffer( this._outBufferSize ), this._outBufferSize, this._soundRate );
-	this._buffers.push( buffer );
+	var buffer = new ApuOutputBuffer( this.renderer.createBuffer( this.outBufferSize ), this.outBufferSize, this.soundRate );
+	this.buffers.push( buffer );
 	return buffer;
 };
 
 
 SquareWaveTester.prototype.synchronise = function( startTicks, endTicks ) {
 
-	if ( this._enabled ) {
-		this._square1.synchronise( startTicks, endTicks );
+	if ( this.enabled ) {
+		this.square1.synchronise( startTicks, endTicks );
 	}
 };
 
 
 SquareWaveTester.prototype.onEndFrame = function( cpuMtc ) {
 
-	if ( this._renderer && this._enabled ) {
+	if ( this.renderer && this.enabled ) {
 		// run a frames worth of sound processing
 		this.synchronise( 0, COLOUR_ENCODING_FRAME_MTC );
 
-		for ( var index=0; index<this._buffers.length; ++index ) {
-			var buf = this._buffers[index];
+		for ( var index=0; index<this.buffers.length; ++index ) {
+			var buf = this.buffers[index];
 			buf.commit();
 			buf.clear();
 		}

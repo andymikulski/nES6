@@ -20,15 +20,15 @@ this.Gui = this.Gui || {};
 	var ControlBarButton = function( mainboard, jqId, options ) {
 
 		var that = this;
-		this._options = options;
-		this._toggleState = false;
-		this._button = $( "#" + jqId ).button( { 'text': false, 'label': this._options.primary.label, 'icons': { 'primary': this._options.primary.icon } } );
+		this.options = options;
+		this.toggleState = false;
+		this.button = $( "#" + jqId ).button( { 'text': false, 'label': this.options.primary.label, 'icons': { 'primary': this.options.primary.icon } } );
 
-		if ( this._options.toggleIcon || this._options.click ) {
-			this._button.click( function() { var ret = that._onClick(); return ret === undefined ? true : ret; } );
+		if ( this.options.toggleIcon || this.options.click ) {
+			this.button.click( function() { var ret = that._onClick(); return ret === undefined ? true : ret; } );
 		}
 
-		if ( this._options.enabledWhenRomIsLoaded ) {
+		if ( this.options.enabledWhenRomIsLoaded ) {
 			this.enable( false );
 			mainboard.connect( 'romLoaded', function( cart ) { that._onRomLoaded( cart ); } );
 		}
@@ -37,8 +37,8 @@ this.Gui = this.Gui || {};
 
 	ControlBarButton.prototype._onClick = function() {
 
-		if ( this._options.click ) {
-			return this._options.click();
+		if ( this.options.click ) {
+			return this.options.click();
 		}
 		return true;
 	};
@@ -46,7 +46,7 @@ this.Gui = this.Gui || {};
 
 	ControlBarButton.prototype._onRomLoaded = function( cart ) {
 
-		if ( this._options.enabledWhenRomIsLoaded ) {
+		if ( this.options.enabledWhenRomIsLoaded ) {
 			this.enable( true );
 		}
 	};
@@ -55,18 +55,18 @@ this.Gui = this.Gui || {};
 	ControlBarButton.prototype.toggleIcon = function( forceToggle ) {
 
 		if ( forceToggle === undefined ) {
-			this._toggleState = !this._toggleState;
+			this.toggleState = !this.toggleState;
 		} else {
-			this._toggleState = forceToggle;
+			this.toggleState = forceToggle;
 		}
-		if ( this._options.toggle ) {
+		if ( this.options.toggle ) {
 			var opts;
-			if ( this._toggleState ) {
-				opts = { 'label': ( this._options.toggle.label || this._options.primary.label ), 'icons': { 'primary': ( this._options.toggle.icon || this._options.primary.icon ) } };
+			if ( this.toggleState ) {
+				opts = { 'label': ( this.options.toggle.label || this.options.primary.label ), 'icons': { 'primary': ( this.options.toggle.icon || this.options.primary.icon ) } };
 			} else {
-				opts = { 'label': this._options.primary.label, 'icons': { 'primary': this._options.primary.icon } };
+				opts = { 'label': this.options.primary.label, 'icons': { 'primary': this.options.primary.icon } };
 			}
-			this._button.button( "option", opts );
+			this.button.button( "option", opts );
 		}
 	};
 
@@ -74,9 +74,9 @@ this.Gui = this.Gui || {};
 	ControlBarButton.prototype.highlight = function( hl ) {
 
 		if ( hl === true || hl === undefined ) {
-			this._button.addClass( 'ui-state-highlight' );
+			this.button.addClass( 'ui-state-highlight' );
 		} else {
-			this._button.removeClass( 'ui-state-highlight' );
+			this.button.removeClass( 'ui-state-highlight' );
 		}
 	};
 
@@ -84,16 +84,16 @@ this.Gui = this.Gui || {};
 	ControlBarButton.prototype.alert = function( hl ) {
 
 		if ( hl === true || hl === undefined ) {
-			this._button.addClass( 'ui-state-error' );
+			this.button.addClass( 'ui-state-error' );
 		} else {
-			this._button.removeClass( 'ui-state-error' );
+			this.button.removeClass( 'ui-state-error' );
 		}
 	};
 
 
 	ControlBarButton.prototype.enable = function( enable ) {
 		var txt = ( enable === undefined || enable ) ? 'enable' : 'disable';
-		this._button.button( txt );
+		this.button.button( txt );
 	};
 
 
@@ -102,19 +102,19 @@ this.Gui = this.Gui || {};
 
 		var that = this;
 
-		this._buttonObject = buttonObject;
-		this._options = options || {};
-		this._menu = $( "#" + menuJqId ).menu();
-		this._menu.hide();
+		this.buttonObject = buttonObject;
+		this.options = options || {};
+		this.menu = $( "#" + menuJqId ).menu();
+		this.menu.hide();
 
 		$( document ).on( "click", function( e ) {
 			that._onDocClick( e );
 		});
 
 		// Connect checkbox change events
-		if ( this._options.checkBoxes && Array.isArray( this._options.checkBoxes ) ) {
-			for ( var i=0; i<this._options.checkBoxes.length; ++i ) {
-				var obj = this._options.checkBoxes[i];
+		if ( this.options.checkBoxes && Array.isArray( this.options.checkBoxes ) ) {
+			for ( var i=0; i<this.options.checkBoxes.length; ++i ) {
+				var obj = this.options.checkBoxes[i];
 				if ( obj.change ) {
 					obj.checkBoxSelector.change( obj.change );
 				}
@@ -130,13 +130,13 @@ this.Gui = this.Gui || {};
 			return;
 		}
 		if ( this.isVisible() ) {
-			if ( !isClickWithinElementBounds( this._menu, e.clientX, e.clientY ) ) {
+			if ( !isClickWithinElementBounds( this.menu, e.clientX, e.clientY ) ) {
 				this.hide();
 			} else {
 				// click was inside the menu. check the options object for specified behaviour
-				if ( this._options.checkBoxes && Array.isArray( this._options.checkBoxes ) ) {
-					for ( var i=0; i<this._options.checkBoxes.length; ++i ) {
-						var obj = this._options.checkBoxes[i];
+				if ( this.options.checkBoxes && Array.isArray( this.options.checkBoxes ) ) {
+					for ( var i=0; i<this.options.checkBoxes.length; ++i ) {
+						var obj = this.options.checkBoxes[i];
 						// if we clicked on the li element, check the checkbox (this way user doesnt have to click checkbox exactly)
 						if ( e.target.id === obj.parentId ) {
 							obj.checkBoxSelector.click();
@@ -159,23 +159,23 @@ this.Gui = this.Gui || {};
 
 
 	ControlBarMenu.prototype.show = function() {
-		this._menu.show().position( {
+		this.menu.show().position( {
 				'my': "left bottom",
 				'at': "left top",
-				'of': this._buttonObject._button
+				'of': this.buttonObject._button
 			});
 	};
 
 
 	ControlBarMenu.prototype.hide = function() {
-		if ( this._menu.is(':visible') ) {
-			this._menu.hide();
+		if ( this.menu.is(':visible') ) {
+			this.menu.hide();
 		}
 	};
 
 
 	ControlBarMenu.prototype.isVisible = function() {
-		return this._menu.is(':visible');
+		return this.menu.is(':visible');
 	};
 
 
@@ -184,13 +184,13 @@ this.Gui = this.Gui || {};
 	var ControlBarSlider = function( jqId, buttonObject, options ) {
 
 		var that = this;
-		this._buttonObject = buttonObject;
-		this._options = options;
-		this._options.defaultValueIndex = this._options.defaultValueIndex === undefined ? 0 : this._options.defaultValueIndex;
-		this._currentIndex = this._options.defaultValueIndex;
-		this._tooltipCreated = false;
+		this.buttonObject = buttonObject;
+		this.options = options;
+		this.options.defaultValueIndex = this.options.defaultValueIndex === undefined ? 0 : this.options.defaultValueIndex;
+		this.currentIndex = this.options.defaultValueIndex;
+		this.tooltipCreated = false;
 
-		this._dialog = $( "#" + jqId ).dialog({
+		this.dialog = $( "#" + jqId ).dialog({
 				'dialogClass': "no-close controlBarSlider",
 				'draggable': false,
 				'autoOpen': false,
@@ -207,25 +207,25 @@ this.Gui = this.Gui || {};
 			} );
 
 		var sliderElement = document.createElement( 'div' );
-		this._dialog[0].appendChild( sliderElement );
+		this.dialog[0].appendChild( sliderElement );
 
-		var isRangeSlider = this._options.values === undefined;
+		var isRangeSlider = this.options.values === undefined;
 
 		if ( isRangeSlider ) {
-			this._slider = $( sliderElement ).slider( {
-				'value': this._options.defaultValueIndex,
-				'min': this._options.minValue,
-				'max': this._options.maxValue,
+			this.slider = $( sliderElement ).slider( {
+				'value': this.options.defaultValueIndex,
+				'min': this.options.minValue,
+				'max': this.options.maxValue,
 				'orientation': "vertical",
 				'change': function( event, ui ) {
 					that._updateTooltip( ui.handle, ui.value );
 				}
 			} );
 		} else {
-			this._slider = $( sliderElement ).slider( {
-				'value': this._options.defaultValueIndex,
+			this.slider = $( sliderElement ).slider( {
+				'value': this.options.defaultValueIndex,
 				'min': 0,
-				'max': this._options.values.length-1,
+				'max': this.options.values.length-1,
 				'step': 1,
 				'orientation': "vertical",
 				'slide': function( event, ui ) {
@@ -236,8 +236,8 @@ this.Gui = this.Gui || {};
 				}
 			} );
 		}
-		this._slider.addClass( 'controlBarSliderContents' );
-		this._createTooltip();
+		this.slider.addClass( 'controlBarSliderContents' );
+		this.createTooltip();
 
 		$( document ).on( "click", function( e ) {
 			that._onDocClick( e );
@@ -246,8 +246,8 @@ this.Gui = this.Gui || {};
 
 
 	ControlBarSlider.prototype._getTooltipText = function( val ) {
-		if ( this._options.values && val >= 0 && val < this._options.values.length ) {
-			return this._options.values[ val ].text;
+		if ( this.options.values && val >= 0 && val < this.options.values.length ) {
+			return this.options.values[ val ].text;
 		} else {
 			return val.toString();
 		}
@@ -255,9 +255,9 @@ this.Gui = this.Gui || {};
 
 
 	ControlBarSlider.prototype._createTooltip = function() {
-		var handleElement = $('.ui-slider-handle', this._slider);
+		var handleElement = $('.ui-slider-handle', this.slider);
 		handleElement.qtip( {
-			'content': this._getTooltipText( this._options.defaultValueIndex ),
+			'content': this.getTooltipText( this.options.defaultValueIndex ),
 			'position': {
 				'corner':{'target':'leftMiddle','tooltip':'rightMiddle'}, //instead of corner:{target:'rightMiddle',tooltip:'leftMiddle'},
 				'adjust':{'screen':true, 'resize':true}
@@ -270,11 +270,11 @@ this.Gui = this.Gui || {};
 
 
 	ControlBarSlider.prototype._updateTooltip = function( handle, val ) {
-		if ( this._currentIndex !== val ) {
-			this._currentIndex = val;
-			$(handle).qtip( "option", 'content.text', this._getTooltipText( val ) );
-			if ( this._options.change ) {
-				this._options.change( this._options.values ? this._options.values[ this._currentIndex ].value : val );
+		if ( this.currentIndex !== val ) {
+			this.currentIndex = val;
+			$(handle).qtip( "option", 'content.text', this.getTooltipText( val ) );
+			if ( this.options.change ) {
+				this.options.change( this.options.values ? this.options.values[ this.currentIndex ].value : val );
 			}
 		}
 	};
@@ -287,7 +287,7 @@ this.Gui = this.Gui || {};
 		}
 		// hide menu when clicked somewhere else
 		if ( this.isVisible() ) {
-			if ( !isClickWithinElementBounds( this._dialog, e.clientX, e.clientY ) ) {
+			if ( !isClickWithinElementBounds( this.dialog, e.clientX, e.clientY ) ) {
 				this.hide();
 			}
 		}
@@ -295,24 +295,24 @@ this.Gui = this.Gui || {};
 
 
 	ControlBarSlider.prototype.show = function() {
-		this._dialog.dialog( "option", "position", {
+		this.dialog.dialog( "option", "position", {
 				'my': "left bottom",
 				'at': "left top",
-				'of': this._buttonObject._button
+				'of': this.buttonObject._button
 			} );
-		this._dialog.dialog( "open" );
+		this.dialog.dialog( "open" );
 	};
 
 
 	ControlBarSlider.prototype.hide = function() {
-		if ( this._dialog.is(':visible') ) {
-			this._dialog.dialog( "close" );
+		if ( this.dialog.is(':visible') ) {
+			this.dialog.dialog( "close" );
 		}
 	};
 
 
 	ControlBarSlider.prototype.isVisible = function() {
-		return this._dialog.is(':visible');
+		return this.dialog.is(':visible');
 	};
 
 
@@ -322,11 +322,11 @@ this.Gui = this.Gui || {};
 	var ControlBarMessage = function( jqId, buttonObject, options ) {
 
 		var that = this;
-		this._buttonObject = buttonObject;
-		this._options = options;
-		this._allowAutoHide = false;
+		this.buttonObject = buttonObject;
+		this.options = options;
+		this.allowAutoHide = false;
 
-		this._dialog = $( "#" + jqId ).dialog({
+		this.dialog = $( "#" + jqId ).dialog({
 				'dialogClass': "no-close controlBarSlider",
 				'draggable': false,
 				'autoOpen': false,
@@ -342,8 +342,8 @@ this.Gui = this.Gui || {};
 				}
 			} );
 
-		this._textElement = document.createElement( 'div' );
-		this._dialog[0].appendChild( this._textElement );
+		this.textElement = document.createElement( 'div' );
+		this.dialog[0].appendChild( this.textElement );
 
 		$( document ).on( "click", function( e ) {
 			that._onDocClick( e );
@@ -353,7 +353,7 @@ this.Gui = this.Gui || {};
 
 	ControlBarMessage.prototype.setText = function( text ) {
 
-		this._textElement.innerHTML = '<p>' + text + '</p>';
+		this.textElement.innerHTML = '<p>' + text + '</p>';
 	};
 
 
@@ -364,8 +364,8 @@ this.Gui = this.Gui || {};
 		}
 		// hide menu when clicked somewhere else
 		if ( this.isVisible() ) {
-			if ( !isClickWithinElementBounds( this._dialog, e.clientX, e.clientY ) ) {
-				if ( this._allowAutoHide ) {
+			if ( !isClickWithinElementBounds( this.dialog, e.clientX, e.clientY ) ) {
+				if ( this.allowAutoHide ) {
 					this.hide();
 				}
 			}
@@ -375,14 +375,14 @@ this.Gui = this.Gui || {};
 
 	ControlBarMessage.prototype.show = function() {
 		var that = this;
-		this._dialog.dialog( "option", "position", {
+		this.dialog.dialog( "option", "position", {
 				'my': "right top",
 				'at': "right bottom",
-				'of': this._buttonObject._button
+				'of': this.buttonObject._button
 			} );
-		this._dialog.dialog( "open" );
-		this._buttonObject.alert( true );
-		this._allowAutoHide = false;
+		this.dialog.dialog( "open" );
+		this.buttonObject.alert( true );
+		this.allowAutoHide = false;
 		setTimeout( function() {
 			that._allowAutoHide = true;
 		}, 300 );
@@ -390,15 +390,15 @@ this.Gui = this.Gui || {};
 
 
 	ControlBarMessage.prototype.hide = function() {
-		if ( this._dialog.is(':visible') ) {
-			this._dialog.dialog( "close" );
+		if ( this.dialog.is(':visible') ) {
+			this.dialog.dialog( "close" );
 		}
-		this._buttonObject.alert( false );
+		this.buttonObject.alert( false );
 	};
 
 
 	ControlBarMessage.prototype.isVisible = function() {
-		return this._dialog.is(':visible');
+		return this.dialog.is(':visible');
 	};
 
 

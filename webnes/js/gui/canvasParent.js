@@ -10,38 +10,38 @@ this.Gui = this.Gui || {};
 
 		var that = this;
 
-		this._eventBus = new Nes.EventBus();
-		this._parent = $( "#content" );
-		this._element = $( "#canvasWrapper" );
+		this.eventBus = new Nes.EventBus();
+		this.parent = $( "#content" );
+		this.element = $( "#canvasWrapper" );
 
-		this._canvasElement = document.createElement('canvas');
-		this._element[0].appendChild( this._canvasElement );
+		this.canvasElement = document.createElement('canvas');
+		this.element[0].appendChild( this.canvasElement );
 
-		this._setSize();
+		this.setSize();
 
 		$(window).resize(function(){
 			that._setSize();
 			that._setPosition();
 		});
-		this._setPosition();
+		this.setPosition();
 	};
 
 
 	CanvasParent.prototype.connect = function( name, cb ) {
 
-		this._eventBus.connect( name, cb );
+		this.eventBus.connect( name, cb );
 	};
 
 
 	CanvasParent.prototype.getCanvasElement = function() {
-		return this._canvasElement;
+		return this.canvasElement;
 	};
 
 
 	CanvasParent.prototype._setSize = function() {
 
-		var parentWidth = this._parent.width();
-		var parentHeight = this._parent.height();
+		var parentWidth = this.parent.width();
+		var parentHeight = this.parent.height();
 
 		var resizeType = 'keepAspectRatio';
 
@@ -50,16 +50,16 @@ this.Gui = this.Gui || {};
 			var aspectRatio = SCREEN_WIDTH / SCREEN_HEIGHT;
 			var newWidth = aspectRatio * parentHeight;
 
-			this._canvasElement.width = Math.floor( newWidth );
-			this._canvasElement.height = parentHeight;
+			this.canvasElement.width = Math.floor( newWidth );
+			this.canvasElement.height = parentHeight;
 
-			this._eventBus.invoke( 'resize' );
+			this.eventBus.invoke( 'resize' );
 		}
 	};
 
 
 	CanvasParent.prototype._setPosition = function() {
-		this._element.position( { 'of': this._parent, 'my': "center center", 'at': "center center" } );
+		this.element.position( { 'of': this.parent, 'my': "center center", 'at': "center center" } );
 	};
 
 

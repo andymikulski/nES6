@@ -1,3 +1,5 @@
+import root from 'window-or-global';
+
 /**
  * nES6 plugin to bind a piece of the DOM with drag-n-drop events, which load ROMs
  * into nES6 accordingly.
@@ -27,14 +29,14 @@ const App = new nES6({
  */
 export default function blurPausePlugin(options = {}) {
   return (nesInstance) => {
-    window.addEventListener('blur', () => {
+    root.addEventListener('blur', () => {
       nesInstance.pause(true);
       if (options.onBlur) {
         options.onBlur();
       }
     }, false);
 
-    window.addEventListener('focus', () => {
+    root.addEventListener('focus', () => {
       nesInstance.pause(false);
       if (options.onFocus) {
         options.onFocus();

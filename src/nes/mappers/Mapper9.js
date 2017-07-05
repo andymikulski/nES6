@@ -16,23 +16,23 @@ import {
 
 export default class Mapper9 extends BaseMapper {
   init() {
-    this._banks = new Int32Array(4);
+    this.banks = new Int32Array(4);
   }
 
   mapperSaveState(state) {
-    state._banks = uintArrayToString(this._banks);
-    state._latches = this._latches.slice(0);
+    state._banks = uintArrayToString(this.banks);
+    state._latches = this.latches.slice(0);
   }
 
   mapperLoadState(state) {
-    this._banks = stringToUintArray(state._banks);
-    this._latches = state._latches.slice(0);
+    this.banks = stringToUintArray(state._banks);
+    this.latches = state._latches.slice(0);
   }
 
   reset() {
-    this._latches = [true, false];
-    for (var i = 0; i < this._banks.length; ++i) {
-      this._banks[i] = 0;
+    this.latches = [true, false];
+    for (var i = 0; i < this.banks.length; ++i) {
+      this.banks[i] = 0;
     }
 
     this.switch32kPrgBank(this.get32kPrgBankCount() - 1);
@@ -47,33 +47,33 @@ export default class Mapper9 extends BaseMapper {
     if (performSync === undefined ? true : performSync) {
       this.mainboard.synchroniser.synchronise();
     }
-    const lowerBankId = this._latches[0] ? 1 : 0;
-    this.switch4kChrBank(this._banks[lowerBankId], true);
-    const upperBankId = this._latches[1] ? 3 : 2;
-    this.switch4kChrBank(this._banks[upperBankId], false);
+    const lowerBankId = this.latches[0] ? 1 : 0;
+    this.switch4kChrBank(this.banks[lowerBankId], true);
+    const upperBankId = this.latches[1] ? 3 : 2;
+    this.switch4kChrBank(this.banks[upperBankId], false);
   }
 
   MMC2Latch(ppuReadAddress) {
 		// http://wiki.nesdev.com/w/index.php/MMC2
     if (ppuReadAddress === 0xFD8) {
-      this._latches[0] = false;
-      this._syncChrBanks(false);
+      this.latches[0] = false;
+      this.syncChrBanks(false);
     } else if (ppuReadAddress === 0xFE8) {
-      this._latches[0] = true;
-      this._syncChrBanks(false);
+      this.latches[0] = true;
+      this.syncChrBanks(false);
     } else if (ppuReadAddress >= 0x1FD8 && ppuReadAddress <= 0x1FDF) {
-      this._latches[1] = false;
-      this._syncChrBanks(false);
+      this.latches[1] = false;
+      this.syncChrBanks(false);
     } else if (ppuReadAddress >= 0x1FE8 && ppuReadAddress <= 0x1FEF) {
-      this._latches[1] = true;
-      this._syncChrBanks(false);
+      this.latches[1] = true;
+      this.syncChrBanks(false);
     }
 		// var latchId = ( ppuReadAddress & 0x1000 ) > 0 ? 1 : 0;
 		// var tilenum = ( ppuReadAddress >> 4 ) & 0xFF;
 		// var isFE = tilenum === 0xFE;
 		// if ( tilenum === 0xFD || isFE ) {
-			// this._latches[ latchId ] = isFE;
-			// this._syncChrBanks();
+			// this.latches[ latchId ] = isFE;
+			// this.syncChrBanks();
 		// }
   }
 
@@ -85,20 +85,20 @@ export default class Mapper9 extends BaseMapper {
         this.switch8kPrgBank(data & 0xf, 0);
         break;
       case 0xB000:
-        this._banks[0] = data & 0x1F;
-        this._syncChrBanks();
+        this.banks[0] = data & 0x1F;
+        this.syncChrBanks();
         break;
       case 0xC000:
-        this._banks[1] = data & 0x1F;
-        this._syncChrBanks();
+        this.banks[1] = data & 0x1F;
+        this.syncChrBanks();
         break;
       case 0xD000:
-        this._banks[2] = data & 0x1F;
-        this._syncChrBanks();
+        this.banks[2] = data & 0x1F;
+        this.syncChrBanks();
         break;
       case 0xE000:
-        this._banks[3] = data & 0x1F;
-        this._syncChrBanks();
+        this.banks[3] = data & 0x1F;
+        this.syncChrBanks();
         break;
       case 0xF000:
         this.mainboard.synchroniser.synchronise();

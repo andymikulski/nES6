@@ -12,8 +12,8 @@ var mapper4 = function() {
 	this.chipEnable = this.interruptsEnabled = true;
 	this.irqCounter = this.irqLatch = 0;
 	this.mReloadFlag = false;
-	this._isMMC6 = false;
-	this._mmc6PrgRamWriteByte = 0;
+	this.isMMC6 = false;
+	this.mmc6PrgRamWriteByte = 0;
 
 	this.lastA12Raise = 0;
 
@@ -36,7 +36,7 @@ mapper4.prototype = Object.create( Nes.basemapper.prototype );
 
 mapper4.prototype._eventIrq = function() {
 	// don't do anything - call to synchronise() will trigger the irq
-	this.mainboard.synchroniser.changeEventTime( this._irqEventId, -1 );
+	this.mainboard.synchroniser.changeEventTime( this.irqEventId, -1 );
 };
 
 mapper4.prototype.mapperSaveState = function( state ) {
@@ -48,14 +48,14 @@ mapper4.prototype.mapperSaveState = function( state ) {
 	state.irqCounter = this.irqCounter;
 	state.irqLatch = this.irqLatch;
 	state.mReloadFlag = this.mReloadFlag;
-	state._isMMC6 = this._isMMC6;
-	state._mmc6PrgRamWriteByte = this._mmc6PrgRamWriteByte;
+	state._isMMC6 = this.isMMC6;
+	state._mmc6PrgRamWriteByte = this.mmc6PrgRamWriteByte;
 	state.lastA12Raise = this.lastA12Raise;
 	state.mSpriteAddress = this.mSpriteAddress;
 	state.mScreenAddress = this.mScreenAddress;
 	state.mRenderingEnabled = this.mRenderingEnabled;
 	state.banks = Nes.uintArrayToString( this.banks );
-	state._interruptInProgress = this._interruptInProgress;
+	state._interruptInProgress = this.interruptInProgress;
 };
 
 mapper4.prototype.mapperLoadState = function( state ) {
@@ -67,14 +67,14 @@ mapper4.prototype.mapperLoadState = function( state ) {
 	this.irqCounter = state.irqCounter;
 	this.irqLatch = state.irqLatch;
 	this.mReloadFlag = state.mReloadFlag;
-	this._isMMC6 = state._isMMC6;
-	this._mmc6PrgRamWriteByte = state._mmc6PrgRamWriteByte;
+	this.isMMC6 = state._isMMC6;
+	this.mmc6PrgRamWriteByte = state._mmc6PrgRamWriteByte;
 	this.lastA12Raise = state.lastA12Raise;
 	this.mSpriteAddress = state.mSpriteAddress;
 	this.mScreenAddress = state.mScreenAddress;
 	this.mRenderingEnabled = state.mRenderingEnabled;
 	this.banks = Nes.stringToUintArray( state.banks );
-	this._interruptInProgress = state._interruptInProgress;
+	this.interruptInProgress = state._interruptInProgress;
 };
 
 mapper4.prototype.syncBanks = function( doPrg, doChr ) {
@@ -156,10 +156,10 @@ mapper4.prototype._lookInDbForMMC6 = function() {
 mapper4.prototype.reset = function() {
 	this.prgRamDisableWrite = false;
 	this.chipEnable = this.interruptsEnabled = true;
-	this._interruptInProgress = false;
+	this.interruptInProgress = false;
 
-	this._A12LowerLimit = ( COLOUR_ENCODING_VBLANK_SCANLINES ) * MASTER_CYCLES_PER_SCANLINE;
-	this._A12UpperLimit = ( COLOUR_ENCODING_FRAME_SCANLINES - 1 ) * MASTER_CYCLES_PER_SCANLINE;
+	this.A12LowerLimit = ( COLOUR_ENCODING_VBLANK_SCANLINES ) * MASTER_CYCLES_PER_SCANLINE;
+	this.A12UpperLimit = ( COLOUR_ENCODING_FRAME_SCANLINES - 1 ) * MASTER_CYCLES_PER_SCANLINE;
 
 
 	this.lastA12Raise = 0;
@@ -170,8 +170,8 @@ mapper4.prototype.reset = function() {
 	this.irqLatch = 0xFF;
 	this.mReloadFlag = false;
 	this.lastA12Raise = 0;
-	this._isMMC6 = this._lookInDbForMMC6();
-	this._mmc6PrgRamWriteByte = 0;
+	this.isMMC6 = this.lookInDbForMMC6();
+	this.mmc6PrgRamWriteByte = 0;
 	this.bankSwapByte = 0;
 	this.banks[0] = 0;
 	this.banks[1] = 2;
@@ -189,7 +189,7 @@ mapper4.prototype.reset = function() {
 
 	var that = this;
 	// TODO: Need to remove this event on mapper unload
-	this._irqEventId = this.mainboard.synchroniser.addEvent( 'mmc3 irq', -1, function() { that._eventIrq(); } );
+	this.irqEventId = this.mainboard.synchroniser.addEvent( 'mmc3 irq', -1, function() { that._eventIrq(); } );
 
 	this.syncBanks( true, true );
 	this.mainboard.ppu.changeMirroringMethod( this.mirroringMethod );
@@ -205,10 +205,10 @@ mapper4.prototype.write8PrgRom = function( offset, data ) {
 				if ( this.bankSwapByte !== data & 0xFF ) {
 					this.bankSwapByte = data & 0xFF;
 
-					if ( this._isMMC6 ) {
+					if ( this.isMMC6 ) {
 						var prgRamEnabled = ( this.bankSwapByte & 0x20 ) > 0;
 						if ( !prgRamEnabled ) {
-							this._mmc6PrgRamWriteByte = 0;
+							this.mmc6PrgRamWriteByte = 0;
 						}
 					}
 
@@ -235,10 +235,10 @@ mapper4.prototype.write8PrgRom = function( offset, data ) {
 			}
 			else
 			{ // odd
-				if ( this._isMMC6 ) {
+				if ( this.isMMC6 ) {
 					var prgRamEnabled = ( this.bankSwapByte & 0x20 ) > 0;
 					if ( prgRamEnabled ) {
-						this._mmc6PrgRamWriteByte = data;
+						this.mmc6PrgRamWriteByte = data;
 					}
 				} else {
 					this.prgRamDisableWrite = ( data & 0x40 ) > 0;
@@ -267,9 +267,9 @@ mapper4.prototype.write8PrgRom = function( offset, data ) {
 			if ( ( offset & 0x1 ) === 0 )
 			{ // even - "Writing any value to this register will disable MMC3 interrupts AND acknowledge any pending interrupts."
 				this.interruptsEnabled = false;
-				if ( this._interruptInProgress ) {
+				if ( this.interruptInProgress ) {
 					this.mainboard.cpu.holdIrqLineLow( false );
-					this._interruptInProgress = false;
+					this.interruptInProgress = false;
 				}
 //				Log::Write( LOG_MAPPER, ( boost::format( "Interrupts disabled on mapper" ) ).str() );
 			}
@@ -305,7 +305,7 @@ mapper4.prototype.decrementIrqCounter = function( tickCount ) {
 	}
 	else if ( this.irqCounter === 0 ) {
 		this.irqCounter = this.irqLatch;
-		if ( this._isMMC6 ) {
+		if ( this.isMMC6 ) {
 			doIrq = false;
 		} else {
 			if ( this.irqCounter === 0 )
@@ -319,12 +319,12 @@ mapper4.prototype.decrementIrqCounter = function( tickCount ) {
 		doIrq = this.irqCounter === 0;
 	}
 
-	if ( doIrq && this.interruptsEnabled && !this._interruptInProgress ) {
+	if ( doIrq && this.interruptsEnabled && !this.interruptInProgress ) {
 		//	if ( this.mainboard.ppu.frameCounter === 43 && pos.x === 260 && pos.y === 0 ) {
 	//				debugger;
 		//		}
 		//console.log( "[" + this.mainboard.ppu.frameCounter + "]" + pos.x + "x" + pos.y + " IRQ cpu: " + cpupos.x + "x" + cpupos.y );
-		this._interruptInProgress = true;
+		this.interruptInProgress = true;
 		this.mainboard.cpu.holdIrqLineLow( true );
 	}
 };
@@ -364,7 +364,7 @@ mapper4.prototype.calculateNextA12Raise = function( cpuMTC ) {
 		}
 	}
 
-	if ( cpuMTC >= this._A12UpperLimit || pixelEvent < 0 ) {
+	if ( cpuMTC >= this.A12UpperLimit || pixelEvent < 0 ) {
 		return -1;
 	}
 
@@ -375,11 +375,11 @@ mapper4.prototype.calculateNextA12Raise = function( cpuMTC ) {
 
 	if ( startMtc <= cpuMTC )
 		startMtc += MASTER_CYCLES_PER_SCANLINE; // if we have already passed the irq event, move onto next scanline
-	if ( this._A12UpperLimit <= startMtc )
+	if ( this.A12UpperLimit <= startMtc )
 		return -1;
 
-	if ( startMtc < this._A12LowerLimit )
-		startMtc = this._A12LowerLimit + scanlineEvent;
+	if ( startMtc < this.A12LowerLimit )
+		startMtc = this.A12LowerLimit + scanlineEvent;
 
 	return startMtc;
 };
@@ -402,7 +402,7 @@ mapper4.prototype.updateIRQTime = function( cpuTime, doSync ) {
 		} else {
 			scanlines = this.mReloadFlag ? 0 : Math.max( this.irqCounter - 1, 0 );
 			newEvent = nextRaise + ( scanlines * MASTER_CYCLES_PER_SCANLINE );
-			if ( newEvent > this._A12UpperLimit ) {
+			if ( newEvent > this.A12UpperLimit ) {
 				newEvent = -1;
 			} else {
 				//var pos = this.mainboard.ppu.ticksToScreenCoordinates( newEvent );
@@ -414,7 +414,7 @@ mapper4.prototype.updateIRQTime = function( cpuTime, doSync ) {
 			}
 		}
 	}
-	this.mainboard.synchroniser.changeEventTime( this._irqEventId, newEvent );
+	this.mainboard.synchroniser.changeEventTime( this.irqEventId, newEvent );
 };
 
 
@@ -448,7 +448,7 @@ If sprites are set to $0000-0FFF and the background is set to $1000-1FFF, then A
 	var startMtc = this.calculateNextA12Raise( startTicks+1 );
 	if ( startMtc >= 0 )
 	{
-		for ( var mtc = startMtc; mtc <= Math.min( this._A12UpperLimit, endTicks ); mtc += MASTER_CYCLES_PER_SCANLINE )
+		for ( var mtc = startMtc; mtc <= Math.min( this.A12UpperLimit, endTicks ); mtc += MASTER_CYCLES_PER_SCANLINE )
 		{
 			this.decrementIrqCounter( mtc );
 		}
@@ -462,12 +462,12 @@ mapper4.prototype.onEndFrame = function() {
 
 mapper4.prototype.write8SRam = function( offset, data ) {
 
-	if ( this._isMMC6 ) {
+	if ( this.isMMC6 ) {
 		if ( offset >= 0x7000 ) {
 			var mirroredOffset = offset & 0x3FF;
 			var lowHalf = ( mirroredOffset & 0x200 ) === 0;
 			var offsetMask = lowHalf ? 0x30 : 0xC0; // writing requires both the write and read bits set
-			if ( ( this._mmc6PrgRamWriteByte & offsetMask ) === offsetMask ) {
+			if ( ( this.mmc6PrgRamWriteByte & offsetMask ) === offsetMask ) {
 				Nes.basemapper.prototype.write8SRam.call( this, mirroredOffset, data );
 			}
 		}
@@ -480,12 +480,12 @@ mapper4.prototype.write8SRam = function( offset, data ) {
 
 mapper4.prototype.read8SRam = function( offset ) {
 
-	if ( this._isMMC6 && offset >= 0x7000 ) {
+	if ( this.isMMC6 && offset >= 0x7000 ) {
 		if ( offset >= 0x7000 ) {
 			var mirroredOffset = offset & 0x3FF;
 			var lowHalf = ( mirroredOffset & 0x200 ) === 0;
 			var offsetMask = lowHalf ? 0x20 : 0x80;
-			if ( ( this._mmc6PrgRamWriteByte & offsetMask ) > 0 ) {
+			if ( ( this.mmc6PrgRamWriteByte & offsetMask ) > 0 ) {
 				return Nes.basemapper.prototype.read8SRam.call( this, mirroredOffset );
 			}
 		}

@@ -23,69 +23,69 @@ this.WebGl = this.WebGl || {};
 	};
 
 	var VertexBuffer = function( glContext ) {
-		this._glContext = glContext;
-		this._itemSize = 0;
-		this._itemCount = 0;
-		this._buffer = this._glContext.createBuffer();
+		this.glContext = glContext;
+		this.itemSize = 0;
+		this.itemCount = 0;
+		this.buffer = this.glContext.createBuffer();
 	};
 
 	VertexBuffer.prototype.setData = function( vertices, itemSize, itemCount ) {
 
 		// ELEMENT_ARRAY_BUFFER is used by index buffer, ARRAY_BUFFER by vertex and tex coord buffers
-		this._itemSize = itemSize;
-		this._itemCount = itemCount;
-		this._glContext.bindBuffer( this._glContext.ARRAY_BUFFER, this._buffer );
-		this._glContext.bufferData( this._glContext.ARRAY_BUFFER, vertices, this._glContext.STATIC_DRAW );
+		this.itemSize = itemSize;
+		this.itemCount = itemCount;
+		this.glContext.bindBuffer( this.glContext.ARRAY_BUFFER, this.buffer );
+		this.glContext.bufferData( this.glContext.ARRAY_BUFFER, vertices, this.glContext.STATIC_DRAW );
 	};
 
 
 	VertexBuffer.prototype.bind = function( positionAttribute ) {
-		this._glContext.bindBuffer( this._glContext.ARRAY_BUFFER, this._buffer );
-		this._glContext.vertexAttribPointer( positionAttribute, this._itemSize, this._glContext.FLOAT, false, 0, 0 );
+		this.glContext.bindBuffer( this.glContext.ARRAY_BUFFER, this.buffer );
+		this.glContext.vertexAttribPointer( positionAttribute, this.itemSize, this.glContext.FLOAT, false, 0, 0 );
 	};
 
 
 
 	var IndexBuffer = function( glContext ) {
 
-		this._glContext = glContext;
-		this._itemCount = 0;
-		this._buffer = this._glContext.createBuffer();
+		this.glContext = glContext;
+		this.itemCount = 0;
+		this.buffer = this.glContext.createBuffer();
 	};
 
 	IndexBuffer.prototype.setData = function( indices, itemCount ) {
-		this._itemCount = itemCount;
-		this._glContext.bindBuffer( this._glContext.ELEMENT_ARRAY_BUFFER, this._buffer );
-		this._glContext.bufferData( this._glContext.ELEMENT_ARRAY_BUFFER, indices, this._glContext.STATIC_DRAW );
+		this.itemCount = itemCount;
+		this.glContext.bindBuffer( this.glContext.ELEMENT_ARRAY_BUFFER, this.buffer );
+		this.glContext.bufferData( this.glContext.ELEMENT_ARRAY_BUFFER, indices, this.glContext.STATIC_DRAW );
 	};
 
 	IndexBuffer.prototype.bind = function() {
-		this._glContext.bindBuffer(this._glContext.ELEMENT_ARRAY_BUFFER, this._buffer);
+		this.glContext.bindBuffer(this.glContext.ELEMENT_ARRAY_BUFFER, this.buffer);
 	};
 
 	IndexBuffer.prototype.draw = function() {
-		this._glContext.drawElements(this._glContext.TRIANGLES, this._itemCount, this._glContext.UNSIGNED_SHORT, 0);
+		this.glContext.drawElements(this.glContext.TRIANGLES, this.itemCount, this.glContext.UNSIGNED_SHORT, 0);
 	};
 
 
 	var ShaderProgram = function( glContext ) {
 
-		this._fragment = null;
-		this._vertex = null;
+		this.fragment = null;
+		this.vertex = null;
 
-		this._glContext = glContext;
+		this.glContext = glContext;
 		// add some extensions - this enables fwidth() method, see https://www.khronos.org/registry/gles/extensions/OES/OES_standard_derivatives.txt
-		this._glContext.getExtension('OES_standard_derivatives');
+		this.glContext.getExtension('OES_standard_derivatives');
 
-		this._uniformLocationCache = {};
-		this._attribCache = {};
-		this._shaderProgram = this._glContext.createProgram();
+		this.uniformLocationCache = {};
+		this.attribCache = {};
+		this.shaderProgram = this.glContext.createProgram();
 	};
 
 
 	ShaderProgram.prototype._compileShader = function( glType, str ) {
 
-		var shader = this._glContext.createShader( glType );
+		var shader = this.glContext.createShader( glType );
 
 		var prepend = '';
 
@@ -98,7 +98,7 @@ this.WebGl = this.WebGl || {};
 		prepend += 'precision mediump float;\n'; // Bodge precision on script
 		prepend += '#extension GL_OES_standard_derivatives : enable\n';
 
-		if ( glType === this._glContext.VERTEX_SHADER ) {
+		if ( glType === this.glContext.VERTEX_SHADER ) {
 			// Add variables common to all vertex shaders
 			prepend += 'uniform mat4 aModelViewProjectionMatrix;\n';
 			prepend += 'attribute vec4 aVertexPosition;\n';
@@ -109,11 +109,11 @@ this.WebGl = this.WebGl || {};
 
 		str = prepend + str;
 
-		this._glContext.shaderSource(shader, str);
-		this._glContext.compileShader(shader);
+		this.glContext.shaderSource(shader, str);
+		this.glContext.compileShader(shader);
 
-		if (!this._glContext.getShaderParameter(shader, this._glContext.COMPILE_STATUS)) {
-			throw new Error( "Error compiling shader script " + this._glContext.getShaderInfoLog(shader) );
+		if (!this.glContext.getShaderParameter(shader, this.glContext.COMPILE_STATUS)) {
+			throw new Error( "Error compiling shader script " + this.glContext.getShaderInfoLog(shader) );
 		}
 
 		return shader;
@@ -142,23 +142,23 @@ this.WebGl = this.WebGl || {};
 			vertexStr = defaultVertexShader;
 		}
 
-		if ( this._fragment ) {
-			this._glContext.detachShader(this._shaderProgram, this._fragment);
+		if ( this.fragment ) {
+			this.glContext.detachShader(this.shaderProgram, this.fragment);
 		}
-		if ( this._vertex ) {
-			this._glContext.detachShader(this._shaderProgram, this._vertex);
+		if ( this.vertex ) {
+			this.glContext.detachShader(this.shaderProgram, this.vertex);
 		}
 
-		this._fragment = this._compileShader( this._glContext.FRAGMENT_SHADER, fragmentStr );
-		this._vertex = this._compileShader( this._glContext.VERTEX_SHADER, vertexStr );
+		this.fragment = this.compileShader( this.glContext.FRAGMENT_SHADER, fragmentStr );
+		this.vertex = this.compileShader( this.glContext.VERTEX_SHADER, vertexStr );
 
-		this._glContext.attachShader(this._shaderProgram, this._fragment);
-		this._glContext.attachShader(this._shaderProgram, this._vertex);
+		this.glContext.attachShader(this.shaderProgram, this.fragment);
+		this.glContext.attachShader(this.shaderProgram, this.vertex);
 
-		this._glContext.linkProgram( this._shaderProgram );
+		this.glContext.linkProgram( this.shaderProgram );
 
-		if (!this._glContext.getProgramParameter( this._shaderProgram, this._glContext.LINK_STATUS )) {
-			throw new Error( this._glContext.getProgramInfoLog( this._shaderProgram ) );
+		if (!this.glContext.getProgramParameter( this.shaderProgram, this.glContext.LINK_STATUS )) {
+			throw new Error( this.glContext.getProgramInfoLog( this.shaderProgram ) );
 		}
 
 		callback( null );
@@ -167,8 +167,8 @@ this.WebGl = this.WebGl || {};
 
 	ShaderProgram.prototype.loadAndLink = function( shaderFile, callback ) {
 
-		this._uniformLocationCache = {};
-		this._attribCache = {};
+		this.uniformLocationCache = {};
+		this.attribCache = {};
 
 		if ( shaderFile && shaderFile.length > 0 ) {
 			var that = this;
@@ -178,82 +178,82 @@ this.WebGl = this.WebGl || {};
 				'dataType': 'xml'
 			});
 		} else {
-			this._shaderLoadSuccess( null, callback );
+			this.shaderLoadSuccess( null, callback );
 		}
 	};
 
 
 	ShaderProgram.prototype.use = function() {
 
-		this._glContext.useProgram(this._shaderProgram);
+		this.glContext.useProgram(this.shaderProgram);
 	};
 
 
 	ShaderProgram.prototype.getUniformLocation = function( name ) {
 
-		if ( !this._uniformLocationCache.hasOwnProperty( name ) ) {
-			 this._uniformLocationCache[ name ] = this._glContext.getUniformLocation(this._shaderProgram, name);
+		if ( !this.uniformLocationCache.hasOwnProperty( name ) ) {
+			 this.uniformLocationCache[ name ] = this.glContext.getUniformLocation(this.shaderProgram, name);
 		}
-		return this._uniformLocationCache[ name ];
+		return this.uniformLocationCache[ name ];
 	};
 
 
 	ShaderProgram.prototype.getAttrib = function( name ) {
 
-		if ( !this._attribCache.hasOwnProperty( name ) ) {
-			this._attribCache[ name ] = this._glContext.getAttribLocation(this._shaderProgram, name);
-			this._glContext.enableVertexAttribArray( this._attribCache[ name ] );
+		if ( !this.attribCache.hasOwnProperty( name ) ) {
+			this.attribCache[ name ] = this.glContext.getAttribLocation(this.shaderProgram, name);
+			this.glContext.enableVertexAttribArray( this.attribCache[ name ] );
 		}
-		return this._attribCache[ name ];
+		return this.attribCache[ name ];
 	};
 
 
 	var FillableTexture = function( glContext, width, height ) {
 
-		this._glContext = glContext;
-		this._texture = this._glContext.createTexture();
-		this._glContext.bindTexture(this._glContext.TEXTURE_2D, this._texture);
-		this._glContext.pixelStorei(this._glContext.UNPACK_FLIP_Y_WEBGL, true);
-		this._glContext.texImage2D(this._glContext.TEXTURE_2D, 0, this._glContext.RGBA, width, height, 0, this._glContext.RGBA, this._glContext.UNSIGNED_BYTE, null );
+		this.glContext = glContext;
+		this.texture = this.glContext.createTexture();
+		this.glContext.bindTexture(this.glContext.TEXTURE_2D, this.texture);
+		this.glContext.pixelStorei(this.glContext.UNPACK_FLIP_Y_WEBGL, true);
+		this.glContext.texImage2D(this.glContext.TEXTURE_2D, 0, this.glContext.RGBA, width, height, 0, this.glContext.RGBA, this.glContext.UNSIGNED_BYTE, null );
 	};
 
 	FillableTexture.prototype.bind = function() {
 
-		this._glContext.activeTexture(this._glContext.TEXTURE0);
-		this._glContext.bindTexture( this._glContext.TEXTURE_2D, this._texture );
+		this.glContext.activeTexture(this.glContext.TEXTURE0);
+		this.glContext.bindTexture( this.glContext.TEXTURE_2D, this.texture );
 
-		var filtering = this._glContext.LINEAR; // NEAREST for block quality, LINEAR for softer texture
+		var filtering = this.glContext.LINEAR; // NEAREST for block quality, LINEAR for softer texture
 
-		this._glContext.texParameteri(this._glContext.TEXTURE_2D, this._glContext.TEXTURE_MAG_FILTER, filtering);
-		this._glContext.texParameteri(this._glContext.TEXTURE_2D, this._glContext.TEXTURE_MIN_FILTER, filtering);
-		this._glContext.texParameteri(this._glContext.TEXTURE_2D, this._glContext.TEXTURE_WRAP_S, this._glContext.CLAMP_TO_EDGE);
-		this._glContext.texParameteri(this._glContext.TEXTURE_2D, this._glContext.TEXTURE_WRAP_T, this._glContext.CLAMP_TO_EDGE);
+		this.glContext.texParameteri(this.glContext.TEXTURE_2D, this.glContext.TEXTURE_MAG_FILTER, filtering);
+		this.glContext.texParameteri(this.glContext.TEXTURE_2D, this.glContext.TEXTURE_MIN_FILTER, filtering);
+		this.glContext.texParameteri(this.glContext.TEXTURE_2D, this.glContext.TEXTURE_WRAP_S, this.glContext.CLAMP_TO_EDGE);
+		this.glContext.texParameteri(this.glContext.TEXTURE_2D, this.glContext.TEXTURE_WRAP_T, this.glContext.CLAMP_TO_EDGE);
 	};
 
 	FillableTexture.prototype.fill = function( x, y, width, height, array ) {
 
-		this._glContext.texSubImage2D( this._glContext.TEXTURE_2D, 0, x, y, width, height, this._glContext.RGBA, this._glContext.UNSIGNED_BYTE, array );
+		this.glContext.texSubImage2D( this.glContext.TEXTURE_2D, 0, x, y, width, height, this.glContext.RGBA, this.glContext.UNSIGNED_BYTE, array );
 	};
 
 
 
 	var OrthoCamera = function( glContext ) {
 
-		this._glContext = glContext;
-		this._mvMatrix = mat4.create();
-		this._pMatrix = mat4.create();
+		this.glContext = glContext;
+		this.mvMatrix = mat4.create();
+		this.pMatrix = mat4.create();
 	};
 
 	OrthoCamera.prototype.setup = function( width, height ) {
 
-		mat4.ortho(this._pMatrix, 0, width, 0, height, 0.1, 100);
-		mat4.identity(this._mvMatrix);
-		mat4.translate(this._mvMatrix, this._mvMatrix, [0.0, 0.0, -0.1]);
+		mat4.ortho(this.pMatrix, 0, width, 0, height, 0.1, 100);
+		mat4.identity(this.mvMatrix);
+		mat4.translate(this.mvMatrix, this.mvMatrix, [0.0, 0.0, -0.1]);
 	};
 
 	OrthoCamera.prototype.getMVPMatrix = function() {
 		var combined = mat4.create();
-		mat4.multiply( combined, this._pMatrix, this._mvMatrix );
+		mat4.multiply( combined, this.pMatrix, this.mvMatrix );
 		return combined;
 	};
 

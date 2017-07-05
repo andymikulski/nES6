@@ -131,4 +131,4 @@ export const JOYPAD_ID_TO_NAME = (id) => {
   return foundId;
 };
 
-export const g_ClearScreenArray = (new Int32Array(SCREEN_WIDTH * SCREEN_HEIGHT)).fill(0);
+export const gClearScreenArray = (new Int32Array(SCREEN_WIDTH * SCREEN_HEIGHT)).fill(0);

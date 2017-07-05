@@ -15,49 +15,49 @@ var lengthCounterTable = [
 
 var ApuSquareWaveOscillator = function( buffer ) {
 
-	this._buffer = buffer;
-	this._enabled = false;
-	this._timer = 0;
-	this._lengthCounter = 0;
-	this._lengthCounterEnabled = true;
-	this._useConstantVolume = false;
-	this._volumeValue = 0;
-	this._envelope = new Nes.ApuEnvelope();
+	this.buffer = buffer;
+	this.enabled = false;
+	this.timer = 0;
+	this.lengthCounter = 0;
+	this.lengthCounterEnabled = true;
+	this.useConstantVolume = false;
+	this.volumeValue = 0;
+	this.envelope = new Nes.ApuEnvelope();
 
-	this._delay = 0;
+	this.delay = 0;
 };
 
 ApuSquareWaveOscillator.prototype.decrementLengthCounter = function() {
-	if ( this._lengthCounter > 0 && this._lengthCounterEnabled ) {
-		this._lengthCounter--;
-		if ( this._lengthCounter === 0 ) {
+	if ( this.lengthCounter > 0 && this.lengthCounterEnabled ) {
+		this.lengthCounter--;
+		if ( this.lengthCounter === 0 ) {
 			// silence
 		}
 	}
 };
 
 ApuSquareWaveOscillator.prototype._getVolume = function() {
-	if ( this._lengthCounter > 0 && this._timer >= 8 ) {
-		if ( this._useConstantVolume ) {
-			return this._volumeValue;
+	if ( this.lengthCounter > 0 && this.timer >= 8 ) {
+		if ( this.useConstantVolume ) {
+			return this.volumeValue;
 		} else {
-			return this._envelope.getEnvelopeVolume();
+			return this.envelope.getEnvelopeVolume();
 		}
 	}
 	return 0;
 };
 
 ApuSquareWaveOscillator.prototype.enable = function( enabled ) {
-	this._enabled = enabled;
-	this._lengthCounter = 0; // set length counter to zero on enabled/disabled
+	this.enabled = enabled;
+	this.lengthCounter = 0; // set length counter to zero on enabled/disabled
 	// disable irq flag (?)
 };
 
 ApuSquareWaveOscillator.prototype.writeEnvelope = function( data ) {
 	// DDLC VVVV 	Duty (D), envelope loop / length counter halt (L), constant volume (C), volume/envelope (V)
-	this._lengthCounterEnabled = ( data & 0x20 ) === 0;
-	this._useConstantVolume = ( data & 0x10 ) === 0x10;
-	this._volumeValue = data & 0xF;
+	this.lengthCounterEnabled = ( data & 0x20 ) === 0;
+	this.useConstantVolume = ( data & 0x10 ) === 0x10;
+	this.volumeValue = data & 0xF;
 };
 
 ApuSquareWaveOscillator.prototype.writeSweep = function( data ) {
@@ -66,15 +66,15 @@ ApuSquareWaveOscillator.prototype.writeSweep = function( data ) {
 
 ApuSquareWaveOscillator.prototype.writeTimer = function( data ) {
 	// TTTT TTTT	Timer low (T) (bottom 8 bits)
-	this._timer = ( this._timer & 0x700 ) | data;
+	this.timer = ( this.timer & 0x700 ) | data;
 };
 
 ApuSquareWaveOscillator.prototype.writeLengthCounter = function( data ) {
 	// LLLL LTTT 	Length counter load (L), timer high (T)
-	this._timer = ( this._timer & 0xFF ) | ( ( data & 0x7 ) << 8 );
-	this._lengthCounter = lengthCounterTable[ (data >> 3) & 0x1f ];
+	this.timer = ( this.timer & 0xFF ) | ( ( data & 0x7 ) << 8 );
+	this.lengthCounter = lengthCounterTable[ (data >> 3) & 0x1f ];
 	//  (also resets duty and starts envelope)
-	this._envelope.reloadOnNextClock();
+	this.envelope.reloadOnNextClock();
 };
 
 
@@ -85,12 +85,12 @@ ApuSquareWaveOscillator.prototype._4bitVolumeToBufferValue = function( vol ) {
 
 ApuSquareWaveOscillator.prototype.synchronise = function( startTicks, endTicks ) {
 
-	if ( !this._enabled ) {
+	if ( !this.enabled ) {
 		return;
 	}
 
-	var volume = this._getVolume();
-	var period = this._timer;
+	var volume = this.getVolume();
+	var period = this.timer;
 
 	// TODO: apply sweep shift
 	var offset = 0;
@@ -99,20 +99,20 @@ ApuSquareWaveOscillator.prototype.synchronise = function( startTicks, endTicks )
 	var timer_period = ( period + 1 ) * 16 * COLOUR_ENCODING_MTC_PER_CPU; // APU cycle is 2* cpu cycle - pulse timer period is 16* cpu cycle due to sequencer having 8 steps
 	var timeUp = Math.floor( timer_period / 2 ); // TODO: implement correct duty cycle: this is 50/50 here
 	var timeDown = timer_period - timeUp;
-	var mtc = startTicks + this._delay;
-	var delta = this._4bitVolumeToBufferValue( volume );
+	var mtc = startTicks + this.delay;
+	var delta = this.4bitVolumeToBufferValue( volume );
 	for ( ; mtc<endTicks; mtc += timer_period ) {
 
-		if ( this._lengthCounter === 0 || volume === 0 || ( period + offset ) >= 0x800 ) {
+		if ( this.lengthCounter === 0 || volume === 0 || ( period + offset ) >= 0x800 ) {
 			// silent
 		} else {
-			this._buffer.write( mtc, timeUp, delta );
-			this._buffer.write( mtc + timeUp, timeDown, -delta );
+			this.buffer.write( mtc, timeUp, delta );
+			this.buffer.write( mtc + timeUp, timeDown, -delta );
 		}
-		//this._decrementLengthCounter();
-		//this._decrementLengthCounter();
+		//this.decrementLengthCounter();
+		//this.decrementLengthCounter();
 	}
-	this._delay = mtc - endTicks;
+	this.delay = mtc - endTicks;
 };
 
 

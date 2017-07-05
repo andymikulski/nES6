@@ -1,3 +1,6 @@
+/* eslint import/no-mutable-exports:0*/
+import root from 'window-or-global';
+
 /**
  * nES6 plugin to bind keyboard events to joypads. Defaults to a 'sensible' key
  * mapping, but also allows for overriding any/all of the map.
@@ -66,7 +69,7 @@ const checkMapCompleteness = (map) => {
 
   joypadButtons.forEach((button) => {
     if (values.indexOf(button) === -1) {
-      console && console.warn(`"${button}" button missing on given gamepad keymap.`);
+      throw new Error(`"${button}" button missing on given gamepad keymap.`);
     }
   });
 };
@@ -83,11 +86,11 @@ const lastPressedButtons = [];
  * @return {Boolean}  Were any gamepads found?
  */
 const registerGamepads = () => {
-  if (!navigator.getGamepads) {
+  if (!root.navigator || !root.navigator.getGamepads) {
     return false;
   }
 
-  gamePads = Array.from(navigator.getGamepads()).filter(x => x);
+  gamePads = Array.from(root.navigator.getGamepads()).filter(x => x);
   return gamePads.length > 0;
 };
 
@@ -122,7 +125,7 @@ const pollGamepads = nesInstance =>
     gamePads.forEach((pad, padIndex) => {
       // Get a list of the currently pressed buttons based on `pressed`
       const currentlyPressed = [];
-      const buttons = pad.buttons.map((butt, idx) => {
+      (pad.buttons || []).forEach((butt, idx) => {
         if (butt.pressed) {
           currentlyPressed.push({
             idx,
@@ -189,12 +192,12 @@ const pollGamepads = nesInstance =>
       if (keyMap[button]) {
         nesInstance[method](pad, keyMap[button]);
       } else {
-        console && console.warn(`nES6 Gamepad - No mapping found for button "${button}"`);
+        throw new Error(`No gamepad mapping found for button "${button}"`);
       }
     });
 
     // Poll gamepads all over again!
-    requestAnimationFrame(pollGamepads(nesInstance));
+    root.requestAnimationFrame(pollGamepads(nesInstance));
   };
 
 /**
@@ -213,8 +216,8 @@ export default function (customKeyMap) {
 
   return (nesInstance) => {
     // Event bindings to kick off polling
-    window.addEventListener('gamepadconnected', pollGamepads(nesInstance), false);
-    window.addEventListener('gamepaddisconnected', pollGamepads(nesInstance), false);
+    root.addEventListener('gamepadconnected', pollGamepads(nesInstance), false);
+    root.addEventListener('gamepaddisconnected', pollGamepads(nesInstance), false);
 
     // ...and a manual poll to pick up gamepads that are already connected
     pollGamepads(nesInstance)();

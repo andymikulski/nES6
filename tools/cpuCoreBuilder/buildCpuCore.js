@@ -14,39 +14,39 @@ var isCmosVersion = false;
 
 var OutputFile = function( filename ) {
 
-	this._filename = path.join( __dirname, '../../project/js/nes', filename );
-	this._tabLevel = 0;
-	this._outText = '';
+	this.filename = path.join( __dirname, '../../project/js/nes', filename );
+	this.tabLevel = 0;
+	this.outText = '';
 };
 
 
 OutputFile.prototype.writeLine = function( line ) {
-	
+
 	if ( line === undefined ) {
 		line = '';
 	}
-	for ( var i=0; i<this._tabLevel; ++i ) {
-		this._outText += '\t';
+	for ( var i=0; i<this.tabLevel; ++i ) {
+		this.outText += '\t';
 	}
-	this._outText += line + endLine;
+	this.outText += line + endLine;
 };
 
 
 OutputFile.prototype.pushTab = function() {
 
-	this._tabLevel++;
+	this.tabLevel++;
 };
 
 
 OutputFile.prototype.popTab = function() {
 
-	this._tabLevel--;
+	this.tabLevel--;
 };
 
 
 OutputFile.prototype.flush = function() {
 
-	fs.writeFileSync( this._filename, this._outText );
+	fs.writeFileSync( this.filename, this.outText );
 };
 
 
@@ -108,12 +108,12 @@ var getDummyAddressCalculation = function( addition ) {
 	return '(address & 0xFF00) | ((address + ' + addition + ') & 0xFF)';
 };
 
-	
+
 var performDummyRead = function( outfile, instruction, addition ) {
 
 	var doDummyReadBoundaryCheck = instruction.opmode === "READ" && instruction.pagecycles > 0;
 	var doDummyRead = true;
-	
+
 	if ( doDummyReadBoundaryCheck ) {
 		outfile.writeLine( 'if ( ( ( address + ' + addition + ' ) & 0xFF00 ) !== ( address & 0xFF00 ) ) { // Only do dummy read if page boundary crossed' );
 		outfile.pushTab();
@@ -126,8 +126,8 @@ var performDummyRead = function( outfile, instruction, addition ) {
 		outfile.writeLine( '}' );
 	}
 };
-	
-	
+
+
 var writeOutAddressingModeCode = function( outfile, instruction, storeFormatData ) {
 
 	switch ( instruction.addressingmode ) {
@@ -250,8 +250,8 @@ var writeOutAddressingModeCode = function( outfile, instruction, storeFormatData
 	default:
 		throw new Error( "Invalid addressingmode for instruction " + instruction.name );
 	}
-	
-	if ( instruction.addressingmode !== 'NONE' ) {	
+
+	if ( instruction.addressingmode !== 'NONE' ) {
 		if ( debug ) {
 			outfile.writeLine( "if ( typeof readInValue !== 'number' ) { debugger; }" );
 		}
@@ -266,10 +266,10 @@ var writeOutCmosDependentSignAndZeroAndOverflowFlags = function( outfile, testVa
 		// outfile.writeLine( 'if ( !cpu.regStatus.Decimal /*!DecimalFlagEnabled()*/ ) {' );
 		// outfile.pushTab();
 	// }
-	
+
 	setSignAndZero( outfile, testVariableName );
 	setOverflow( outfile, testVariableName, inputVariableName );
-	
+
 	// if ( !isCmosVersion ) {
 		// outfile.popTab();
 		// outfile.writeLine( '}' );
@@ -339,7 +339,7 @@ var writeOutActionCode = function( outfile, instruction, inputVariableName ) {
 			incrementStackReg( outfile );
 
 			outfile.writeLine( 'cpu.setPC( cpu.read16FromMemNoWrap( CPU_IRQ_ADDRESS ) );' );
-			
+
 			outfile.writeLine( 'cpu.setInterrupt( true );' );
 			if ( isCmosVersion ) {
 				outfile.writeLine( 'cpu.setDecimal( false ); // Decimal flag is cleared in the CMOS version' );
@@ -536,7 +536,7 @@ var writeOutActionCode = function( outfile, instruction, inputVariableName ) {
 			popStack( outfile, 'var temp' );
 			outfile.writeLine( 'cpu.statusRegFromByte( temp );' );
 			decrementStackReg( outfile );
-			
+
 			incrementSubCycle( outfile );
 			popStack( outfile, 'cpu.programCounter' );
 			decrementStackReg( outfile );
@@ -544,7 +544,7 @@ var writeOutActionCode = function( outfile, instruction, inputVariableName ) {
 			incrementSubCycle( outfile );
 			popStack( outfile, 'temp' );
 			outfile.writeLine( 'cpu.programCounter |= ( temp & 0xFF ) << 8;' );
-	
+
 			if ( debug ) {
 				outfile.writeLine( 'if ( cpu.programCounter < 0x6000 && cpu.programCounter > 0xFFFF ) { debugger; }' );
 			}
@@ -570,7 +570,7 @@ var writeOutActionCode = function( outfile, instruction, inputVariableName ) {
 
 			incrementSubCycle( outfile );
 			outfile.writeLine( 'cpu.programCounter = ( cpu.getPC() + 1 ) & 0xFFFF;' );
-			
+
 			if ( debug ) {
 				outfile.writeLine( 'if ( cpu.programCounter < 0x6000 && cpu.programCounter > 0xFFFF ) { debugger; }' );
 			}
@@ -718,13 +718,13 @@ var writeOutActionCode = function( outfile, instruction, inputVariableName ) {
 			setSignAndZero( outfile, 'cpu.regA' );
 		break;
 			/*
-SAX ANDs the contents of the A and X registers (leaving the contents of A 
+SAX ANDs the contents of the A and X registers (leaving the contents of A
 intact), subtracts an immediate value, and then stores the result in X.
-... A few points might be made about the action of subtracting an immediate 
-value.  It actually works just like the CMP instruction, except that CMP 
-does not store the result of the subtraction it performs in any register.  
-This subtract operation is not affected by the state of the Carry flag, 
-though it does affect the Carry flag.  It does not affect the Overflow 
+... A few points might be made about the action of subtracting an immediate
+value.  It actually works just like the CMP instruction, except that CMP
+does not store the result of the subtraction it performs in any register.
+This subtract operation is not affected by the state of the Carry flag,
+though it does affect the Carry flag.  It does not affect the Overflow
 flag.
 	*/
 		case "SAX":
@@ -873,23 +873,23 @@ var outputInstructionExecuteMethods = function( opcodeData, storeFormatData, use
 		outfile.writeLine( 'switch ( opcode ) {' );
 	}
 	outfile.writeLine();
-	
+
 	// build a function for each instruction
 	for ( var instructionIndex=0; instructionIndex<instructions.length; ++instructionIndex ) {
-		
+
 		var instruction = instructions[ instructionIndex ];
 		var functionName = instruction.name + "_" + instruction.addressingmode + "_" + instruction.code + postfix;
-		
-		if ( !useSwitchStatement ) {	
+
+		if ( !useSwitchStatement ) {
 			outfile.writeLine( 'function ' + functionName + "( cpu, memory ) {" );
 		} else {
 			outfile.writeLine( 'case ' + instruction.code + ': { // ' + instruction.name + " " + instruction.addressingmode );
 		}
-		
+
 		outfile.pushTab();
-		
+
 		outfile.writeLine( 'var cyclesTaken = ' + instruction.basecycles + ';' );
-		
+
 		if ( storeFormatData ) {
 			outfile.writeLine( 'formatData.programCounter = cpu.getPC();' );
 			outfile.writeLine( 'formatData.opcode = ' + instruction.code + ';' );
@@ -902,10 +902,10 @@ var outputInstructionExecuteMethods = function( opcodeData, storeFormatData, use
 
 		// Do addressing mode first
 		writeOutAddressingModeCode( outfile, instruction, storeFormatData );
-		
+
 		if ( instruction.addressingmode !== "RELATIVE" && instruction.code !== 0 ) // not a branch or BRK
 			outfile.writeLine( "cpu.setPC( ( cpu.getPC() + " + instruction.size + " ) & 0xFFFF );" );
-				
+
 		// BIT optimisation: Warn the PPU that we are doing a BIT instruction.
 		// This is so we can optimise 2002 loops that are waiting for vblank.
 		if ( instruction.functiontype === "BIT" ) {
@@ -919,7 +919,7 @@ var outputInstructionExecuteMethods = function( opcodeData, storeFormatData, use
 		}
 
 		outfile.writeLine( 'return cyclesTaken;' );
-		
+
 		outfile.popTab();
 		outfile.writeLine( '};' );
 		if ( useSwitchStatement ) {
@@ -930,7 +930,7 @@ var outputInstructionExecuteMethods = function( opcodeData, storeFormatData, use
 			outfile.writeLine( 'instructions' + postfix + '[ ' + instruction.code + ' ] = ' + functionName + ";" );
 		}
 	}
-	
+
 	if ( useSwitchStatement ) {
 		outfile.writeLine( '};' ); // end of switch
 		outfile.popTab();
@@ -949,7 +949,7 @@ var outputInstructionExecuteMethods = function( opcodeData, storeFormatData, use
 		}
 	}
 	outfile.writeLine();
-	
+
 	outfile.flush();
 };
 
@@ -959,21 +959,21 @@ var outputTraceFormatMethods = function( opcodeData, filename ) {
 
 	var instructions = opcodeData.INSTRUCTIONS;
 	var outfile = new OutputFile( filename );
-	
+
 	// then build functions which formats a cpu instruction string for debugging purposes
 	outfile.writeLine( 'this.Nes = this.Nes || {};' );
 	outfile.writeLine();
 	outfile.writeLine( '// This file has been automatically generated by the cpuCoreBuilder.js tool');
 	outfile.writeLine();
-	outfile.writeLine( '(function(){' );	
+	outfile.writeLine( '(function(){' );
 	outfile.pushTab();
 	outfile.writeLine( '"use strict";' );
 	outfile.writeLine();
 	outfile.writeLine( 'var formatCpuTraceString = [];' );
 	outfile.writeLine( 'var formatStr;' );
-	
+
 	for ( var instructionIndex=0; instructionIndex<instructions.length; ++instructionIndex ) {
-	
+
 		var instruction = instructions[ instructionIndex ];
 		outfile.writeLine( 'formatCpuTraceString[ ' + instruction.code + ' ] = function( formatData ) { // ' + instruction.name + " " + instruction.addressingmode );
 		outfile.pushTab();
@@ -1023,16 +1023,16 @@ var outputTraceFormatMethods = function( opcodeData, filename ) {
 		default:
 			throw new Error( "Invalid addressingmode for instruction " + instruction.name );
 		}
-		
+
 		outfile.writeLine( 'while ( formatStr.length < 47 ) { formatStr += " "; }' );
-		
+
 		// cpu registers
 		outfile.writeLine( 'formatStr += " A:" + ZERO_PAD_HEX( formatData.regs.a, 2 );' );
 		outfile.writeLine( 'formatStr += " X:" + ZERO_PAD_HEX( formatData.regs.x, 2 );' );
 		outfile.writeLine( 'formatStr += " Y:" + ZERO_PAD_HEX( formatData.regs.y, 2 );' );
 		outfile.writeLine( 'formatStr += " P:" + ZERO_PAD_HEX( formatData.regs.p, 2 );' );
 		outfile.writeLine( 'formatStr += " SP:" + ZERO_PAD_HEX( formatData.regs.sp, 2 );' );
-		
+
 		outfile.writeLine( 'return formatStr;' );
 		outfile.popTab();
 		outfile.writeLine( '};' );
@@ -1042,7 +1042,7 @@ var outputTraceFormatMethods = function( opcodeData, filename ) {
 	outfile.popTab();
 	outfile.writeLine( '}());' );
 	outfile.writeLine();
-	
+
 	outfile.flush();
 };
 
@@ -1050,16 +1050,16 @@ var outputTraceFormatMethods = function( opcodeData, filename ) {
 var start = function() {
 
 	var opcodeData = JSON.parse( fs.readFileSync( opcodeJson ) );
-	
+
 	// Fast version - (chrome) no format data is outputted. Uses an array of functions to execute each instruction (large switch statements choke on chrome)
 	outputInstructionExecuteMethods( opcodeData, false, false, 'cpu6502_instructions_fast.js', 'cpuInstructions' );
-	
+
 	// Fast version - (firefox). Large switch statement, no format data
 	outputInstructionExecuteMethods( opcodeData, false, true, 'cpu6502_instructions_fast_switch.js', 'cpuInstructionsSwitch' );
-	
+
 	// Slow version - this is to allow for cpu traces
 	outputInstructionExecuteMethods( opcodeData, true, false, 'cpu6502_instructions_trace.js', 'cpuInstructionsTrace' );
-	
+
 	// This takes the formatData object created by the trace version of the instructions and turns it into a string
 	outputTraceFormatMethods( opcodeData, 'cpu6502_instructions_formatString.js' );
 };

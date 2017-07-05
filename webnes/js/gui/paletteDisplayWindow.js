@@ -17,50 +17,50 @@ this.Gui = this.Gui || {};
 
 	var PaletteDisplayWindow = function( mainboard, divElement ) {
 
-		this._mainboard = mainboard;
+		this.mainboard = mainboard;
 
 		// add canvas for rendering all sprites on
-		this._offscreenElement = document.createElement('canvas');
-		this._offscreenElement.width = pixelColoursAcross;
-		this._offscreenElement.height = pixelColoursDown;
-		this._offscreenCanvas = this._offscreenElement.getContext( "2d" );
-		this._offscreenCanvas.imageSmoothingEnabled = false;
-		this._offscreenData = this._offscreenCanvas.getImageData( 0, 0, pixelColoursAcross, pixelColoursDown );
-		this._offscreen32BitView = new Uint32Array( this._offscreenData.data.buffer );
+		this.offscreenElement = document.createElement('canvas');
+		this.offscreenElement.width = pixelColoursAcross;
+		this.offscreenElement.height = pixelColoursDown;
+		this.offscreenCanvas = this.offscreenElement.getContext( "2d" );
+		this.offscreenCanvas.imageSmoothingEnabled = false;
+		this.offscreenData = this.offscreenCanvas.getImageData( 0, 0, pixelColoursAcross, pixelColoursDown );
+		this.offscreen32BitView = new Uint32Array( this.offscreenData.data.buffer );
 
-		this._element = document.createElement('canvas');
-		this._element.width = canvasWidth;
-		this._element.height = canvasHeight;
-		this._canvas = this._element.getContext("2d");
-		this._canvas.imageSmoothingEnabled = false;
+		this.element = document.createElement('canvas');
+		this.element.width = canvasWidth;
+		this.element.height = canvasHeight;
+		this.canvas = this.element.getContext("2d");
+		this.canvas.imageSmoothingEnabled = false;
 
-		divElement.appendChild( this._element );
+		divElement.appendChild( this.element );
 
-		this._infoElement = document.createElement('p');
-		divElement.appendChild( this._infoElement );
+		this.infoElement = document.createElement('p');
+		divElement.appendChild( this.infoElement );
 
-		this._loadPaletteData();
+		this.loadPaletteData();
 	};
 
 
 	PaletteDisplayWindow.prototype._loadPaletteData = function() {
 
-		if ( this._mainboard.cart ) {
+		if ( this.mainboard.cart ) {
 
 			var info = '';
 
 			for ( var index=0; index<32; ++index ) {
-				var paletteIndex = this._mainboard.ppu.paletteTables[ Math.floor( index / 16 ) ][ index % 16 ];
-				var colour = this._mainboard.renderBuffer.defaultPalette32BitVals[ paletteIndex || 0 ] || 0;
-				this._offscreen32BitView[ index ] = colour;
+				var paletteIndex = this.mainboard.ppu.paletteTables[ Math.floor( index / 16 ) ][ index % 16 ];
+				var colour = this.mainboard.renderBuffer.defaultPalette32BitVals[ paletteIndex || 0 ] || 0;
+				this.offscreen32BitView[ index ] = colour;
 
 		//		info += ( 0x3F00 + index ).toString(16) + "=" + paletteIndex.toString( 16 ) + "</br>";
 			}
 
-			this._infoElement.innerHTML = info;
+			this.infoElement.innerHTML = info;
 		}
 
-		this._updateCanvas();
+		this.updateCanvas();
 		var that = this;
 		setTimeout( function() { that._loadPaletteData(); }, 1000 );
 	};
@@ -68,9 +68,9 @@ this.Gui = this.Gui || {};
 
 	PaletteDisplayWindow.prototype._updateCanvas = function() {
 
-		this._offscreenCanvas.putImageData( this._offscreenData, 0, 0 );
+		this.offscreenCanvas.putImageData( this.offscreenData, 0, 0 );
 		// Draw offscreen canvas onto front buffer, resizing it in the process
-		this._canvas.drawImage( this._offscreenElement, 0, 0, this._element.clientWidth, this._element.clientHeight );
+		this.canvas.drawImage( this.offscreenElement, 0, 0, this.element.clientWidth, this.element.clientHeight );
 	};
 
 

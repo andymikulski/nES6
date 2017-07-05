@@ -11,8 +11,8 @@ var ppu = function( mainboard ) {
 	this.lastTransferredValue = 0;
 	this.mirroringMethod = null;
 	this.spriteMemory = new Int32Array( 0x100 );
-	this._invokeA12Latch = false;
-	this._bitOperationOn2002 = false;
+	this.invokeA12Latch = false;
+	this.bitOperationOn2002 = false;
 
 	this.nameTablesMap = new Int32Array( 4 );
 	this.nameTables = [];
@@ -21,8 +21,8 @@ var ppu = function( mainboard ) {
 
 	this.paletteTables = [ new Int32Array( 0x10 ), new Int32Array( 0x10 ) ];
 	this.frameCounter = 0;
-	this._ppuRenderBg = new Nes.PpuRenderBg( this );
-	this._ppuRenderSprites = new Nes.PpuRenderSprites( this );
+	this.ppuRenderBg = new Nes.PpuRenderBg( this );
+	this.ppuRenderSprites = new Nes.PpuRenderSprites( this );
 
 	this.resetVariables();
 };
@@ -30,18 +30,18 @@ var ppu = function( mainboard ) {
 
 ppu.prototype.reset = function( cold ) {
 
-	this._useMapperNameTableRead = this.mainboard.cart.memoryMapper.nameTableRead !== undefined;
-	this._sync = this.mainboard.synchroniser;
+	this.useMapperNameTableRead = this.mainboard.cart.memoryMapper.nameTableRead !== undefined;
+	this.sync = this.mainboard.synchroniser;
 	this.resetVariables( cold );
-	this._invokeA12Latch = this.mainboard.cart.memoryMapper.ppuA12Latch !== undefined;
-	this._ppuRenderBg.reset();
-	this._ppuRenderSprites.reset();
+	this.invokeA12Latch = this.mainboard.cart.memoryMapper.ppuA12Latch !== undefined;
+	this.ppuRenderBg.reset();
+	this.ppuRenderSprites.reset();
 };
 
 
 ppu.prototype.bitOperationHappening = function() {
 
-	this._bitOperationOn2002 = true;
+	this.bitOperationOn2002 = true;
 };
 
 
@@ -73,10 +73,10 @@ ppu.prototype.resetVariables = function( cold ) {
 ppu.prototype.hookSyncEvents = function( synchroniser ) {
 
 	var that = this;
-	this._clockSkipEventId = synchroniser.addEvent( 'ppu clockskip', this.getMasterTicksTillClockSkip(), function() { that._eventClockskip(); } );
-	this._vblankClearEventId = synchroniser.addEvent( 'ppu vblank clear', COLOUR_ENCODING_VBLANK_MTC, function( eventTime ) { that._eventVblankClear( eventTime ); } );
-	this._ppuNmiEventId = synchroniser.addEvent( 'ppu NMI', -1, function( eventTime ) { that._eventNmiTrigger( eventTime ); } );
-	this._spriteZeroEventId = synchroniser.addEvent( 'ppu sprite zero hit', -1, function( eventTime ) { that._eventSpriteZeroHit( eventTime ); } );
+	this.clockSkipEventId = synchroniser.addEvent( 'ppu clockskip', this.getMasterTicksTillClockSkip(), function() { that._eventClockskip(); } );
+	this.vblankClearEventId = synchroniser.addEvent( 'ppu vblank clear', COLOUR_ENCODING_VBLANK_MTC, function( eventTime ) { that._eventVblankClear( eventTime ); } );
+	this.ppuNmiEventId = synchroniser.addEvent( 'ppu NMI', -1, function( eventTime ) { that._eventNmiTrigger( eventTime ); } );
+	this.spriteZeroEventId = synchroniser.addEvent( 'ppu sprite zero hit', -1, function( eventTime ) { that._eventSpriteZeroHit( eventTime ); } );
 };
 
 
@@ -84,7 +84,7 @@ ppu.prototype._eventClockskip = function() {
 
 	// Skip a PPU clock cycle if the background is enabled
 	if ( this.isOddFrame && ( this.control2 & 0x8 ) > 0 /*ppuControl2.backgroundSwitch*/ && COLOUR_ENCODING_NAME === "NTSC" ) {
-		this._sync.advanceCpuMTC( MASTER_CYCLES_PER_PPU );
+		this.sync.advanceCpuMTC( MASTER_CYCLES_PER_PPU );
 	}
 };
 
@@ -104,24 +104,24 @@ ppu.prototype._eventNmiTrigger = function( eventTime ) {
 		this.mainboard.cpu.nonMaskableInterrupt( eventTime );
 	}
 
-	this._sync.changeEventTime( this._ppuNmiEventId, -1 );
+	this.sync.changeEventTime( this.ppuNmiEventId, -1 );
 };
 
 
 ppu.prototype._eventSpriteZeroHit = function( eventTime ) {
 
-	Nes.Trace.writeLine( Nes.trace_ppu, "PPU sprite hit set" );
-	// var realmtc = this._sync.getCpuMTC();
+	Nes.Trace.writeLine( Nes.tracePpu, "PPU sprite hit set" );
+	// var realmtc = this.sync.getCpuMTC();
 	// console.log( "[" + this.frameCounter + "] Sprite hit at: " + realmtc + " [" + JSON.stringify( this.ticksToScreenCoordinates( realmtc ) )
 		// + " due: " + eventTime + " [" + JSON.stringify( this.ticksToScreenCoordinates( eventTime ) ) + "]" );
 	this.status |= 0x40;
-	this._sync.changeEventTime( this._spriteZeroEventId, -1 );
+	this.sync.changeEventTime( this.spriteZeroEventId, -1 );
 };
 
 
 ppu.prototype._eventSpriteOverflow = function( eventTime ) {
 
-	//var realmtc = this._sync.getCpuMTC();
+	//var realmtc = this.sync.getCpuMTC();
 	//console.log( "Sprite overflow at: " + realmtc + " [" + JSON.stringify( this.ticksToScreenCoordinates( realmtc ) )
 	//	+ " due: " + eventTime + " [" + JSON.stringify( this.ticksToScreenCoordinates( eventTime ) ) + "]" );
 	this.status |= 0x20; /*ppuStatus.spriteOverflow = true;*/
@@ -144,7 +144,7 @@ ppu.prototype.getMasterTicksTillClockSkip = function( tickCount ) {
 // else the values will be overwritten
 var screenPos = { x:0, y:0 };
 ppu.prototype.ticksToScreenCoordinates = function( tickCount ) {
-	tickCount = tickCount || this._sync.getCpuMTC();
+	tickCount = tickCount || this.sync.getCpuMTC();
 	tickCount = Math.floor( tickCount / MASTER_CYCLES_PER_PPU ) | 0;
 	screenPos.x = tickCount % PPU_TICKS_PER_SCANLINE;
 	screenPos.y = ( Math.floor( tickCount / PPU_TICKS_PER_SCANLINE ) - COLOUR_ENCODING_VBLANK_SCANLINES - 1 ) | 0;
@@ -175,7 +175,7 @@ ppu.prototype.isRendering = function( tickCount, includeHblank ) {
 
 
 ppu.prototype.updatePPUReadAddress = function( newAddress, invokedFromRegisterWrite ) {
-	if ( invokedFromRegisterWrite && this._invokeA12Latch ) {
+	if ( invokedFromRegisterWrite && this.invokeA12Latch ) {
 		if ( ( newAddress & 0x1000 ) > 0 ) {
 			this.mainboard.cart.memoryMapper.ppuA12Latch();
 		}
@@ -243,28 +243,28 @@ ppu.prototype.handleSpriteTransfer = function() {
 	var baseReadAddress = this.spriteTransferArgument * 0x100;
 	if ( this.doSpriteTransferAfterNextCpuInstruction) {
 		this.doSpriteTransferAfterNextCpuInstruction = false;
-		this._sync.synchronise();
+		this.sync.synchronise();
 		// TODO: Optimise
-		this._sync.advanceCpuMTC( 1 * COLOUR_ENCODING_MTC_PER_CPU );
+		this.sync.advanceCpuMTC( 1 * COLOUR_ENCODING_MTC_PER_CPU );
 		this.spriteaddress &= 0xFF
 		for ( var i=0; i<0x100; ++i )
 		{
 			var dmaData = this.mainboard.memory.read8( baseReadAddress + i );
-			this._sync.advanceCpuMTC( 1 * COLOUR_ENCODING_MTC_PER_CPU );
+			this.sync.advanceCpuMTC( 1 * COLOUR_ENCODING_MTC_PER_CPU );
 			TYPED_ARRAY_SET_INT32( this.spriteMemory, this.spriteaddress, dmaData );
 			this.spriteaddress = (this.spriteaddress + 1 ) & 0xFF;
 			//this.lastTransferredValue = dmaData;
-			this._sync.advanceCpuMTC( 1 * COLOUR_ENCODING_MTC_PER_CPU );
+			this.sync.advanceCpuMTC( 1 * COLOUR_ENCODING_MTC_PER_CPU );
 		}
 		// add extra cycle on odd frame
 		if ( this.isOddFrame )
-			this._sync.advanceCpuMTC( 1 * COLOUR_ENCODING_MTC_PER_CPU );
+			this.sync.advanceCpuMTC( 1 * COLOUR_ENCODING_MTC_PER_CPU );
 	}
 };
 
 
 ppu.prototype._writeTo2000 = function( offset, data ) {
-	var cpuMtc = this._sync.getCpuMTC();
+	var cpuMtc = this.sync.getCpuMTC();
 	var vblankSetTime = COLOUR_ENCODING_FRAME_MTC;
 	var ticksTillSet = vblankSetTime - cpuMtc;
 
@@ -280,13 +280,13 @@ ppu.prototype._writeTo2000 = function( offset, data ) {
 		// NMI should occur if enabled when VBL already set
 		// vblank = true && vblanknmi = false
 		if ( ( this.status & 0x80 ) > 0 && ( this.control1 & 0x80 ) === 0 ) { // there be a 1-PPU clock latency for this
-			var triggerTime = this._sync.getCpuMTC() + MASTER_CYCLES_PER_PPU * 1;
+			var triggerTime = this.sync.getCpuMTC() + MASTER_CYCLES_PER_PPU * 1;
 			//console.log( "NMI trigger due: " + triggerTime );
-			this._sync.changeEventTime( this._ppuNmiEventId, triggerTime );
+			this.sync.changeEventTime( this.ppuNmiEventId, triggerTime );
 		}
 	}
 
-	this._sync.synchronise();
+	this.sync.synchronise();
 
 	// update nametable switch
 	this.ppuLatchAddress &= 0xF3FF;
@@ -300,7 +300,7 @@ ppu.prototype._writeTo2000 = function( offset, data ) {
 
 	if ( spriteScreenAddressChanged ) {
 		this.mainboard.cart.memoryMapper.spriteScreenEnabledUpdate( ( this.control1 & 0x8 ) > 0, ( this.control1 & 0x10 ) > 0 );
-		this._ppuRenderBg.onControl1Change( this.control1 );
+		this.ppuRenderBg.onControl1Change( this.control1 );
 	}
 	if ( spriteSizeChanged && this.mainboard.cart.memoryMapper.spriteSizeChanged ) { // used by MMC5
 		this.mainboard.cart.memoryMapper.spriteSizeChanged( ( this.control1 & 0x20 ) > 0 );
@@ -309,7 +309,7 @@ ppu.prototype._writeTo2000 = function( offset, data ) {
 
 
 ppu.prototype._writeTo2001 = function( offset, data ) {
-	this._sync.synchronise();
+	this.sync.synchronise();
 	var renderingEnabledChanged = ( ( this.control2 & 0x18 ) > 0 ) !== ( ( data & 0x18 ) > 0 );
 	//var spriteVisibleOrClippingChanged = ( ( this.control2 & 0x14 ) > 0 ) !== ( ( data & 0x14 ) > 0 );
 
@@ -321,7 +321,7 @@ ppu.prototype._writeTo2001 = function( offset, data ) {
 
 
 ppu.prototype._writeTo2005 = function( offset, data ) {
-	this._sync.synchronise();
+	this.sync.synchronise();
 
 /*
 I don't know anything about this game in particular, but bear in mind when examining
@@ -359,7 +359,7 @@ Emulators that don't use cycle-accurate PPU rendering will not correctly handle 
 
 ppu.prototype._writeTo2006 = function( offset, data ) {
 	// first write is upper byte of address, second is lower
-	this._sync.synchronise();
+	this.sync.synchronise();
 
 	if ( !this.ppuSecondAddressWrite )
 	{
@@ -394,12 +394,12 @@ ppu.prototype._writeTo2007 = function( offset, data ) {
 	the Y scroll during rendering. If the $2007 access happens to coincide with a standard VRAM address increment (either horizontal or vertical),
 	it will presumably not double-increment the relevant counter.
 	*/
-	this._sync.synchronise();
+	this.sync.synchronise();
 
 	var bufferedAddress = 0;
 	var newAddress = 0;
 
-	if ( !this.isRendering( this._sync.getCpuMTC(), false ) ) {
+	if ( !this.isRendering( this.sync.getCpuMTC(), false ) ) {
 		bufferedAddress = this.ppuReadAddress;
 
 		// increment PPU address as according to bit 2 of 0x2000
@@ -427,27 +427,27 @@ ppu.prototype.writeToRegister = function( offset, data ) {
 	switch ( offset )
 	{
 	case 0:
-		this._writeTo2000( offset, data );
+		this.writeTo2000( offset, data );
 		break;
 	case 0x01:
-		this._writeTo2001( offset, data );
+		this.writeTo2001( offset, data );
 		break;
 	case 0x03: // sprite memory address, no need to synchronise
 		this.spriteaddress = data & 0xFF;
 		break;
 	case 0x04: // sprite memory data
-		this._sync.synchronise();
+		this.sync.synchronise();
 		TYPED_ARRAY_SET_INT32( this.spriteMemory, this.spriteaddress & 0xFF, data );
 		this.spriteaddress = ( this.spriteaddress + 1 ) & 0xFF;
 		break;
 	case 0x05: // PPU scrolling
-		this._writeTo2005( offset, data );
+		this.writeTo2005( offset, data );
 		break;
 	case 0x06: // PPU memory address
-		this._writeTo2006( offset, data );
+		this.writeTo2006( offset, data );
 		break;
 	case 0x07: // PPU memory data
-		this._writeTo2007( offset, data );
+		this.writeTo2007( offset, data );
 		break;
 	}
 };
@@ -460,7 +460,7 @@ ppu.prototype.writeToSpriteDMARegister = function( data ) {
 
 
 ppu.prototype._readFromRegister2002 = function() {
-	var cpuMtc = this._sync.getCpuMTC();
+	var cpuMtc = this.sync.getCpuMTC();
 	var vblankSetTime = COLOUR_ENCODING_FRAME_MTC;
 	var ticksTillSet = vblankSetTime - cpuMtc;
 	var suppress = false;
@@ -481,15 +481,15 @@ ppu.prototype._readFromRegister2002 = function() {
 	// If we are performing a BIT on 2002, then we can optimise by not needing
 	// to synchronise (as it is only looking at the vblank flag, and we always know
 	// when that is due to happen)
-	//if ( !this._bitOperationOn2002 ) {
+	//if ( !this.bitOperationOn2002 ) {
 	//Nes.Trace.writeLine( 'ppu', '2002 read sync - pre: ' + cpuMtc );
-		this._sync.synchronise();
+		this.sync.synchronise();
 	//Nes.Trace.writeLine( 'ppu', '2002 read sync - post ' + cpuMtc );
 	// } else {
 		// if ( ticksTillSet < MASTER_CYCLES_PER_PPU * 5 ) { // if it's about to clear, synchronise
-			// this._sync.synchronise();
+			// this.sync.synchronise();
 		// }
-		// this._bitOperationOn2002 = false;
+		// this.bitOperationOn2002 = false;
 	// }
 
 	var ret = this.status;
@@ -511,7 +511,7 @@ ppu.prototype._readFromRegister2007 = function() {
 	var bufferedaddress = this.ppuReadAddress;
 	var newAddress = 0;
 
-	if ( !this.isRendering( this._sync.getCpuMTC(), true ) )
+	if ( !this.isRendering( this.sync.getCpuMTC(), true ) )
 	{
 		newAddress = ( this.ppuReadAddress + ( ( this.control1 & 0x4 ) > 0 /*ppuControl1.verticalWrite*/ ? 32 : 1) ) & 0xFFFF;
 		this.updatePPUReadAddress( newAddress, true );
@@ -542,7 +542,7 @@ ppu.prototype.readFromRegister = function( offset ) {
 	switch ( offset ) // offset is 0x2000 -> 0x2008
 	{
 	case 0x2:
-		ret = this._readFromRegister2002();
+		ret = this.readFromRegister2002();
 	break;
 
 	case 0x4: // sprite memory data
@@ -550,7 +550,7 @@ ppu.prototype.readFromRegister = function( offset ) {
 	break;
 
 	case 0x7: // PPU memory data
-		ret = this._readFromRegister2007();
+		ret = this.readFromRegister2007();
 	break;
 
 	//case 0x2005:
@@ -620,7 +620,7 @@ ppu.prototype.read8 = function( offset, renderingSprites, readType ) {
 		} else { // IS_INT_BETWEEN( offset, 0x2000, 0x3F00 )
 			// name tables
 			pageid = ( offset & 0xC00 ) >> 10;
-			if ( this._useMapperNameTableRead ) {
+			if ( this.useMapperNameTableRead ) {
 				return this.mainboard.cart.memoryMapper.nameTableRead( this.nameTables, pageid, offset & 0x3FF ) | 0;
 			} else {
 				pagepos = TYPED_ARRAY_GET_INT32( this.nameTablesMap, pageid );
@@ -634,8 +634,8 @@ ppu.prototype.read8 = function( offset, renderingSprites, readType ) {
 ppu.prototype.synchronise = function( startTicks, endTicks ) {
 
 	if ( this.isRenderingEnabled() ) {
-		this._ppuRenderSprites.renderTo( startTicks, endTicks );
-		this.ppuReadAddress = this._ppuRenderBg.renderTo( startTicks, endTicks, this.ppuReadAddress, this.ppuLatchAddress );
+		this.ppuRenderSprites.renderTo( startTicks, endTicks );
+		this.ppuReadAddress = this.ppuRenderBg.renderTo( startTicks, endTicks, this.ppuReadAddress, this.ppuLatchAddress );
 	}
 };
 
@@ -650,7 +650,7 @@ ppu.prototype.onEndFrame = function() {
 
 	if ( this.forceNmi || (!this.suppressNmi && ( this.control1 & 0x80 ) > 0 ) )
 	{
-		Nes.Trace.writeLine( Nes.trace_ppu, 'this.mainboard.cpu.nonMaskableInterrupt: ' + (  COLOUR_ENCODING_FRAME_MTC + MASTER_CYCLES_PER_PPU ) );
+		Nes.Trace.writeLine( Nes.tracePpu, 'this.mainboard.cpu.nonMaskableInterrupt: ' + (  COLOUR_ENCODING_FRAME_MTC + MASTER_CYCLES_PER_PPU ) );
 		this.mainboard.cpu.nonMaskableInterrupt( COLOUR_ENCODING_FRAME_MTC + MASTER_CYCLES_PER_PPU );
 	}
 
@@ -659,11 +659,11 @@ ppu.prototype.onEndFrame = function() {
 	this.forceNmi = false;
 	this.isOddFrame = !this.isOddFrame;
 	this.frameCounter++;
-	this._ppuRenderBg.onEndFrame();
-	this._ppuRenderSprites.onEndFrame();
+	this.ppuRenderBg.onEndFrame();
+	this.ppuRenderSprites.onEndFrame();
 
 	if ( Nes.Trace.enabled() ) {
-		Nes.Trace.writeLine( Nes.trace_ppu, '[' + this.frameCounter + '] Frame finished' );
+		Nes.Trace.writeLine( Nes.tracePpu, '[' + this.frameCounter + '] Frame finished' );
 	}
 };
 
@@ -677,7 +677,7 @@ ppu.prototype.getBackgroundPaletteIndex = function() {
 
 ppu.prototype.readNameTable = function( address, readType ) {
 	var pageid = (address >> 10) & 3;
-	if ( this._useMapperNameTableRead ) {
+	if ( this.useMapperNameTableRead ) {
 		return this.mainboard.cart.memoryMapper.nameTableRead( this.nameTables, pageid, address & 0x3FF, readType ) | 0;
 	} else {
 		var pagepos = TYPED_ARRAY_GET_INT32( this.nameTablesMap, pageid );
@@ -720,7 +720,7 @@ ppu.prototype.saveState = function() {
 
 	data.lastTransferredValue = this.lastTransferredValue;
 	data.frameCounter = this.frameCounter;
-	data._invokeA12Latch = this._invokeA12Latch;
+	data._invokeA12Latch = this.invokeA12Latch;
 
 	data.doSpriteTransferAfterNextCpuInstruction = this.doSpriteTransferAfterNextCpuInstruction;
 	data.spriteTransferArgument = this.spriteTransferArgument;
@@ -736,8 +736,8 @@ ppu.prototype.saveState = function() {
 	}
 	data.nameTablesMap = Nes.uintArrayToString( this.nameTablesMap );
 
-	this._ppuRenderBg.saveState( data );
-	this._ppuRenderSprites.saveState( data );
+	this.ppuRenderBg.saveState( data );
+	this.ppuRenderSprites.saveState( data );
 	return data;
 };
 
@@ -767,7 +767,7 @@ ppu.prototype.loadState = function( state ) {
 
 	this.doSpriteTransferAfterNextCpuInstruction = state.doSpriteTransferAfterNextCpuInstruction;
 	this.spriteTransferArgument = state.spriteTransferArgument;
-	this._invokeA12Latch = state._invokeA12Latch;
+	this.invokeA12Latch = state._invokeA12Latch;
 
 	this.spriteMemory = Nes.stringToUintArray( state.spriteMemory );
 	this.nameTables = [];
@@ -780,8 +780,8 @@ ppu.prototype.loadState = function( state ) {
 	}
 	this.nameTablesMap = Nes.stringToUintArray( state.nameTablesMap );
 
-	this._ppuRenderBg.loadState( state );
-	this._ppuRenderSprites.loadState( state );
+	this.ppuRenderBg.loadState( state );
+	this.ppuRenderSprites.loadState( state );
 };
 
 

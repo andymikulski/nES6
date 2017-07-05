@@ -7,7 +7,7 @@ import InputDeviceBus from './controls/InputDeviceBus';
 import Synchroniser from './Synchroniser';
 import CPU from './CPU/Cpu6502';
 
-import { enableType, trace_all, trace_cpuInstructions } from '../utils/Trace';
+import { enableType, traceAll, traceCpuInstructions } from '../utils/Trace';
 
 export default class Mainboard extends EventBus {
   constructor(renderSurface) {
@@ -25,7 +25,7 @@ export default class Mainboard extends EventBus {
     this.renderBuffer = new RenderBuffer(this, renderSurface);
 
     this.synchroniser = new Synchroniser(this);
-    this.synchroniser.connect('frameEnd', ::this._onFrameEnd);
+    this.synchroniser.connect('frameEnd', ::this.onFrameEnd);
     this.synchroniser.addObject('ppu', this.ppu);
     this.synchroniser.addObject('apu', this.apu);
 
@@ -45,7 +45,7 @@ export default class Mainboard extends EventBus {
   }
 
   setTraceOption(traceType, checked) {
-    if (traceType === trace_all || traceType === trace_cpuInstructions) {
+    if (traceType === traceAll || traceType === traceCpuInstructions) {
       this.cpu.enableTrace(checked); // cpu instructions require different code path, needs to be invoked seperately
     }
     enableType(traceType, checked);

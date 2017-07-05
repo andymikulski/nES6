@@ -1,3 +1,7 @@
+/* eslint import/no-mutable-exports: 0*/
+
+import root from 'window-or-global';
+
 /**
  * nES6 plugin to bind keyboard events to joypads. Defaults to a 'sensible' key
  * mapping, but also allows for overriding any/all of the map.
@@ -66,7 +70,7 @@ const checkMapCompleteness = (map) => {
 
   joypadButtons.forEach((button) => {
     if (values.indexOf(button) === -1) {
-      console && console.warn(`"${button}" button missing on given keymap.`);
+      throw new Error(`"${button}" button missing on given keyboard keymap.`);
     }
   });
 };
@@ -86,7 +90,7 @@ export default function (options = {}) {
   }
 
   return (nesInstance) => {
-    window.addEventListener('keydown', (event) => {
+    root.addEventListener('keydown', (event) => {
       if (keyMap[event.keyCode]) {
         event.preventDefault();
         const playerNum = event.shiftKey ? 1 : 0;
@@ -107,7 +111,7 @@ export default function (options = {}) {
       }
     }, false);
 
-    window.addEventListener('keyup', (event) => {
+    root.addEventListener('keyup', (event) => {
       if (keyMap[event.keyCode]) {
         event.preventDefault();
         const playerNum = event.shiftKey ? 1 : 0;

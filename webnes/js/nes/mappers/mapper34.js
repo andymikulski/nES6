@@ -13,7 +13,7 @@ mapper34.prototype = Object.create( Nes.basemapper.prototype );
 mapper34.prototype.reset = function() {
 
 	var isImpossibleMission2 = this.mainboard.cart.getHash() === "68315AFB344108CB0D43E119BA0353D5A44BD489";
-	this._isNinaBoard = isImpossibleMission2;
+	this.isNinaBoard = isImpossibleMission2;
 	this.switch32kPrgBank( 0 );
 	if ( this.get8kChrBankCount() === 0 )
 	{
@@ -28,7 +28,7 @@ mapper34.prototype.reset = function() {
 
 
 mapper34.prototype.write8SRam = function( offset, data ) {
-	if ( this._isNinaBoard ) {
+	if ( this.isNinaBoard ) {
 		this.mainboard.synchroniser.synchronise();
 		if ( offset === 0x7FFE ) {
 			this.switch4kChrBank( data & 0xF, true );
@@ -45,7 +45,7 @@ mapper34.prototype.write8SRam = function( offset, data ) {
 };
 
 mapper34.prototype.write8PrgRom = function( offset, data ) {
-	if ( !this._isNinaBoard ) {
+	if ( !this.isNinaBoard ) {
 		this.mainboard.synchroniser.synchronise();
 		this.switch32kPrgBank( data & 0xFF );
 	} else {

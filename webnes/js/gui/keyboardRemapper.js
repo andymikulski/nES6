@@ -21,15 +21,15 @@ this.Gui = this.Gui || {};
 	var KeyboardRemapper = function( app ) {
 
 		var that = this;
-		this._app = app;
-		this._keysAssigned = [];
-		this._waitingPress = false;
-		this._waitingPlayerId = 0;
-		this._waitingPressKey = '';
-		this._contentsDiv = $( "#keyboardRemapperDialog_contents" );
-		this._existingKeysContents = $( "#keyboardRemapperSetKeyDialog_existingKeysContents" );
+		this.app = app;
+		this.keysAssigned = [];
+		this.waitingPress = false;
+		this.waitingPlayerId = 0;
+		this.waitingPressKey = '';
+		this.contentsDiv = $( "#keyboardRemapperDialog_contents" );
+		this.existingKeysContents = $( "#keyboardRemapperSetKeyDialog_existingKeysContents" );
 
-		this._dialog = $( "#keyboardRemapperDialog" ).dialog({
+		this.dialog = $( "#keyboardRemapperDialog" ).dialog({
 			'autoOpen': false,
 			'title': 'Control mapping',
 			'height': 450,
@@ -45,7 +45,7 @@ this.Gui = this.Gui || {};
 			}
 		});
 
-		this._setKeyDialog = $( "#keyboardRemapperSetKeyDialog" ).dialog({
+		this.setKeyDialog = $( "#keyboardRemapperSetKeyDialog" ).dialog({
 			'dialogClass': "no-close",
 			'draggable': false,
 			'autoOpen': false,
@@ -68,7 +68,7 @@ this.Gui = this.Gui || {};
 			}
 		});
 
-		this._setKeyDialogContents = $( "#keyboardRemapperSetKeyDialog_contents" );
+		this.setKeyDialogContents = $( "#keyboardRemapperSetKeyDialog_contents" );
 
 		$('.keyboardMap')['maphilight']();
 
@@ -88,12 +88,12 @@ this.Gui = this.Gui || {};
 
 	KeyboardRemapper.prototype._onDocumentKeypress = function( event, pressed ) {
 
-		if ( this._waitingPress ) {
+		if ( this.waitingPress ) {
 			if ( pressed ) {
 				var kc = Number( event.keyCode );
-				if ( this._keysAssigned.indexOf( kc ) < 0 ) {
-					this._keysAssigned.push( kc );
-					this._setKeyDialogContents[0].innerHTML = '<p>New keys: ' + this._keyArrayToHtml( this._keysAssigned ) + '</p>';
+				if ( this.keysAssigned.indexOf( kc ) < 0 ) {
+					this.keysAssigned.push( kc );
+					this.setKeyDialogContents[0].innerHTML = '<p>New keys: ' + this.keyArrayToHtml( this.keysAssigned ) + '</p>';
 				}
 			}
 		}
@@ -108,37 +108,37 @@ this.Gui = this.Gui || {};
 	KeyboardRemapper.prototype.show = function() {
 
 		_open = this;
-		this._app.pause( true );
-		this._dialog.dialog( "open" );
+		this.app.pause( true );
+		this.dialog.dialog( "open" );
 	};
 
 
 	KeyboardRemapper.prototype._onClose = function() {
 
-		this._app.pause( false );
+		this.app.pause( false );
 	};
 
 
 	KeyboardRemapper.prototype._onSetKeyClick = function( playerId, keyName ) {
 
 		var id = JOYPAD_NAME_TO_ID( keyName );
-		this._waitingPressKey = id;
-		this._waitingPress = true;
-		this._waitingPlayerId = playerId;
-		this._keysAssigned.length = 0;
-		this._setKeyDialogContents[0].innerHTML = '<p>New keys:</p>';
-		var existingKeys = this._app._input.getKeyBindings( playerId, id );
+		this.waitingPressKey = id;
+		this.waitingPress = true;
+		this.waitingPlayerId = playerId;
+		this.keysAssigned.length = 0;
+		this.setKeyDialogContents[0].innerHTML = '<p>New keys:</p>';
+		var existingKeys = this.app._input.getKeyBindings( playerId, id );
 
-		this._existingKeysContents[0].innerHTML = '<p>Current keys: ' + this._keyArrayToHtml( existingKeys ) + '</p>';
-		this._setKeyDialog.dialog('option', 'title', 'Player ' + ( playerId + 1 ) + ': Press keys to assign to ' + keyName );
-		this._setKeyDialog.dialog( "open" );
+		this.existingKeysContents[0].innerHTML = '<p>Current keys: ' + this.keyArrayToHtml( existingKeys ) + '</p>';
+		this.setKeyDialog.dialog('option', 'title', 'Player ' + ( playerId + 1 ) + ': Press keys to assign to ' + keyName );
+		this.setKeyDialog.dialog( "open" );
 	};
 
 
 	KeyboardRemapper.prototype._onKeySetApplyClick = function() {
 
-		this._app._input.saveKeyBindings( this._waitingPlayerId, this._waitingPressKey, this._keysAssigned );
-		this._setKeyDialog.dialog( "close" );
+		this.app._input.saveKeyBindings( this.waitingPlayerId, this.waitingPressKey, this.keysAssigned );
+		this.setKeyDialog.dialog( "close" );
 	};
 
 

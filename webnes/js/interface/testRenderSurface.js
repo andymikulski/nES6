@@ -8,20 +8,20 @@ this.Test = this.Test || {};
 
 	var TestRenderSurface = function( canvasParent ) {
 
-		this._buffer = new Uint32Array( SCREEN_WIDTH * SCREEN_HEIGHT );
+		this.buffer = new Uint32Array( SCREEN_WIDTH * SCREEN_HEIGHT );
 	};
 
 
 	TestRenderSurface.prototype.writeToBuffer = function( bufferIndex, insertIndex, colour ) {
 
-		this._buffer[ insertIndex ] = 0xFF000000 | colour;
+		this.buffer[ insertIndex ] = 0xFF000000 | colour;
 	};
 
 
 	TestRenderSurface.prototype.clearBuffers = function( backgroundColour ) {
 
-		for ( var i=0; i<this._buffer.length; ++i ) {
-			this._buffer[i] = 0xFF000000 | backgroundColour;
+		for ( var i=0; i<this.buffer.length; ++i ) {
+			this.buffer[i] = 0xFF000000 | backgroundColour;
 		}
 	};
 
@@ -34,7 +34,7 @@ this.Test = this.Test || {};
 	TestRenderSurface.prototype.getRenderBufferHash = function() {
 
 		var rusha = new Rusha();
-		return rusha.digestFromArrayBuffer( this._buffer ).toUpperCase();
+		return rusha.digestFromArrayBuffer( this.buffer ).toUpperCase();
 	};
 
 

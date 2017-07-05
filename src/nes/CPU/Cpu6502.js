@@ -1,8 +1,8 @@
 // CPU 6502
 import {
 	writeLine,
-	trace_cpu,
-	trace_cpuInstructions
+	traceCpu,
+	traceCpuInstructions
 } from '../../utils/Trace';
 
 import fastInstructions from './fastInstructions';
@@ -29,16 +29,16 @@ export default class Cpu6502 {
 		this.executeCallback = null;
 		this.cmosVersion = false;
 		this.isRunning = true;
-		this._traceEnabled = false;
-		this._previousTraceProgramCounters = new Uint16Array(maximumTracesToStoreForLoopDetection); // used to detect loops in cpu traces
-		this._previousTraceProgramCountersIndex = 0;
-		this._inTraceLoop = false;
-		this._traceLoopCount = 0;
+		this.traceEnabled = false;
+		this.previousTraceProgramCounters = new Uint16Array(maximumTracesToStoreForLoopDetection); // used to detect loops in cpu traces
+		this.previousTraceProgramCountersIndex = 0;
+		this.inTraceLoop = false;
+		this.traceLoopCount = 0;
 
 		//var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
-		this._useSwitchStatement = false; // isFirefox;
-		this._instructionSet = fastInstructions; // Default to 'fast' versions
+		this.useSwitchStatement = false; // isFirefox;
+		this.instructionSet = fastInstructions; // Default to 'fast' versions
 		this.resetVariables();
 	}
 
@@ -51,11 +51,11 @@ export default class Cpu6502 {
 
 	enableTrace(enabled) {
 
-		this._traceEnabled = enabled === undefined ? true : enabled;
-		if (this._traceEnabled) {
-			this._instructionSet = traceInstructions; // use slow instructions
+		this.traceEnabled = enabled === undefined ? true : enabled;
+		if (this.traceEnabled) {
+			this.instructionSet = traceInstructions; // use slow instructions
 		} else {
-			this._instructionSet = fastInstructions; // use fast instructions
+			this.instructionSet = fastInstructions; // use fast instructions
 		}
 	}
 
@@ -70,14 +70,14 @@ export default class Cpu6502 {
 		this.irqLineLow = 0;
 		this.triggerNmiAfterNextInstruction = false;
 
-		this._flagCarry = false;
-		this._flagZero = false;
-		this._flagInterrupt = false;
-		this._flagDecimal = false;
-		this._flagBreak = true;
-		this._flagUnused = true;
-		this._flagOverflow = false;
-		this._flagSign = false;
+		this.flagCarry = false;
+		this.flagZero = false;
+		this.flagInterrupt = false;
+		this.flagDecimal = false;
+		this.flagBreak = true;
+		this.flagUnused = true;
+		this.flagOverflow = false;
+		this.flagSign = false;
 
 		this.regS = 0;
 		this.regX = 0;
@@ -102,68 +102,68 @@ export default class Cpu6502 {
 
 
 	getZero() {
-		return this._flagZero;
+		return this.flagZero;
 	}
 
 	setZero(zero) {
-		this._flagZero = zero;
+		this.flagZero = zero;
 	}
 
 	getOverflow() {
-		return this._flagOverflow;
+		return this.flagOverflow;
 	}
 
 	setOverflow(f) {
-		this._flagOverflow = f;
+		this.flagOverflow = f;
 	}
 
 	getInterrupt() {
-		return this._flagInterrupt;
+		return this.flagInterrupt;
 	}
 
 	setInterrupt(f) {
-		this._flagInterrupt = f;
+		this.flagInterrupt = f;
 	}
 
 	getBreak() {
-		return this._flagBreak;
+		return this.flagBreak;
 	}
 
 	setBreak(f) {
-		this._flagBreak = f;
+		this.flagBreak = f;
 	}
 
 	getDecimal() {
-		return this._flagDecimal;
+		return this.flagDecimal;
 	}
 
 	setDecimal(f) {
-		this._flagDecimal = f;
+		this.flagDecimal = f;
 	}
 
 	getUnused() {
-		return this._flagUnused;
+		return this.flagUnused;
 	}
 
 	setUnused(f) {
-		this._flagUnused = f;
+		this.flagUnused = f;
 	}
 
 	getCarry() {
-		return this._flagCarry;
+		return this.flagCarry;
 	}
 
 	setCarry(f) {
-		this._flagCarry = f;
+		this.flagCarry = f;
 	}
 
 
 	getSign() {
-		return this._flagSign;
+		return this.flagSign;
 	}
 
 	setSign(f) {
-		this._flagSign = f;
+		this.flagSign = f;
 	}
 
 
@@ -215,7 +215,7 @@ export default class Cpu6502 {
 			this.setInterrupt(true);
 
 			if (this.cmosVersion)
-				this._flagDecimal = false;
+				this.flagDecimal = false;
 
 			this.programCounter = this.mainboard.memory.read16NoZeroPageWrap(CPU_RESET_ADDRESS);
 			//this.programCounter = 0xC000;
@@ -235,34 +235,34 @@ export default class Cpu6502 {
 			this.pushStack(this.programCounter & 0xFF);
 			this.incrementStackReg();
 
-			this._flagBreak = false;
+			this.flagBreak = false;
 
 			this.pushStack(this.statusRegToByte());
 			this.incrementStackReg();
 
-			this._flagInterrupt = true;
+			this.flagInterrupt = true;
 			if (this.cmosVersion)
-				this._flagDecimal = false;
+				this.flagDecimal = false;
 			this.programCounter = this.mainboard.memory.read16NoZeroPageWrap(CPU_NMI_ADDRESS);
 			this.nmiPending = false;
 			return 7;
 		}
 
-		if (this.irqLineLow > 0 && !this.waitOneInstructionAfterCli && !this._flagInterrupt) {
+		if (this.irqLineLow > 0 && !this.waitOneInstructionAfterCli && !this.flagInterrupt) {
 			// IRQ interrupt
 			this.pushStack((this.programCounter >> 8) & 0xFF);
 			this.incrementStackReg();
 			this.pushStack(this.programCounter & 0xFF);
 			this.incrementStackReg();
 
-			this._flagBreak = false;
+			this.flagBreak = false;
 
 			this.pushStack(this.statusRegToByte());
 			this.incrementStackReg();
 
-			this._flagInterrupt = true;
+			this.flagInterrupt = true;
 			if (this.cmosVersion)
-				this._flagDecimal = false;
+				this.flagDecimal = false;
 			this.programCounter = this.mainboard.memory.read16NoZeroPageWrap(CPU_IRQ_ADDRESS);
 			return 7;
 		}
@@ -271,7 +271,7 @@ export default class Cpu6502 {
 
 
 	nonMaskableInterrupt(ppuMasterTickCount) {
-		writeLine(trace_cpu, 'NMI triggered');
+		writeLine(traceCpu, 'NMI triggered');
 		this.nmiPending = true;
 		if (this.mainboard.synchroniser.isPpuTickOnLastCycleOfCpuInstruction(ppuMasterTickCount)) {
 			// CPU is *always* either ahead or equal to the PPU master tick count.
@@ -300,27 +300,27 @@ export default class Cpu6502 {
 
 	statusRegToByte() {
 		var b = 0;
-		b |= (this._flagCarry ? 0x1 : 0);
-		b |= (this._flagZero ? 0x2 : 0);
-		b |= (this._flagInterrupt ? 0x4 : 0);
-		b |= (this._flagDecimal ? 0x8 : 0);
-		b |= (this._flagBreak ? 0x10 : 0);
-		b |= (this._flagUnused ? 0x20 : 0);
-		b |= (this._flagOverflow ? 0x40 : 0);
-		b |= (this._flagSign ? 0x80 : 0);
+		b |= (this.flagCarry ? 0x1 : 0);
+		b |= (this.flagZero ? 0x2 : 0);
+		b |= (this.flagInterrupt ? 0x4 : 0);
+		b |= (this.flagDecimal ? 0x8 : 0);
+		b |= (this.flagBreak ? 0x10 : 0);
+		b |= (this.flagUnused ? 0x20 : 0);
+		b |= (this.flagOverflow ? 0x40 : 0);
+		b |= (this.flagSign ? 0x80 : 0);
 		return b;
 	}
 
 
 	statusRegFromByte(b) {
-		this._flagCarry = (b & 0x1) > 0;
-		this._flagZero = (b & 0x2) > 0;
-		this._flagInterrupt = (b & 0x4) > 0;
-		this._flagDecimal = (b & 0x8) > 0;
-		this._flagBreak = (b & 0x10) > 0;
-		this._flagUnused = (b & 0x20) > 0;
-		this._flagOverflow = (b & 0x40) > 0;
-		this._flagSign = (b & 0x80) > 0;
+		this.flagCarry = (b & 0x1) > 0;
+		this.flagZero = (b & 0x2) > 0;
+		this.flagInterrupt = (b & 0x4) > 0;
+		this.flagDecimal = (b & 0x8) > 0;
+		this.flagBreak = (b & 0x10) > 0;
+		this.flagUnused = (b & 0x20) > 0;
+		this.flagOverflow = (b & 0x40) > 0;
+		this.flagSign = (b & 0x80) > 0;
 	}
 
 
@@ -391,7 +391,7 @@ export default class Cpu6502 {
 			this.waitOneInstructionAfterCli = false;
 
 		var opcode = this.mainboard.memory.read8(this.programCounter);
-		var cyclesTaken = this._instructionSet[opcode](this, this.mainboard.memory);
+		var cyclesTaken = this.instructionSet[opcode](this, this.mainboard.memory);
 		this.subcycle = 0;
 		return cyclesTaken;
 	}
@@ -399,8 +399,8 @@ export default class Cpu6502 {
 
 	_hasProgramCounterBeenSeenBefore(pg) {
 
-		for (var i = 0; i < this._previousTraceProgramCounters.length; ++i) {
-			if (this._previousTraceProgramCounters[i] === pg) {
+		for (var i = 0; i < this.previousTraceProgramCounters.length; ++i) {
+			if (this.previousTraceProgramCounters[i] === pg) {
 				return i;
 			}
 		}
@@ -411,26 +411,26 @@ export default class Cpu6502 {
 	_doTrace() {
 		var instructionData = cpuTrace;
 		// check previous instructions for the same program counter
-		var prevIndex = this._hasProgramCounterBeenSeenBefore(instructionData.programCounter);
+		var prevIndex = this.hasProgramCounterBeenSeenBefore(instructionData.programCounter);
 		if (prevIndex >= 0) {
 			// if it's the same loop as the one that's already detected, don't report.
-			if (!this._inTraceLoop) {
-				this._inTraceLoop = true;
-				this._traceLoopCount = 0;
+			if (!this.inTraceLoop) {
+				this.inTraceLoop = true;
+				this.traceLoopCount = 0;
 			}
-			this._traceLoopCount++;
+			this.traceLoopCount++;
 		} else {
-			if (this._inTraceLoop) {
-				this._inTraceLoop = false;
-				writeLine(trace_cpuInstructions, "LOOP " + this._traceLoopCount + " TIMES");
-				this._traceLoopCount = 0;
+			if (this.inTraceLoop) {
+				this.inTraceLoop = false;
+				writeLine(traceCpuInstructions, "LOOP " + this.traceLoopCount + " TIMES");
+				this.traceLoopCount = 0;
 			}
 		}
 
-		if (!this._inTraceLoop) {
-			this._previousTraceProgramCounters[this._previousTraceProgramCountersIndex] = instructionData.programCounter;
-			this._previousTraceProgramCountersIndex = (this._previousTraceProgramCountersIndex + 1) & 0x1F;
-			writeLine(trace_cpuInstructions, formatCpuTraceString[instructionData.opcode](instructionData));
+		if (!this.inTraceLoop) {
+			this.previousTraceProgramCounters[this.previousTraceProgramCountersIndex] = instructionData.programCounter;
+			this.previousTraceProgramCountersIndex = (this.previousTraceProgramCountersIndex + 1) & 0x1F;
+			writeLine(traceCpuInstructions, formatCpuTraceString[instructionData.opcode](instructionData));
 			//$.extend( true, {}, instructionData );
 		}
 	}
@@ -447,14 +447,14 @@ export default class Cpu6502 {
 		data.irqLineLow = this.irqLineLow;
 		data.triggerNmiAfterNextInstruction = this.triggerNmiAfterNextInstruction;
 
-		data._flagCarry = this._flagCarry;
-		data._flagZero = this._flagZero;
-		data._flagInterrupt = this._flagInterrupt;
-		data._flagDecimal = this._flagDecimal;
-		data._flagBreak = this._flagBreak;
-		data._flagUnused = this._flagUnused;
-		data._flagOverflow = this._flagOverflow;
-		data._flagSign = this._flagSign;
+		data._flagCarry = this.flagCarry;
+		data._flagZero = this.flagZero;
+		data._flagInterrupt = this.flagInterrupt;
+		data._flagDecimal = this.flagDecimal;
+		data._flagBreak = this.flagBreak;
+		data._flagUnused = this.flagUnused;
+		data._flagOverflow = this.flagOverflow;
+		data._flagSign = this.flagSign;
 
 		data.regS = this.regS;
 		data.regX = this.regX;
@@ -475,14 +475,14 @@ export default class Cpu6502 {
 		this.irqLineLow = state.irqLineLow;
 		this.triggerNmiAfterNextInstruction = state.triggerNmiAfterNextInstruction;
 
-		this._flagCarry = state._flagCarry;
-		this._flagZero = state._flagZero;
-		this._flagInterrupt = state._flagInterrupt;
-		this._flagDecimal = state._flagDecimal;
-		this._flagBreak = state._flagBreak;
-		this._flagUnused = state._flagUnused;
-		this._flagOverflow = state._flagOverflow;
-		this._flagSign = state._flagSign;
+		this.flagCarry = state._flagCarry;
+		this.flagZero = state._flagZero;
+		this.flagInterrupt = state._flagInterrupt;
+		this.flagDecimal = state._flagDecimal;
+		this.flagBreak = state._flagBreak;
+		this.flagUnused = state._flagUnused;
+		this.flagOverflow = state._flagOverflow;
+		this.flagSign = state._flagSign;
 
 		this.regS = state.regS;
 		this.regX = state.regX;

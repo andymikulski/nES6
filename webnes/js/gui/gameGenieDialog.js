@@ -11,12 +11,12 @@ this.Gui = this.Gui || {};
 	var GameGenieDialog = function( app ) {
 
 		var that = this;
-		this._app = app;
-		this._contentsDiv = $( "#gameGenieDialog_contents" );
+		this.app = app;
+		this.contentsDiv = $( "#gameGenieDialog_contents" );
 
-		this._app.connect( 'cartLoaded', function( cart ) { that._onCartLoaded( cart ); } );
+		this.app.connect( 'cartLoaded', function( cart ) { that._onCartLoaded( cart ); } );
 
-		this._dialog = $( "#gameGenieDialog" ).dialog({
+		this.dialog = $( "#gameGenieDialog" ).dialog({
 			'autoOpen': false,
 			'title': 'Game Genie Codes',
 			'height': 400,
@@ -37,14 +37,14 @@ this.Gui = this.Gui || {};
 	GameGenieDialog.prototype.show = function() {
 
 		_open = this;
-		this._app.pause( true );
-		this._dialog.dialog( "open" );
+		this.app.pause( true );
+		this.dialog.dialog( "open" );
 	};
 
 
 	GameGenieDialog.prototype._onClose = function() {
 
-		this._app.pause( false );
+		this.app.pause( false );
 	};
 
 
@@ -66,7 +66,7 @@ this.Gui = this.Gui || {};
 			}
 		}
 
-		this._contentsDiv[0].innerHTML = html;
+		this.contentsDiv[0].innerHTML = html;
 	};
 
 

@@ -35,32 +35,32 @@ export default class nES6 extends EventBus {
 
     this.options = options || {};
 
-    this._cart = null;
-    this._romLoaded = false;
-    this._mainboard = null;
-    this._renderSurface = null;
-    this._fpsMeter = null;
-    this._spriteDisplay = null;
-    this._paletteDisplay = null;
-    this._logWindow = null;
-    this._encodingTypeToSet = '';
-    this._newRomWaiting = false;
-    this._newRomLoaded = {
+    this.cart = null;
+    this.romLoaded = false;
+    this.mainboard = null;
+    this.renderSurface = null;
+    this.fpsMeter = null;
+    this.spriteDisplay = null;
+    this.paletteDisplay = null;
+    this.logWindow = null;
+    this.encodingTypeToSet = '';
+    this.newRomWaiting = false;
+    this.newRomLoaded = {
       name: '',
       binaryString: null
     };
 
-    this._frameTimeTarget = 0;
-    this._lastFrameTime = 0;
-    this._gameSpeed = 100; // 100% normal speed
+    this.frameTimeTarget = 0;
+    this.lastFrameTime = 0;
+    this.gameSpeed = 100; // 100% normal speed
 
-    this._isPaused = 0;
-    this._pauseNextFrame = false;
-    this._pauseOnFrame = -1;
+    this.isPaused = 0;
+    this.pauseNextFrame = false;
+    this.pauseOnFrame = -1;
 
-    this.animate = ::this._animate;
+    this.animate = ::this.animate;
 
-    window.onerror = ::this._showError;
+    window.onerror = ::this.showError;
 
 
     // Apply plugins
@@ -80,12 +80,12 @@ export default class nES6 extends EventBus {
   }
 
   setColourEncodingType(encodingType) {
-    this._encodingTypeToSet = encodingType;
+    this.encodingTypeToSet = encodingType;
   }
 
   _loadRomCallback(name, binaryString) {
-    this._newRomWaiting = true;
-    this._newRomLoaded = {
+    this.newRomWaiting = true;
+    this.newRomLoaded = {
       name,
       binaryString: binaryString instanceof Uint8Array
         ? binaryString : new Uint8Array(binaryString),
@@ -94,20 +94,20 @@ export default class nES6 extends EventBus {
 
   start() {
     if (this.options.fps) {
-      this._fpsMeter = new Stats();
-      this._fpsMeter.showPanel( 1 );
-      document.body.appendChild( this._fpsMeter.dom );
+      this.fpsMeter = new Stats();
+      this.fpsMeter.showPanel( 1 );
+      document.body.appendChild( this.fpsMeter.dom );
     }
 
-    this._renderSurface = this.createRenderSurface();
+    this.renderSurface = this.createRenderSurface();
 
-    this._mainboard = new Mainboard(this._renderSurface);
-    this._mainboard.connect('reset', ::this._onReset);
+    this.mainboard = new Mainboard(this.renderSurface);
+    this.mainboard.connect('reset', ::this.onReset);
 
     // disable audio for headless rendering
     if (this.options.render === 'headless'
       || this.options.audio === false) {
-      this._mainboard.enableSound(false);
+      this.mainboard.enableSound(false);
     }
 
     this.animate();
@@ -115,8 +115,8 @@ export default class nES6 extends EventBus {
 
 
   pause(isPaused) {
-    const changed = isPaused !== this._isPaused;
-    this._isPaused = isPaused;
+    const changed = isPaused !== this.isPaused;
+    this.isPaused = isPaused;
 
     if (changed) {
       this.invoke('isPausedChange', isPaused);
@@ -125,78 +125,78 @@ export default class nES6 extends EventBus {
 
 
   isPaused() {
-    return this._isPaused;
+    return this.isPaused;
   }
 
 
   _onReset() {
-    this._calculateFrameTimeTarget();
+    this.calculateFrameTimeTarget();
   }
 
   _calculateFrameTimeTarget() {
-    if (this._gameSpeed) {
-      const base = (100000 / this._gameSpeed); // 100000 = 1000 * 100 ( 1000 milliseconds, multiplied by 100 as gameSpeed is a %)
-      this._frameTimeTarget = (base / COLOUR_ENCODING_REFRESHRATE);
+    if (this.gameSpeed) {
+      const base = (100000 / this.gameSpeed); // 100000 = 1000 * 100 ( 1000 milliseconds, multiplied by 100 as gameSpeed is a %)
+      this.frameTimeTarget = (base / COLOUR_ENCODING_REFRESHRATE);
     }
   }
 
 
   reset() {
-    this._mainboard.reset();
+    this.mainboard.reset();
   }
 
 
   playOneFrame() {
     this.pause(false);
-    this._pauseNextFrame = true;
+    this.pauseNextFrame = true;
   }
 
 
   playUntilFrame(frameNum) {
     this.pause(false);
-    this._pauseOnFrame = frameNum;
+    this.pauseOnFrame = frameNum;
   }
 
 
   enableSound(enable) {
-    this._mainboard.enableSound(enable);
+    this.mainboard.enableSound(enable);
   }
 
 
   soundEnabled() {
-    return this._mainboard.apu.soundEnabled();
+    return this.mainboard.apu.soundEnabled();
   }
 
 
   soundSupported() {
-    return this._mainboard.apu.soundSupported();
+    return this.mainboard.apu.soundSupported();
   }
 
 
   setVolume(val) {
-    this._mainboard.setVolume(val);
+    this.mainboard.setVolume(val);
   }
 
 
   setGameSpeed(gameSpeed) {
-    this._gameSpeed = gameSpeed;
-    this._calculateFrameTimeTarget();
+    this.gameSpeed = gameSpeed;
+    this.calculateFrameTimeTarget();
   }
 
 
   setTraceOption(traceType, checked) {
-    this._mainboard.setTraceOption(traceType, checked);
+    this.mainboard.setTraceOption(traceType, checked);
   }
 
 
   _readyToRender() {
-    if (this._gameSpeed <= 0) {
+    if (this.gameSpeed <= 0) {
       return true;
     }
     var now = performance ? performance.now() : Date.now(); // Date.now() in unsupported browsers
-    var diff = now - (this._lastFrameTime || 0);
-    if (diff >= this._frameTimeTarget) {
-      this._lastFrameTime = now;
+    var diff = now - (this.lastFrameTime || 0);
+    if (diff >= this.frameTimeTarget) {
+      this.lastFrameTime = now;
       return true;
     } else {
       return false;
@@ -207,7 +207,7 @@ export default class nES6 extends EventBus {
   startTrace() {
     this.invoke('traceRunning', true);
     // if ( traceType === 'cpuInstructions' ) {
-    this._mainboard.cpu.enableTrace(true);
+    this.mainboard.cpu.enableTrace(true);
     // }
     Trace.start();
   }
@@ -215,79 +215,79 @@ export default class nES6 extends EventBus {
 
   stopTrace() {
     Trace.stop();
-    this._mainboard.cpu.enableTrace(false);
+    this.mainboard.cpu.enableTrace(false);
     this.invoke('traceRunning', false);
   }
 
 
   screenshot() {
-    this._renderSurface.screenshotToFile();
+    this.renderSurface.screenshotToFile();
   }
 
   _animate() {
-    if ((this.options.forceTimeSync || this._gameSpeed !== 100) && !this._readyToRender()) {
+    if ((this.options.forceTimeSync || this.gameSpeed !== 100) && !this.readyToRender()) {
       requestAnimationFrame(this.animate);
       return;
     }
 
-    if (this._fpsMeter) {
-      this._fpsMeter.begin();
+    if (this.fpsMeter) {
+      this.fpsMeter.begin();
     }
 
-    if (this._newRomWaiting) {
-      this._doRomLoad(this._newRomLoaded);
-      this._newRomWaiting = false;
+    if (this.newRomWaiting) {
+      this.doRomLoad(this.newRomLoaded);
+      this.newRomWaiting = false;
     }
 
-    if (this._romLoaded) {
-      this._romLoaded = false;
-      this._mainboard.loadCartridge(this._cart);
-      this.invoke('cartLoaded', this._cart);
+    if (this.romLoaded) {
+      this.romLoaded = false;
+      this.mainboard.loadCartridge(this.cart);
+      this.invoke('cartLoaded', this.cart);
     }
 
-    if (this._isPaused) {
-      if (this._fpsMeter) {
-        this._fpsMeter.end();
+    if (this.isPaused) {
+      if (this.fpsMeter) {
+        this.fpsMeter.end();
       }
       setTimeout(this.animate, 300);
       return;
     }
 
-    var bgColour = this._mainboard.renderBuffer.pickColour(this._mainboard.ppu.getBackgroundPaletteIndex());
-    this._renderSurface.clearBuffers(bgColour);
-    this._mainboard.renderBuffer.clearBuffer();
+    var bgColour = this.mainboard.renderBuffer.pickColour(this.mainboard.ppu.getBackgroundPaletteIndex());
+    this.renderSurface.clearBuffers(bgColour);
+    this.mainboard.renderBuffer.clearBuffer();
 
-    this._mainboard.doFrame();
-    this._renderSurface.render(this._mainboard);
+    this.mainboard.doFrame();
+    this.renderSurface.render(this.mainboard);
 
-    if (this._fpsMeter) {
-      this._fpsMeter.end();
+    if (this.fpsMeter) {
+      this.fpsMeter.end();
     }
 
     requestAnimationFrame(this.animate);
   }
 
   exportState(fullSave){
-    return this._mainboard.saveState(fullSave);
+    return this.mainboard.saveState(fullSave);
   }
 
   importState(loadedData){
-    return this._mainboard.loadState(loadedData);
+    return this.mainboard.loadState(loadedData);
   }
 
   _doRomLoad({
     name,
     binaryString
   }) {
-    this._cart = new Cartridge(this._mainboard);
-    this._cart.loadRom({
+    this.cart = new Cartridge(this.mainboard);
+    this.cart.loadRom({
       name,
       binaryString,
       fileSize: binaryString.length / 1000 // in KB
     })
-    .catch(::this._showError)
+    .catch(::this.showError)
     .then(()=>{
-      this._romLoaded = true;
+      this.romLoaded = true;
     });
   }
 
@@ -312,7 +312,7 @@ export default class nES6 extends EventBus {
    * @return {void}
    */
   loadRomFromBinary(binaryString, name = 'Game') {
-    this._loadRomCallback(name, binaryString);
+    this.loadRomCallback(name, binaryString);
   }
 
   _showError(err) {
@@ -334,17 +334,17 @@ export default class nES6 extends EventBus {
   }
 
   enterGameGenieCode(code) {
-    processGenieCode(this._mainboard, code, true);
+    processGenieCode(this.mainboard, code, true);
   }
 
   loadShaderFromUrl(url) {
-    if (this._renderSurface.loadShaderFromUrl) {
-      this._renderSurface.loadShaderFromUrl(url);
+    if (this.renderSurface.loadShaderFromUrl) {
+      this.renderSurface.loadShaderFromUrl(url);
     }
   }
 
   pressControllerButton(playerNum, button) {
-    var joypad = this._mainboard.inputdevicebus.getJoypad(playerNum);
+    var joypad = this.mainboard.inputdevicebus.getJoypad(playerNum);
     const buttonIdPressed = JOYPAD_NAME_TO_ID(button);
 
     if (typeof buttonIdPressed !== 'undefined') {
@@ -353,7 +353,7 @@ export default class nES6 extends EventBus {
   }
 
   depressControllerButton(playerNum, button) {
-    var joypad = this._mainboard.inputdevicebus.getJoypad(playerNum);
+    var joypad = this.mainboard.inputdevicebus.getJoypad(playerNum);
     const buttonIdPressed = JOYPAD_NAME_TO_ID(button);
 
     if (typeof buttonIdPressed !== 'undefined') {
@@ -392,9 +392,9 @@ export default class nES6 extends EventBus {
   }
 
   setRenderer(type) {
-    this._renderSurface = this.createRenderSurface(type);
-    this._mainboard.renderBuffer._renderSurface = this._renderSurface;
+    this.renderSurface = this.createRenderSurface(type);
+    this.mainboard.renderBuffer._renderSurface = this.renderSurface;
     // this will come back to haunt me
-    this._mainboard.enableSound(type !== 'headless');
+    this.mainboard.enableSound(type !== 'headless');
   }
 }

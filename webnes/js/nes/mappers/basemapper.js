@@ -40,17 +40,17 @@ basemapper.prototype.construct = function( mainboard, mirroringMethod ) {
 	this.mainboard = mainboard;
 	this.mirroringMethod = mirroringMethod;
 	this.prgPagesMap = new Int32Array( 4 );
-	this._prgData = null;
-	this._prgPageCount = 0;
+	this.prgData = null;
+	this.prgPageCount = 0;
 
 	this.chrPages = [];
 	this.chrPagesMap = new Int32Array( 8 );
-	this._chrData = null;
-	this._chrPageCount = 0;
-	this._usingChrVram = false;
+	this.chrData = null;
+	this.chrPageCount = 0;
+	this.usingChrVram = false;
 
-	this._gameGenieActive = false;
-	this._gameGeniePokes = {};
+	this.gameGenieActive = false;
+	this.gameGeniePokes = {};
 
 	this.sram = new Int32Array( 0x2000 );
 	this.expansionRam = new Int32Array( 0x1FE0 );
@@ -76,15 +76,15 @@ basemapper.prototype.renderingEnabledChanged = function( enabled ) { };
 
 basemapper.prototype.setPrgData = function( array, prg8kPageCount ) {
 
-	this._prgData = array;
-	this._prgPageCount = prg8kPageCount;
+	this.prgData = array;
+	this.prgPageCount = prg8kPageCount;
 };
 
 
 basemapper.prototype.setChrData = function( array, chr1kPageCount ) {
 
-	this._chrData = array;
-	this._chrPageCount = chr1kPageCount;
+	this.chrData = array;
+	this.chrPageCount = chr1kPageCount;
 };
 
 
@@ -92,43 +92,43 @@ basemapper.prototype.setChrData = function( array, chr1kPageCount ) {
 
 
 basemapper.prototype.get1kChrBankCount = function() {
-	return this._chrPageCount;
+	return this.chrPageCount;
 };
 
 
 basemapper.prototype.get2kChrBankCount = function() {
-	return this._chrPageCount >> 1; // Math.floor( this.chrPages.length / 2 );
+	return this.chrPageCount >> 1; // Math.floor( this.chrPages.length / 2 );
 };
 
 
 basemapper.prototype.get4kChrBankCount = function() {
-	return this._chrPageCount >> 2; // Math.floor( this.chrPages.length / 4 );
+	return this.chrPageCount >> 2; // Math.floor( this.chrPages.length / 4 );
 };
 
 
 basemapper.prototype.get8kChrBankCount = function() {
-	return this._chrPageCount >> 3; // Math.floor( this.chrPages.length / 8 );
+	return this.chrPageCount >> 3; // Math.floor( this.chrPages.length / 8 );
 };
 
 
 basemapper.prototype.get8kPrgBankCount = function() {
-	return this._prgPageCount;
+	return this.prgPageCount;
 };
 
 
 basemapper.prototype.get16kPrgBankCount = function() {
-	return this._prgPageCount >> 1; // Math.floor( this.prgPages.length / 2 );
+	return this.prgPageCount >> 1; // Math.floor( this.prgPages.length / 2 );
 };
 
 
 basemapper.prototype.get32kPrgBankCount = function() {
-	return this._prgPageCount >> 2; // Math.floor( this.prgPages.length / 4 );
+	return this.prgPageCount >> 2; // Math.floor( this.prgPages.length / 4 );
 };
 
 
 basemapper.prototype.switch8kPrgBank = function( id, pos ) {
 	//Nes.Trace.writeLine( 'mapper', 'switch8kPrgBank:' + id );
-	this.setPrgPage( id % this._prgPageCount, pos );
+	this.setPrgPage( id % this.prgPageCount, pos );
 };
 
 
@@ -136,7 +136,7 @@ basemapper.prototype.switch16kPrgBank = function( id, low ) {
 	if ( this.get16kPrgBankCount() > 0 )
 	{
 		//Nes.Trace.writeLine( 'mapper', 'switch16kPrgBank:' + id );
-		var aid = ( id * 2 ) % this._prgPageCount;
+		var aid = ( id * 2 ) % this.prgPageCount;
 		for ( var i=0; i<2; ++i )
 			this.setPrgPage( aid + i, i + (low ? 0 : 2) );
 	}
@@ -147,7 +147,7 @@ basemapper.prototype.switch32kPrgBank = function( id ) {
 	if ( this.get32kPrgBankCount() > 0 )
 	{
 		//Nes.Trace.writeLine( 'mapper', 'switch32kPrgBank:' + id );
-		var aid = ( id * 4 ) % this._prgPageCount;
+		var aid = ( id * 4 ) % this.prgPageCount;
 		for ( var i=0; i<4; ++i )
 			this.setPrgPage( aid + i, i );
 	}
@@ -167,14 +167,14 @@ basemapper.prototype.setChrPage = function( id, pos ) {
 
 
 basemapper.prototype.switch1kChrBank = function( id, pos ) {
-	this.setChrPage( id % this._chrPageCount, pos );
+	this.setChrPage( id % this.chrPageCount, pos );
 };
 
 
 basemapper.prototype.switch2kChrBank = function( id, pos ) {
 	if ( this.get2kChrBankCount() > 0 )
 	{
-		var aid = ( id * 2 ) % this._chrPageCount;
+		var aid = ( id * 2 ) % this.chrPageCount;
 		for ( var i=0; i<2; ++i )
 			this.setChrPage( aid + i, ( pos * 2 ) + i );
 	}
@@ -184,7 +184,7 @@ basemapper.prototype.switch2kChrBank = function( id, pos ) {
 basemapper.prototype.switch4kChrBank = function( id, low ) {
 	if ( this.get4kChrBankCount() > 0 )
 	{
-		var aid = ( id * 4 ) % this._chrPageCount;
+		var aid = ( id * 4 ) % this.chrPageCount;
 		for ( var i=0; i<4; ++i )
 			this.setChrPage( aid + i, i + (low ? 0 : 4) );
 	}
@@ -194,7 +194,7 @@ basemapper.prototype.switch4kChrBank = function( id, low ) {
 basemapper.prototype.switch8kChrBank = function( id ) {
 	if ( this.get8kChrBankCount() > 0 )
 	{
-		var aid = ( id * 8 ) % this._chrPageCount;
+		var aid = ( id * 8 ) % this.chrPageCount;
 		for ( var i=0; i<8; ++i )
 			this.setChrPage( aid + i, i );
 	}
@@ -204,10 +204,10 @@ basemapper.prototype.switch8kChrBank = function( id ) {
 basemapper.prototype.useVRAM = function( numBanks ) {
 
 	numBanks = numBanks || 8;
-	this._usingChrVram = true;
-	this._chrData = new Int32Array( 0x400 * numBanks );
+	this.usingChrVram = true;
+	this.chrData = new Int32Array( 0x400 * numBanks );
 
-	this._chrPageCount = numBanks;
+	this.chrPageCount = numBanks;
 	for ( var i=0; i< Math.min( 8, numBanks ); ++i ) {
 		this.setChrPage( i, i );
 	}
@@ -224,11 +224,11 @@ basemapper.prototype.read8PrgRom = function( offset ) {
 	var pageid = ( offset & 0x6000 ) >> 13; // Math.floor( ( prgOffset ) / 0x2000 );
 	var pagepos = TYPED_ARRAY_GET_INT32( this.prgPagesMap, pageid );
 	var aid = offset & 0x1FFF;
-	var readValue = TYPED_ARRAY_GET_INT32( this._prgData, pagepos + aid );
+	var readValue = TYPED_ARRAY_GET_INT32( this.prgData, pagepos + aid );
 
-	if ( this._gameGenieActive ) {
-		if ( this._gameGeniePokes.hasOwnProperty( offset ) ) {
-			return this._checkGameGenieCode( readValue, offset );
+	if ( this.gameGenieActive ) {
+		if ( this.gameGeniePokes.hasOwnProperty( offset ) ) {
+			return this.checkGameGenieCode( readValue, offset );
 		}
 	}
 	return readValue;
@@ -237,7 +237,7 @@ basemapper.prototype.read8PrgRom = function( offset ) {
 
 basemapper.prototype._checkGameGenieCode = function( readValue, offset ) {
 	// Game genie override
-	var gg = this._gameGeniePokes[ offset ];
+	var gg = this.gameGeniePokes[ offset ];
 	if ( gg.compare === -1 || gg.compare === readValue ) {
 		return gg.value;
 	}
@@ -247,11 +247,11 @@ basemapper.prototype._checkGameGenieCode = function( readValue, offset ) {
 
 // VRAM 0x0000 -> 0x2000
 basemapper.prototype.write8ChrRom = function( offset, data ) {
-	if ( this._usingChrVram ) {
+	if ( this.usingChrVram ) {
 		var pageid = ( offset & 0x1C00 ) >> 10; // Math.floor( offset / 0x400 );
 		var pagepos = TYPED_ARRAY_GET_INT32( this.chrPagesMap, pageid );
 		var writeOffset = pagepos + ( offset & 0x3FF );
-		TYPED_ARRAY_SET_INT32( this._chrData, writeOffset, data );
+		TYPED_ARRAY_SET_INT32( this.chrData, writeOffset, data );
 	}
 };
 
@@ -260,7 +260,7 @@ basemapper.prototype.read8ChrRom = function( offset, renderingSprites, readType 
 	var pageid = ( offset & 0x1C00 ) >> 10; // Math.floor( offset / 0x400 );
 	var pagepos = TYPED_ARRAY_GET_INT32( this.chrPagesMap, pageid );
 	var readOffset = pagepos + ( offset & 0x3FF );
-	return TYPED_ARRAY_GET_INT32( this._chrData, readOffset ) | 0;
+	return TYPED_ARRAY_GET_INT32( this.chrData, readOffset ) | 0;
 };
 
 
@@ -291,25 +291,25 @@ basemapper.prototype.reset = function() {
 // Called from gameGenie.js - modified the PRG at given value
 basemapper.prototype.gameGeniePoke = function( codeName, address, value, compareValue ) {
 
-	this._gameGenieActive = true;
-	this._gameGeniePokes[ address ] = { name: codeName, value: value, compare: compareValue };
+	this.gameGenieActive = true;
+	this.gameGeniePokes[ address ] = { name: codeName, value: value, compare: compareValue };
 };
 
 basemapper.prototype.removeGameGeniePoke = function( codeName ) {
 
-	var keyArray = Object.keys( this._gameGeniePokes );
+	var keyArray = Object.keys( this.gameGeniePokes );
 	for ( var i=0; i<keyArray.length; ++i ) {
 		var prop = keyArray[i];
-		if ( this._gameGeniePokes.hasOwnProperty( prop ) ) {
-			var gg = this._gameGeniePokes[ prop ];
+		if ( this.gameGeniePokes.hasOwnProperty( prop ) ) {
+			var gg = this.gameGeniePokes[ prop ];
 			if ( gg && gg.name === codeName ) {
-				delete this._gameGeniePokes[ prop ];
+				delete this.gameGeniePokes[ prop ];
 			}
 		}
 	}
 
-	var codesActive = Object.keys( this._gameGeniePokes ).length;
-	this._gameGenieActive = codesActive > 0;
+	var codesActive = Object.keys( this.gameGeniePokes ).length;
+	this.gameGenieActive = codesActive > 0;
 };
 
 
@@ -318,15 +318,15 @@ basemapper.prototype.saveState = function() {
 	var data = {};
 
 	data.mirroringMethod = this.mirroringMethod;
-	data._usingChrVram = this._usingChrVram;
+	data._usingChrVram = this.usingChrVram;
 	//data.prgPagesMap = $.extend( {}, this.prgPagesMap );
 	//data.chrPagesMap = $.extend( {}, this.chrPagesMap ); // TODO: restore
 	data.sram = Nes.uintArrayToString( this.sram );
 	data.expansionRam = Nes.uintArrayToString( this.expansionRam );
-	data._gameGeniePokes = $.extend( {}, this._gameGeniePokes );
-	if ( this._usingChrVram ) {
+	data._gameGeniePokes = $.extend( {}, this.gameGeniePokes );
+	if ( this.usingChrVram ) {
 		//data.chrPages = this.chrPages.map( function( page ) { return Nes.uintArrayToString( page ); } );
-		data._chrData = Nes.uintArrayToString( this._chrData );
+		data._chrData = Nes.uintArrayToString( this.chrData );
 	}
 	if ( this.mapperSaveState ) {
 		this.mapperSaveState( data );
@@ -338,14 +338,14 @@ basemapper.prototype.saveState = function() {
 basemapper.prototype.loadState = function( state ) {
 
 	this.mirroringMethod = state.mirroringMethod;
-	this._usingChrVram = state._usingChrVram;
+	this.usingChrVram = state._usingChrVram;
 	//this.prgPagesMap = $.extend( {}, state.prgPagesMap );
 	// this.chrPagesMap = $.extend( {}, state.chrPagesMap ); // TODO: restore
 	this.sram = Nes.stringToUintArray( state.sram );
 	this.expansionRam = Nes.stringToUintArray( state.expansionRam );
-	this._gameGeniePokes = $.extend( {}, state._gameGeniePokes );
-	if ( this._usingChrVram ) {
-		this._chrData = Nes.stringToUintArray( state._chrData );
+	this.gameGeniePokes = $.extend( {}, state._gameGeniePokes );
+	if ( this.usingChrVram ) {
+		this.chrData = Nes.stringToUintArray( state._chrData );
 	}
 	if ( this.mapperLoadState ) {
 		this.mapperLoadState( state );

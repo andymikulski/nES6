@@ -15,9 +15,9 @@ export default class Cartridge {
   constructor(mainboard) {
     this.mainboard = mainboard;
     this.memoryMapper = null;
-    this._sha1 = '';
-    this._name = '';
-    this._colourEncodingType = g_DefaultColourEncoding;
+    this.sha1 = '';
+    this.name = '';
+    this.colourEncodingType = g_DefaultColourEncoding;
   }
 
   getHighestFrequencyElement(map) {
@@ -43,15 +43,15 @@ export default class Cartridge {
       value = 'NTSC';
     }
 
-    this._colourEncodingType = value;
+    this.colourEncodingType = value;
   }
 
   getName() {
-    return this._name;
+    return this.name;
   }
 
   getHash() {
-    return this._sha1;
+    return this.sha1;
   }
 
 
@@ -68,7 +68,7 @@ export default class Cartridge {
 		binaryString,
 		fileSize,
 	}) {
-    this._name = name;
+    this.name = name;
     let stringIndex = 0;
     const correctHeader = [78, 69, 83, 26];
 
@@ -103,7 +103,7 @@ export default class Cartridge {
     if (hasTrainer) { stringIndex += 512; }
 
 		// calculate SHA1 on PRG and CHR data, look it up in the db, then load it
-    this._sha1 = sha1(binaryString, stringIndex);
+    this.sha1 = sha1(binaryString, stringIndex);
 
 		// mapper is loaded async so we need to (a)wait for it
     this.memoryMapper = await mapperFactory(mapperId, this.mainboard, mirroringMethod);
@@ -125,10 +125,10 @@ export default class Cartridge {
     stringIndex += chrSize;
 
 		// determine NTSC or PAL
-    this._determineColourEncodingType(name);
-    setColourEncodingType(this._colourEncodingType);
+    this.determineColourEncodingType(name);
+    setColourEncodingType(this.colourEncodingType);
     const prgKb = prg8kChunkCount * 8;
-    console.log(`Cartridge '${name}' loaded. \n\nSHA1: \t\t${this._sha1} \nFile Size: \t${fileSize} KB \nMapper:\t\t${mapperId} \nMirroring:\t${mirroringMethodToString(mirroringMethod)} \nPRG:\t\t${prgKb}kb \nCHR:\t\t${chr1kChunkCount}kb \nEncoding:\t${this._colourEncodingType}`);
+    console.log(`Cartridge '${name}' loaded. \n\nSHA1: \t\t${this.sha1} \nFile Size: \t${fileSize} KB \nMapper:\t\t${mapperId} \nMirroring:\t${mirroringMethodToString(mirroringMethod)} \nPRG:\t\t${prgKb}kb \nCHR:\t\t${chr1kChunkCount}kb \nEncoding:\t${this.colourEncodingType}`);
   }
 
   reset() {

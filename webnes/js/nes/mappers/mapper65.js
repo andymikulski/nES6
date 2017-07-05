@@ -12,10 +12,10 @@ mapper65.prototype = Object.create( Nes.basemapper.prototype );
 
 mapper65.prototype.reset = function() {
 
-	this._irqEnabled = false;
-	this._irqCounter = 0;
-	this._irqReload = 0;
-	this._nextIrqRaise = -1;
+	this.irqEnabled = false;
+	this.irqCounter = 0;
+	this.irqReload = 0;
+	this.nextIrqRaise = -1;
 
 	this.switch8kPrgBank( 0, 0 );
 	this.switch8kPrgBank( 1, 1 );
@@ -27,7 +27,7 @@ mapper65.prototype.reset = function() {
 
 	// TODO: Need to remove this event on mapper unload
 	var that = this;
-	this._irqEventId = this.mainboard.synchroniser.addEvent( 'mapper65 irq', -1, function() {} );
+	this.irqEventId = this.mainboard.synchroniser.addEvent( 'mapper65 irq', -1, function() {} );
 };
 
 mapper65.prototype.write8PrgRom = function( offset, data ) {
@@ -49,26 +49,26 @@ mapper65.prototype.write8PrgRom = function( offset, data ) {
 				}
 				break;
 			case 0x9003: //IRQ Enable
-				this._irqEnabled = ( data & 0x80 ) > 0;
+				this.irqEnabled = ( data & 0x80 ) > 0;
 				this.mainboard.cpu.holdIrqLineLow( false );
 				break;
 			case 0x9004: //IRQ Reload
-				this._irqCounter = this._irqReload * COLOUR_ENCODING_MTC_PER_CPU;
+				this.irqCounter = this.irqReload * COLOUR_ENCODING_MTC_PER_CPU;
 				this.mainboard.cpu.holdIrqLineLow( false );
 				var nextIrqRaise = -1;
-				if ( this._irqEnabled ) {
-					nextIrqRaise = this.mainboard.synchroniser.getCpuMTC() + this._irqCounter;
+				if ( this.irqEnabled ) {
+					nextIrqRaise = this.mainboard.synchroniser.getCpuMTC() + this.irqCounter;
 				}
-				if ( nextIrqRaise !== this._nextIrqRaise ) {
-					this.mainboard.synchroniser.changeEventTime( this._irqEventId, nextIrqRaise );
-					this._nextIrqRaise = nextIrqRaise;
+				if ( nextIrqRaise !== this.nextIrqRaise ) {
+					this.mainboard.synchroniser.changeEventTime( this.irqEventId, nextIrqRaise );
+					this.nextIrqRaise = nextIrqRaise;
 				}
 				break;
 			case 0x9005: //High 8 bits of IRQ Reload
-				this._irqReload = ( this._irqReload & 0xFF ) | ( data << 8 );
+				this.irqReload = ( this.irqReload & 0xFF ) | ( data << 8 );
 				break;
 			case 0x9006: //Low 8 bits of IRQ Reload
-				this._irqReload = ( this._irqReload & 0xFF00 ) | data;
+				this.irqReload = ( this.irqReload & 0xFF00 ) | data;
 				break;
 			}
 		}
@@ -91,13 +91,13 @@ mapper65.prototype.write8PrgRom = function( offset, data ) {
 
 mapper65.prototype.synchronise = function( startTicks, endTicks ) {
 
-	if ( this._irqEnabled ) {
-		this._irqCounter -= ( endTicks - startTicks );
-		if ( this._irqCounter <= 0 ) {
-			this.mainboard.synchroniser.changeEventTime( this._irqEventId, -1 );
+	if ( this.irqEnabled ) {
+		this.irqCounter -= ( endTicks - startTicks );
+		if ( this.irqCounter <= 0 ) {
+			this.mainboard.synchroniser.changeEventTime( this.irqEventId, -1 );
 			this.mainboard.cpu.holdIrqLineLow( true );
-			this._irqCounter = 0;
-			this._irqEnabled = false;
+			this.irqCounter = 0;
+			this.irqEnabled = false;
 		}
 	}
 };

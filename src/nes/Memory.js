@@ -33,7 +33,7 @@ export default class Memory {
 
 
 	read8(offset) {
-		return this._properRead8(offset & 0xFFFF) & 0xFF;
+		return this.properRead8(offset & 0xFFFF) & 0xFF;
 	}
 
 	_readRegister4000(offset) {
@@ -64,7 +64,7 @@ export default class Memory {
 			case 0x2000: // IS_INT_BETWEEN( offset, 0x2000, 0x4000 )
 				return this.gppu.readFromRegister(bot3);
 			case 0x4000:
-				return this._readRegister4000(offset);
+				return this.readRegister4000(offset);
 			case 0x6000: // IS_INT_BETWEEN( offset, 0x6000, 0x8000 )
 				return this.gmapper.read8SRam(offset);
 			default: // IS_INT_BETWEEN( offset, 0x8000, 0x10000 )

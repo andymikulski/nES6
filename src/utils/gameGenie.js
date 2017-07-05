@@ -19,35 +19,42 @@ const codes = {
 
 const ggcodeArray = new Int32Array(8);
 
+const codeCache = {};
 export function stringToCodeArray(codeString) {
-  for (let i = 0; i < codeString.length; ++i) {
-    const code = codes[codeString[i]];
-    if (code === undefined) {
-      throw new Error('Invalid character in game genie code');
+  if (codeCache[codeString]) {
+    for (let i = 0; i < codeString.length; ++i) {
+      const code = codes[codeString[i]];
+      if (code === undefined) {
+        throw new Error('Invalid character in game genie code');
+      }
+      ggcodeArray[i] = code;
     }
-    ggcodeArray[i] = code;
+    codeCache[codeString] = ggcodeArray;
   }
-  return ggcodeArray;
+
+  return codeCache[codeString];
 }
 
 export function processGenieCode(mainboard, codeString, enable) {
-  if (codeString.length !== 6 && codeString.length !== 8) {
+  const length = codeString.length;
+
+  if (length !== 6 && length !== 8) {
     throw new Error(`Invalid game genie code entered '${codeString}'`);
   }
 
   if (enable) {
-    const code = GameGenie.stringToCodeArray(codeString);
+    const code = stringToCodeArray(codeString);
 
-		// Char # |   0   |   1   |   2   |   3   |   4   |   5   |
-		// Bit  # |3|2|1|0|3|2|1|0|3|2|1|0|3|2|1|0|3|2|1|0|3|2|1|0|
-		// maps to|1|6|7|8|H|2|3|4|-|I|J|K|L|A|B|C|D|M|N|O|5|E|F|G|
+    // Char # |   0   |   1   |   2   |   3   |   4   |   5   |
+    // Bit  # |3|2|1|0|3|2|1|0|3|2|1|0|3|2|1|0|3|2|1|0|3|2|1|0|
+    // maps to|1|6|7|8|H|2|3|4|-|I|J|K|L|A|B|C|D|M|N|O|5|E|F|G|
     if (codeString.length === 6) {
-      var value = (code[0] & 0x7); // 678
+      let value = (code[0] & 0x7); // 678
       value |= (code[5] & 0x8); // 5
       value |= (code[1] & 0x7) << 4; // 234
       value |= (code[0] & 0x8) << 4; // 1
 
-      var address = (code[4] & 0x7); // MNO
+      let address = (code[4] & 0x7); // MNO
       address |= (code[3] & 0x8); // L
       address |= (code[2] & 0x7) << 4; // IJK
       address |= (code[1] & 0x8) << 4; // H
@@ -57,17 +64,17 @@ export function processGenieCode(mainboard, codeString, enable) {
 
       mainboard.cart.memoryMapper.gameGeniePoke(codeString, address + 0x8000, value, -1);
     } else if (codeString.length === 8) {
-			// Note: Similar to 6 character code but '5' is in different place
-			// Char # |   0   |   1   |   2   |   3   |   4   |   5   |   6   |   7   |
-			// Bit  # |3|2|1|0|3|2|1|0|3|2|1|0|3|2|1|0|3|2|1|0|3|2|1|0|3|2|1|0|3|2|1|0|
-			// maps to|1|6|7|8|H|2|3|4|-|I|J|K|L|A|B|C|D|M|N|O|%|E|F|G|!|^|&|*|5|@|#|$|
-			// compareValue = !@#$%^&*
-      var value = (code[0] & 0x7); // 678
+      // Note: Similar to 6 character code but '5' is in different place
+      // Char # |   0   |   1   |   2   |   3   |   4   |   5   |   6   |   7   |
+      // Bit  # |3|2|1|0|3|2|1|0|3|2|1|0|3|2|1|0|3|2|1|0|3|2|1|0|3|2|1|0|3|2|1|0|
+      // maps to|1|6|7|8|H|2|3|4|-|I|J|K|L|A|B|C|D|M|N|O|%|E|F|G|!|^|&|*|5|@|#|$|
+      // compareValue = !@#$%^&*
+      let value = (code[0] & 0x7); // 678
       value |= (code[7] & 0x8); // 5
       value |= (code[1] & 0x7) << 4; // 234
       value |= (code[0] & 0x8) << 4; // 1
 
-      var address = (code[4] & 0x7); // MNO
+      let address = (code[4] & 0x7); // MNO
       address |= (code[3] & 0x8); // L
       address |= (code[2] & 0x7) << 4; // IJK
       address |= (code[1] & 0x8) << 4; // H
@@ -80,9 +87,9 @@ export function processGenieCode(mainboard, codeString, enable) {
       compareValue |= (code[7] & 0x7) << 4; // @#$
       compareValue |= (code[6] & 0x8) << 4; // !
 
-			// It then checks the value to be replaced with the compare
-			// value, if they are the same it replaces the original value with the new
-			// value if not the value remains the same.
+      // It then checks the value to be replaced with the compare
+      // value, if they are the same it replaces the original value with the new
+      // value if not the value remains the same.
       mainboard.cart.memoryMapper.gameGeniePoke(codeString, address + 0x8000, value, compareValue);
     }
   } else {

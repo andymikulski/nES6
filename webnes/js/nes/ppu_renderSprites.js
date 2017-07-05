@@ -8,33 +8,33 @@ this.Nes = this.Nes || {};
 var PpuRenderSprites = function( ppu ) {
 
 	this.ppu = ppu;
-	this._overflowSet = false;
-	this._useMMC2Latch = false;
+	this.overflowSet = false;
+	this.useMMC2Latch = false;
 };
 
 
 PpuRenderSprites.prototype.reset = function() {
 
-	this._overflowSet = false;
-	this._useMMC2Latch = this.ppu.mainboard.cart.memoryMapper.MMC2Latch !== undefined;
+	this.overflowSet = false;
+	this.useMMC2Latch = this.ppu.mainboard.cart.memoryMapper.MMC2Latch !== undefined;
 };
 
 
 PpuRenderSprites.prototype.onEndFrame = function() {
 
-	this._overflowSet = false;
+	this.overflowSet = false;
 };
 
 
 PpuRenderSprites.prototype.saveState = function( data ) {
 
-	data._overflowSet = this._overflowSet;
+	data._overflowSet = this.overflowSet;
 };
 
 
 PpuRenderSprites.prototype.loadState = function( state ) {
 
-	this._overflowSet = state._overflowSet;
+	this.overflowSet = state._overflowSet;
 };
 
 /* TODO: 2C02 errata.txt states: Is this right?
@@ -109,7 +109,7 @@ PpuRenderSprites.prototype._renderSprite = function( spriteHeight, spritenum, st
 		secondByte = this.ppu.read8( ppuAddress + 8, true, 0 );
 		paletteMergeByte = (attribs & 3) << 2;
 
-		if ( this._useMMC2Latch ) {
+		if ( this.useMMC2Latch ) {
 			this.ppu.mainboard.cart.memoryMapper.MMC2Latch( ppuAddress + 8 );
 		}
 
@@ -224,7 +224,7 @@ PpuRenderSprites.prototype.renderTo = function( startTicks, endTicks ) {
 	// check each sprite to see which fall within the area to check.
 	for ( spritenum=0; spritenum < 64; ++spritenum )
 	{
-		// if ( ( this.ppu.status & 0x20 ) === 0 /*!ppuStatus.spriteOverflow*/ && !this._overflowSet && nextScanlineSpritesCount >= 8 )
+		// if ( ( this.ppu.status & 0x20 ) === 0 /*!ppuStatus.spriteOverflow*/ && !this.overflowSet && nextScanlineSpritesCount >= 8 )
 		// { // bug in ppu, must emulate for purposes of calculating correct overflow set time
 			// var overflowSpriteY = this.ppu.spriteMemory[ spritenum * 4 + readFromY ];
 			// readFromY++;
@@ -241,7 +241,7 @@ PpuRenderSprites.prototype.renderTo = function( startTicks, endTicks ) {
 					// // ticksWhenToSetOverflow += ( 64 * MASTER_CYCLES_PER_PPU );
 					// // ticksWhenToSetOverflow += ( spritenum * 2 * MASTER_CYCLES_PER_PPU ) + ( 8 * 6 * MASTER_CYCLES_PER_PPU );
 
-					// // this._overflowSet = true;
+					// // this.overflowSet = true;
 					// // this.ppu.mainboard.synchroniser.addEvent( 'ppu sprite overflow', ticksWhenToSetOverflow, function( eventTime ) { that.ppu._eventSpriteOverflow( eventTime ); } );
 				// // }
 			// //}
@@ -253,7 +253,7 @@ PpuRenderSprites.prototype.renderTo = function( startTicks, endTicks ) {
 			if ( isRangeOverlapping( startline, endline, spritey, spritey + spriteHeight ) ) {
 				//var moreThanEightSprites = nextScanlineSpritesCount >= 8;
 				//nextScanlineSpritesCount++;
-				this._renderSprite( spriteHeight, spritenum, startline, endline, spritey );
+				this.renderSprite( spriteHeight, spritenum, startline, endline, spritey );
 			}
 		}
 	}

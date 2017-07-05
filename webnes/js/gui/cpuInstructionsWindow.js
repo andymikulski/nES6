@@ -8,15 +8,15 @@ this.Nes = this.Nes || {};
 	// var CpuInstructionsWindow = function( mainboard, divElement ) {
 
 		// var that = this;
-		// this._strArray = [];
-		// this._dataArray = [];
-		// this._element = document.createElement('textarea');
-		// this._element.rows = 10;
-		// this._element.cols = 40;
-		// divElement.appendChild( this._element );
-		// this._mainboard = mainboard;
-		// this._mainboard.connect( 'reset', function() { that._reset(); } );
-		// this._mainboard.cpu.setExecuteCallback( function( programCounter, instruction, instructionBytes, addressingModeArgs ) {
+		// this.strArray = [];
+		// this.dataArray = [];
+		// this.element = document.createElement('textarea');
+		// this.element.rows = 10;
+		// this.element.cols = 40;
+		// divElement.appendChild( this.element );
+		// this.mainboard = mainboard;
+		// this.mainboard.connect( 'reset', function() { that._reset(); } );
+		// this.mainboard.cpu.setExecuteCallback( function( programCounter, instruction, instructionBytes, addressingModeArgs ) {
 			// that._onCpuExecute( programCounter, instruction, instructionBytes, addressingModeArgs );
 		// } );
 	// };
@@ -32,24 +32,24 @@ this.Nes = this.Nes || {};
 	// CpuInstructionsWindow.prototype._onCpuExecute = function( programCounter, instruction, instructionBytes, addressingModeArgs ) {
 
 		// // get next instruction details
-		// var currentProgramCounter = this._mainboard.cpu.programCounter;
-		// var nextOpCode = this._mainboard.memory.read8( currentProgramCounter );
+		// var currentProgramCounter = this.mainboard.cpu.programCounter;
+		// var nextOpCode = this.mainboard.memory.read8( currentProgramCounter );
 		// var nextInstruction = Nes.getInstructionByOpcode( nextOpCode );
 
 		// // is next instruction break pointed?
-		// if ( this._mainboard.cpu.isRunning ) {
-			// this._mainboard.cpu.breakPoint( false );
+		// if ( this.mainboard.cpu.isRunning ) {
+			// this.mainboard.cpu.breakPoint( false );
 		// }
 
-	// //	this._addData( [ programCounter, instruction, instructionBytes, addressingModeArgs ] );
+	// //	this.addData( [ programCounter, instruction, instructionBytes, addressingModeArgs ] );
 
 		// //if ( !instruction.legal ) {
-		// //	this._onTextRefresh( true );
+		// //	this.onTextRefresh( true );
 		// //	debugger;
 		// //}
 
 		// // if ( instruction.name === "BRK" ) {
-		// // //	this._onTextRefresh( true );
+		// // //	this.onTextRefresh( true );
 			// // debugger;
 		// // }
 	// };

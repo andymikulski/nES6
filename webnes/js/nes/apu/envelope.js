@@ -6,38 +6,38 @@ this.Nes = this.Nes || {};
 
 
 var ApuEnvelope = function() {
-	this._envelopeCounter = 0; // number of ticks every time the envelope volume is decremented.
-	this._envelopeVolume = 0;
-	this._doEnvelopeReloadOnNextClock = false;
+	this.envelopeCounter = 0; // number of ticks every time the envelope volume is decremented.
+	this.envelopeVolume = 0;
+	this.doEnvelopeReloadOnNextClock = false;
 };
 
 
 ApuEnvelope.prototype.reset = function() {
-	this._envelopeCounter = 0;
-	this._envelopeVolume = 0;
-	this._doEnvelopeReloadOnNextClock = false;
+	this.envelopeCounter = 0;
+	this.envelopeVolume = 0;
+	this.doEnvelopeReloadOnNextClock = false;
 };
 
 
 ApuEnvelope.prototype.reloadOnNextClock = function() {
-	this._doEnvelopeReloadOnNextClock = true;
+	this.doEnvelopeReloadOnNextClock = true;
 };
 
 // Called every time the envelope is clocked by the divider
 ApuEnvelope.prototype.decrementCounter = function( envelopeNotLooped ) {
 
-	if ( this._doEnvelopeReloadOnNextClock ) {
-		this._doEnvelopeReloadOnNextClock = false;
-		this._envelopeCounter = this._volumeValue;
-		this._envelopeVolume = 15;
+	if ( this.doEnvelopeReloadOnNextClock ) {
+		this.doEnvelopeReloadOnNextClock = false;
+		this.envelopeCounter = this.volumeValue;
+		this.envelopeVolume = 15;
 	} else {
-		this._envelopeCounter--;
-		if ( this._envelopeCounter < 0 ) {
-			this._envelopeCounter = this._volumeValue;
-			if ( this._envelopeVolume > 0 || !envelopeNotLooped ) {
-				this._envelopeVolume--;
-				if ( this._envelopeVolume < 0 ) {
-					this._envelopeVolume = 15;
+		this.envelopeCounter--;
+		if ( this.envelopeCounter < 0 ) {
+			this.envelopeCounter = this.volumeValue;
+			if ( this.envelopeVolume > 0 || !envelopeNotLooped ) {
+				this.envelopeVolume--;
+				if ( this.envelopeVolume < 0 ) {
+					this.envelopeVolume = 15;
 				}
 			}
 		}
@@ -46,7 +46,7 @@ ApuEnvelope.prototype.decrementCounter = function( envelopeNotLooped ) {
 
 
 ApuEnvelope.prototype.getEnvelopeVolume = function() {
-	return this._envelopeVolume;
+	return this.envelopeVolume;
 };
 
 

@@ -26,12 +26,12 @@ var APU_FRAME_MODE1_TOTAL = 37282 * APU_BASE_UNIT;
 
 
 var ApuFrameCounter = function( mainboard ) {
-	this._mainboard = mainboard;
-	this._mode = 0;
-	this._lastFrameStartMtc = 0;
-	this._sequenceStage = 0; // either 0,1,2,3 or 4 (if mode 1 enabled) to indicate where in the sequence the frame counter is
-	this._irqEventId = -1;
-	this._interruptInProgress = false;
+	this.mainboard = mainboard;
+	this.mode = 0;
+	this.lastFrameStartMtc = 0;
+	this.sequenceStage = 0; // either 0,1,2,3 or 4 (if mode 1 enabled) to indicate where in the sequence the frame counter is
+	this.irqEventId = -1;
+	this.interruptInProgress = false;
 };
 
 
@@ -40,7 +40,7 @@ var ApuFrameCounter = function( mainboard ) {
 ApuFrameCounter.prototype.getNextFrameClock = function( ticks ) {
 
 	// work out when next frame count is
-	var nextFrameTicks = this._lastFrameStartMtc + ( ( this._sequenceStage + 1 ) * APU_FRAME_COUNTER_INTERVAL );
+	var nextFrameTicks = this.lastFrameStartMtc + ( ( this.sequenceStage + 1 ) * APU_FRAME_COUNTER_INTERVAL );
 	if ( nextFrameTicks >= COLOUR_ENCODING_FRAME_MTC ) {
 		nextFrameTicks -= COLOUR_ENCODING_FRAME_MTC;
 	}
@@ -50,7 +50,7 @@ ApuFrameCounter.prototype.getNextFrameClock = function( ticks ) {
 
 ApuFrameCounter.prototype._getNextIrqClock = function( ticks ) {
 
-	var nextIrqTicks = this._lastFrameStartMtc + APU_IRQ_FRAME_EVENT;
+	var nextIrqTicks = this.lastFrameStartMtc + APU_IRQ_FRAME_EVENT;
 	if ( nextIrqTicks >= COLOUR_ENCODING_FRAME_MTC ) {
 		nextIrqTicks -= COLOUR_ENCODING_FRAME_MTC;
 	}
@@ -59,28 +59,28 @@ ApuFrameCounter.prototype._getNextIrqClock = function( ticks ) {
 
 
 ApuFrameCounter.prototype.acknowledgeClock = function( ticks ) {
-	this._sequenceStage++;
+	this.sequenceStage++;
 	var endOfApuFrame = false;
 	var frameSize = 0;
-	switch ( this._mode ) {
+	switch ( this.mode ) {
 		case 0:
-			endOfApuFrame = this._sequenceStage >= 4;
+			endOfApuFrame = this.sequenceStage >= 4;
 			frameSize = APU_FRAME_MODE0_TOTAL;
 			break;
 		case 1:
-			endOfApuFrame = this._sequenceStage >= 5;
+			endOfApuFrame = this.sequenceStage >= 5;
 			frameSize = APU_FRAME_MODE1_TOTAL;
 			break;
 	}
 	if ( endOfApuFrame ) {
 		// end of the apu frame - the apu frame is slightly longer than simply the clock interval * sequence count
-		this._sequenceStage = 0;
-		this._lastFrameStartMtc += frameSize;
-		if ( this._lastFrameStartMtc >= COLOUR_ENCODING_FRAME_MTC ) {
-			this._lastFrameStartMtc -= COLOUR_ENCODING_FRAME_MTC;
+		this.sequenceStage = 0;
+		this.lastFrameStartMtc += frameSize;
+		if ( this.lastFrameStartMtc >= COLOUR_ENCODING_FRAME_MTC ) {
+			this.lastFrameStartMtc -= COLOUR_ENCODING_FRAME_MTC;
 		}
 		// Update IRQ time
-		this._mainboard.synchroniser.changeEventTime( this._irqEventId, this._getNextIrqClock() );
+		this.mainboard.synchroniser.changeEventTime( this.irqEventId, this.getNextIrqClock() );
 	}
 };
 
@@ -92,22 +92,22 @@ ApuFrameCounter.prototype.onEndFrame = function() {
 
 ApuFrameCounter.prototype.reset = function() {
 	var that = this;
-	this._irqEventId = this._mainboard.synchroniser.addEvent( 'apu irq', -1, function( eventTime ) { that._eventApuIrq( eventTime ); } );
+	this.irqEventId = this.mainboard.synchroniser.addEvent( 'apu irq', -1, function( eventTime ) { that._eventApuIrq( eventTime ); } );
 };
 
 
 ApuFrameCounter.prototype._eventApuIrq = function( eventTime ) {
-	if ( !this._interruptInProgress ) {
-		this._interruptInProgress = true;
+	if ( !this.interruptInProgress ) {
+		this.interruptInProgress = true;
 		this.mainboard.cpu.holdIrqLineLow( true );
 	}
 };
 
 
 ApuFrameCounter.prototype.acknowledgeIrq = function() {
-	if ( this._interruptInProgress ) {
-		this._mainboard.cpu.holdIrqLineLow( false );
-		this._interruptInProgress = false;
+	if ( this.interruptInProgress ) {
+		this.mainboard.cpu.holdIrqLineLow( false );
+		this.interruptInProgress = false;
 	}
 };
 

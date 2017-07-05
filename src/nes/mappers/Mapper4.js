@@ -21,8 +21,8 @@ export default class Mapper4 extends BaseMapper {
     this.chipEnable = this.interruptsEnabled = true;
     this.irqCounter = this.irqLatch = 0;
     this.mReloadFlag = false;
-    this._isMMC6 = false;
-    this._mmc6PrgRamWriteByte = 0;
+    this.isMMC6 = false;
+    this.mmc6PrgRamWriteByte = 0;
 
     this.lastA12Raise = 0;
     this.mSpriteAddress = this.mScreenAddress = false;
@@ -42,7 +42,7 @@ export default class Mapper4 extends BaseMapper {
 
   _eventIrq() {
 		// don't do anything - call to synchronise() will trigger the irq
-    this.mainboard.synchroniser.changeEventTime(this._irqEventId, -1);
+    this.mainboard.synchroniser.changeEventTime(this.irqEventId, -1);
   }
 
   mapperSaveState(state) {
@@ -53,14 +53,14 @@ export default class Mapper4 extends BaseMapper {
     state.irqCounter = this.irqCounter;
     state.irqLatch = this.irqLatch;
     state.mReloadFlag = this.mReloadFlag;
-    state._isMMC6 = this._isMMC6;
-    state._mmc6PrgRamWriteByte = this._mmc6PrgRamWriteByte;
+    state._isMMC6 = this.isMMC6;
+    state._mmc6PrgRamWriteByte = this.mmc6PrgRamWriteByte;
     state.lastA12Raise = this.lastA12Raise;
     state.mSpriteAddress = this.mSpriteAddress;
     state.mScreenAddress = this.mScreenAddress;
     state.mRenderingEnabled = this.mRenderingEnabled;
     state.banks = uintArrayToString(this.banks);
-    state._interruptInProgress = this._interruptInProgress;
+    state._interruptInProgress = this.interruptInProgress;
   }
 
   mapperLoadState(state) {
@@ -71,14 +71,14 @@ export default class Mapper4 extends BaseMapper {
     this.irqCounter = state.irqCounter;
     this.irqLatch = state.irqLatch;
     this.mReloadFlag = state.mReloadFlag;
-    this._isMMC6 = state._isMMC6;
-    this._mmc6PrgRamWriteByte = state._mmc6PrgRamWriteByte;
+    this.isMMC6 = state._isMMC6;
+    this.mmc6PrgRamWriteByte = state._mmc6PrgRamWriteByte;
     this.lastA12Raise = state.lastA12Raise;
     this.mSpriteAddress = state.mSpriteAddress;
     this.mScreenAddress = state.mScreenAddress;
     this.mRenderingEnabled = state.mRenderingEnabled;
     this.banks = stringToUintArray(state.banks);
-    this._interruptInProgress = state._interruptInProgress;
+    this.interruptInProgress = state._interruptInProgress;
   }
 
   syncBanks(doPrg, doChr) {
@@ -152,10 +152,10 @@ export default class Mapper4 extends BaseMapper {
   reset() {
     this.prgRamDisableWrite = false;
     this.chipEnable = this.interruptsEnabled = true;
-    this._interruptInProgress = false;
+    this.interruptInProgress = false;
 
-    this._A12LowerLimit = (COLOUR_ENCODING_VBLANK_SCANLINES) * MASTER_CYCLES_PER_SCANLINE;
-    this._A12UpperLimit = (COLOUR_ENCODING_FRAME_SCANLINES - 1) * MASTER_CYCLES_PER_SCANLINE;
+    this.A12LowerLimit = (COLOUR_ENCODING_VBLANK_SCANLINES) * MASTER_CYCLES_PER_SCANLINE;
+    this.A12UpperLimit = (COLOUR_ENCODING_FRAME_SCANLINES - 1) * MASTER_CYCLES_PER_SCANLINE;
 
 
     this.lastA12Raise = 0;
@@ -166,8 +166,8 @@ export default class Mapper4 extends BaseMapper {
     this.irqLatch = 0xFF;
     this.mReloadFlag = false;
     this.lastA12Raise = 0;
-    this._isMMC6 = this._lookInDbForMMC6();
-    this._mmc6PrgRamWriteByte = 0;
+    this.isMMC6 = this.lookInDbForMMC6();
+    this.mmc6PrgRamWriteByte = 0;
     this.bankSwapByte = 0;
     this.banks[0] = 0;
     this.banks[1] = 2;
@@ -185,7 +185,7 @@ export default class Mapper4 extends BaseMapper {
 
     const that = this;
 		// TODO: Need to remove this event on mapper unload
-    this._irqEventId = this.mainboard.synchroniser.addEvent('mmc3 irq', -1, () => {
+    this.irqEventId = this.mainboard.synchroniser.addEvent('mmc3 irq', -1, () => {
       that._eventIrq();
     });
 
@@ -201,10 +201,10 @@ export default class Mapper4 extends BaseMapper {
           if (this.bankSwapByte !== data & 0xFF) {
             this.bankSwapByte = data & 0xFF;
 
-            if (this._isMMC6) {
+            if (this.isMMC6) {
               var prgRamEnabled = (this.bankSwapByte & 0x20) > 0;
               if (!prgRamEnabled) {
-                this._mmc6PrgRamWriteByte = 0;
+                this.mmc6PrgRamWriteByte = 0;
               }
             }
 
@@ -226,10 +226,10 @@ export default class Mapper4 extends BaseMapper {
             this.mainboard.ppu.changeMirroringMethod(mirroringMethod);
           }
         } else { // odd
-          if (this._isMMC6) {
+          if (this.isMMC6) {
             var prgRamEnabled = (this.bankSwapByte & 0x20) > 0;
             if (prgRamEnabled) {
-              this._mmc6PrgRamWriteByte = data;
+              this.mmc6PrgRamWriteByte = data;
             }
           } else {
             this.prgRamDisableWrite = (data & 0x40) > 0;
@@ -254,9 +254,9 @@ export default class Mapper4 extends BaseMapper {
       case 0xE000:
         if ((offset & 0x1) === 0) { // even - "Writing any value to this register will disable MMC3 interrupts AND acknowledge any pending interrupts."
           this.interruptsEnabled = false;
-          if (this._interruptInProgress) {
+          if (this.interruptInProgress) {
             this.mainboard.cpu.holdIrqLineLow(false);
-            this._interruptInProgress = false;
+            this.interruptInProgress = false;
           }
 					//				Log::Write( LOG_MAPPER, ( boost::format( "Interrupts disabled on mapper" ) ).str() );
         } else { // odd
@@ -286,7 +286,7 @@ export default class Mapper4 extends BaseMapper {
       this.mReloadFlag = false;
     } else if (this.irqCounter === 0) {
       this.irqCounter = this.irqLatch;
-      if (this._isMMC6) {
+      if (this.isMMC6) {
         doIrq = false;
       } else if (this.irqCounter === 0) { doIrq = true; }
     } else {
@@ -294,12 +294,12 @@ export default class Mapper4 extends BaseMapper {
       doIrq = this.irqCounter === 0;
     }
 
-    if (doIrq && this.interruptsEnabled && !this._interruptInProgress) {
+    if (doIrq && this.interruptsEnabled && !this.interruptInProgress) {
 			//	if ( this.mainboard.ppu.frameCounter === 43 && pos.x === 260 && pos.y === 0 ) {
 			//				debugger;
 			//		}
 			// console.log( "[" + this.mainboard.ppu.frameCounter + "]" + pos.x + "x" + pos.y + " IRQ cpu: " + cpupos.x + "x" + cpupos.y );
-      this._interruptInProgress = true;
+      this.interruptInProgress = true;
       this.mainboard.cpu.holdIrqLineLow(true);
     }
   }
@@ -336,7 +336,7 @@ export default class Mapper4 extends BaseMapper {
       }
     }
 
-    if (cpuMTC >= this._A12UpperLimit || pixelEvent < 0) {
+    if (cpuMTC >= this.A12UpperLimit || pixelEvent < 0) {
       return -1;
     }
 
@@ -346,9 +346,9 @@ export default class Mapper4 extends BaseMapper {
     let startMtc = cpuMTC - modmtc + scanlineEvent; // ticks till next irq decrement event
 
     if (startMtc <= cpuMTC) { startMtc += MASTER_CYCLES_PER_SCANLINE; } // if we have already passed the irq event, move onto next scanline
-    if (this._A12UpperLimit <= startMtc) { return -1; }
+    if (this.A12UpperLimit <= startMtc) { return -1; }
 
-    if (startMtc < this._A12LowerLimit) { startMtc = this._A12LowerLimit + scanlineEvent; }
+    if (startMtc < this.A12LowerLimit) { startMtc = this.A12LowerLimit + scanlineEvent; }
 
     return startMtc;
   }
@@ -370,7 +370,7 @@ export default class Mapper4 extends BaseMapper {
       } else {
         scanlines = this.mReloadFlag ? 0 : Math.max(this.irqCounter - 1, 0);
         newEvent = nextRaise + (scanlines * MASTER_CYCLES_PER_SCANLINE);
-        if (newEvent > this._A12UpperLimit) {
+        if (newEvent > this.A12UpperLimit) {
           newEvent = -1;
         } else {
 					// var pos = this.mainboard.ppu.ticksToScreenCoordinates( newEvent );
@@ -382,7 +382,7 @@ export default class Mapper4 extends BaseMapper {
         }
       }
     }
-    this.mainboard.synchroniser.changeEventTime(this._irqEventId, newEvent);
+    this.mainboard.synchroniser.changeEventTime(this.irqEventId, newEvent);
   }
 
 
@@ -415,7 +415,7 @@ export default class Mapper4 extends BaseMapper {
 		// tickLimit is the start of the rendering frame - only started being clocked when rendering
     const startMtc = this.calculateNextA12Raise(startTicks + 1);
     if (startMtc >= 0) {
-      for (let mtc = startMtc; mtc <= Math.min(this._A12UpperLimit, endTicks); mtc += MASTER_CYCLES_PER_SCANLINE) {
+      for (let mtc = startMtc; mtc <= Math.min(this.A12UpperLimit, endTicks); mtc += MASTER_CYCLES_PER_SCANLINE) {
         this.decrementIrqCounter(mtc);
       }
     }
@@ -427,12 +427,12 @@ export default class Mapper4 extends BaseMapper {
   }
 
   write8SRam(offset, data) {
-    if (this._isMMC6) {
+    if (this.isMMC6) {
       if (offset >= 0x7000) {
         const mirroredOffset = offset & 0x3FF;
         const lowHalf = (mirroredOffset & 0x200) === 0;
         const offsetMask = lowHalf ? 0x30 : 0xC0; // writing requires both the write and read bits set
-        if ((this._mmc6PrgRamWriteByte & offsetMask) === offsetMask) {
+        if ((this.mmc6PrgRamWriteByte & offsetMask) === offsetMask) {
           BaseMapper.prototype.write8SRam.call(this, mirroredOffset, data);
         }
       }
@@ -442,12 +442,12 @@ export default class Mapper4 extends BaseMapper {
   }
 
   read8SRam(offset) {
-    if (this._isMMC6 && offset >= 0x7000) {
+    if (this.isMMC6 && offset >= 0x7000) {
       if (offset >= 0x7000) {
         const mirroredOffset = offset & 0x3FF;
         const lowHalf = (mirroredOffset & 0x200) === 0;
         const offsetMask = lowHalf ? 0x20 : 0x80;
-        if ((this._mmc6PrgRamWriteByte & offsetMask) > 0) {
+        if ((this.mmc6PrgRamWriteByte & offsetMask) > 0) {
           return BaseMapper.prototype.read8SRam.call(this, mirroredOffset);
         }
       }

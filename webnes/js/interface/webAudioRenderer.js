@@ -7,12 +7,12 @@ this.Gui = this.Gui || {};
 
 var WebAudioBuffer = function( audioContext, masterVolNode, size ) {
 
-	this._locked = false;
+	this.locked = false;
 	this.audioContext = audioContext;
 
 	this.audioNode = null;
-	this._gainNode = this.audioContext['createGain']();
-	this._gainNode['connect']( masterVolNode );
+	this.gainNode = this.audioContext['createGain']();
+	this.gainNode['connect']( masterVolNode );
 
 	this.audioBuffer = this.audioContext['createBuffer']( 1, size, this.audioContext['sampleRate'] );
 
@@ -21,14 +21,14 @@ var WebAudioBuffer = function( audioContext, masterVolNode, size ) {
 
 WebAudioBuffer.prototype.lockBuffer = function() {
 
-	this._locked = true;
+	this.locked = true;
 	return this.audioBuffer['getChannelData']( 0 );
 };
 
 
 WebAudioBuffer.prototype.unlockBuffer = function() {
 
-	this._locked = false;
+	this.locked = false;
 
 	// Alternative method using audio node buffer instead of onaudioprocess
 	if ( this.audioNode ) {
@@ -38,7 +38,7 @@ WebAudioBuffer.prototype.unlockBuffer = function() {
 	this.audioNode = this.audioContext['createBufferSource']();
 	this.audioNode['buffer'] = this.audioBuffer;
 
-	this.audioNode['connect'](this._gainNode);
+	this.audioNode['connect'](this.gainNode);
 	this.audioNode['start'](0);
 };
 
@@ -53,14 +53,14 @@ var WebAudioRenderer = function( bufferSize, sampleRate ) {
 		throw new Error( "WebAudio not supported in this browser" );
 	}
 	this.audioContext = new window.AudioContext();
-	this._gainNode = this.audioContext['createGain']();
-	this._gainNode['connect']( this.audioContext['destination'] );
+	this.gainNode = this.audioContext['createGain']();
+	this.gainNode['connect']( this.audioContext['destination'] );
 };
 
 
 WebAudioRenderer.prototype.setVolume = function( val ) {
-	if ( this._gainNode ) {
-		this._gainNode['gain']['value'] = val / 100;
+	if ( this.gainNode ) {
+		this.gainNode['gain']['value'] = val / 100;
 	}
 };
 
@@ -71,7 +71,7 @@ WebAudioRenderer.prototype.getSampleRate = function() {
 
 
 WebAudioRenderer.prototype.createBuffer = function( size ) {
-	return new WebAudioBuffer( this.audioContext, this._gainNode, size );
+	return new WebAudioBuffer( this.audioContext, this.gainNode, size );
 };
 
 

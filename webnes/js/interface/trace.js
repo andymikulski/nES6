@@ -5,42 +5,42 @@ this.Nes = this.Nes || {};
 (function(){
 	"use strict";
 
-	Nes.trace_cpu = 0;
-	Nes.trace_cpuInstructions = 1;
-	Nes.trace_ppu = 2;
-	Nes.trace_mapper = 3;
-	Nes.trace_apu = 4;
-	Nes.trace_all = 5;
+	Nes.traceCpu = 0;
+	Nes.traceCpuInstructions = 1;
+	Nes.tracePpu = 2;
+	Nes.traceMapper = 3;
+	Nes.traceApu = 4;
+	Nes.traceAll = 5;
 
 
 	var Trace = function( ) {
 
-		this._lines = [];
-		this._running = false;
-		this._enabledTypes = new Array( Nes.trace_all + 1 );
-		for ( var i=0; i<this._enabledTypes.length; ++i ) {
-			this._enabledTypes[ i ] = 0;
+		this.lines = [];
+		this.running = false;
+		this.enabledTypes = new Array( Nes.traceAll + 1 );
+		for ( var i=0; i<this.enabledTypes.length; ++i ) {
+			this.enabledTypes[ i ] = 0;
 		}
 	};
 
 
 	Trace.prototype.enabled = function() {
 
-		return this._running;
+		return this.running;
 	};
 
 
 	Trace.prototype.enableType = function( traceType, checked ) {
 
-		this._enabledTypes[ traceType ] = checked ? 1 : 0;
+		this.enabledTypes[ traceType ] = checked ? 1 : 0;
 	};
 
 
 	Trace.prototype.writeLine = function( traceType, line ) {
 
-		if ( this._running ) {
-			if ( this._enabledTypes[ traceType ] === 1 ) {
-				this._lines.push( line + '\r\n' );
+		if ( this.running ) {
+			if ( this.enabledTypes[ traceType ] === 1 ) {
+				this.lines.push( line + '\r\n' );
 			}
 		}
 	};
@@ -48,19 +48,19 @@ this.Nes = this.Nes || {};
 
 	Trace.prototype.start = function() {
 
-		this._running = true;
+		this.running = true;
 	};
 
 
 	Trace.prototype.stop = function() {
 
-		this._running = false;
+		this.running = false;
 
 		// save to file
-		if ( this._lines.length > 0 ) {
-			var blob = new Blob( this._lines, {type: "text/plain;charset=utf-8"} );
+		if ( this.lines.length > 0 ) {
+			var blob = new Blob( this.lines, {type: "text/plain;charset=utf-8"} );
 			saveAs( blob, "trace.txt" );
-			this._lines.length = 0;
+			this.lines.length = 0;
 		}
 	};
 

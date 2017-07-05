@@ -21,7 +21,7 @@ var mapper64 = function() {
 
 	this.mSpriteAddress = this.mScreenAddress = false;
 	this.mRenderingEnabled = false;
-	this._cpuCycleMode = false;
+	this.cpuCycleMode = false;
 
 	this.banks = new Int32Array( 16 );
 	this.banks[0] = 0;
@@ -44,7 +44,7 @@ mapper64.prototype = Object.create( Nes.basemapper.prototype );
 
 mapper64.prototype._eventIrq = function() {
 	// don't do anything - call to synchronise() will trigger the irq
-	this.mainboard.synchroniser.changeEventTime( this._irqEventId, -1 );
+	this.mainboard.synchroniser.changeEventTime( this.irqEventId, -1 );
 };
 
 mapper64.prototype.mapperSaveState = function( state ) {
@@ -52,7 +52,7 @@ mapper64.prototype.mapperSaveState = function( state ) {
 	state.bankSwapByte = this.bankSwapByte;
 	state.prgRamDisableWrite = this.prgRamDisableWrite;
 	state.chipEnable = this.chipEnable;
-	state._cpuCycleMode = this._cpuCycleMode;
+	state._cpuCycleMode = this.cpuCycleMode;
 	state.interruptsEnabled = this.interruptsEnabled;
 	state.irqCounter = this.irqCounter;
 	state.irqLatch = this.irqLatch;
@@ -62,14 +62,14 @@ mapper64.prototype.mapperSaveState = function( state ) {
 	state.mScreenAddress = this.mScreenAddress;
 	state.mRenderingEnabled = this.mRenderingEnabled;
 	state.banks = Nes.uintArrayToString( this.banks );
-	state._interruptInProgress = this._interruptInProgress;
+	state._interruptInProgress = this.interruptInProgress;
 };
 
 mapper64.prototype.mapperLoadState = function( state ) {
 
 	this.bankSwapByte = state.bankSwapByte;
 	this.prgRamDisableWrite = state.prgRamDisableWrite;
-	this._cpuCycleMode = state._cpuCycleMode;
+	this.cpuCycleMode = state._cpuCycleMode;
 	this.chipEnable = state.chipEnable;
 	this.interruptsEnabled = state.interruptsEnabled;
 	this.irqCounter = state.irqCounter;
@@ -80,7 +80,7 @@ mapper64.prototype.mapperLoadState = function( state ) {
 	this.mScreenAddress = state.mScreenAddress;
 	this.mRenderingEnabled = state.mRenderingEnabled;
 	this.banks = Nes.stringToUintArray( state.banks );
-	this._interruptInProgress = state._interruptInProgress;
+	this.interruptInProgress = state._interruptInProgress;
 };
 
 mapper64.prototype.syncBanks = function( doPrg, doChr ) {
@@ -163,10 +163,10 @@ mapper64.prototype.syncBanks = function( doPrg, doChr ) {
 mapper64.prototype.reset = function() {
 	this.prgRamDisableWrite = false;
 	this.chipEnable = this.interruptsEnabled = true;
-	this._interruptInProgress = false;
+	this.interruptInProgress = false;
 
-	this._A12LowerLimit = ( COLOUR_ENCODING_VBLANK_SCANLINES ) * MASTER_CYCLES_PER_SCANLINE;
-	this._A12UpperLimit = ( COLOUR_ENCODING_FRAME_SCANLINES - 1 ) * MASTER_CYCLES_PER_SCANLINE;
+	this.A12LowerLimit = ( COLOUR_ENCODING_VBLANK_SCANLINES ) * MASTER_CYCLES_PER_SCANLINE;
+	this.A12UpperLimit = ( COLOUR_ENCODING_FRAME_SCANLINES - 1 ) * MASTER_CYCLES_PER_SCANLINE;
 
 
 	this.lastA12Raise = 0;
@@ -177,7 +177,7 @@ mapper64.prototype.reset = function() {
 	this.irqLatch = 0xFF;
 	this.mReloadFlag = false;
 	this.lastA12Raise = 0;
-	this._cpuCycleMode = false;
+	this.cpuCycleMode = false;
 	this.bankSwapByte = 0;
 	this.banks[0] = 0;
 	this.banks[1] = 2;
@@ -200,7 +200,7 @@ mapper64.prototype.reset = function() {
 
 	var that = this;
 	// TODO: Need to remove this event on mapper unload
-	this._irqEventId = this.mainboard.synchroniser.addEvent( 'mapper64 irq', -1, function() { that._eventIrq(); } );
+	this.irqEventId = this.mainboard.synchroniser.addEvent( 'mapper64 irq', -1, function() { that._eventIrq(); } );
 
 	this.syncBanks( true, true );
 	this.mainboard.ppu.changeMirroringMethod( this.mirroringMethod );
@@ -259,8 +259,8 @@ mapper64.prototype.write8PrgRom = function( offset, data ) {
 					this.mainboard.synchroniser.synchronise();
 				}
 				this.mReloadFlag = true;
-				this._cpuCycleMode = ( data & 0x1 ) > 0;
-				// if ( this._cpuCycleMode ) {
+				this.cpuCycleMode = ( data & 0x1 ) > 0;
+				// if ( this.cpuCycleMode ) {
 					// console.log( "Mapper 64 cpu cycle mode is active" );
 				// } else {
 					// console.log( "Mapper 64 cpu cycle mode is inactive" );
@@ -272,9 +272,9 @@ mapper64.prototype.write8PrgRom = function( offset, data ) {
 			if ( ( offset & 0x1 ) === 0 )
 			{ // even - "Writing any value to this register will disable MMC3 interrupts AND acknowledge any pending interrupts."
 				this.interruptsEnabled = false;
-				if ( this._interruptInProgress ) {
+				if ( this.interruptInProgress ) {
 					this.mainboard.cpu.holdIrqLineLow( false );
-					this._interruptInProgress = false;
+					this.interruptInProgress = false;
 				}
 //				Log::Write( LOG_MAPPER, ( boost::format( "Interrupts disabled on mapper" ) ).str() );
 			}
@@ -315,9 +315,9 @@ mapper64.prototype.decrementIrqCounter = function( tickCount ) {
 		doIrq = this.irqCounter === 0;
 	}
 
-	if ( doIrq && this.interruptsEnabled && !this._interruptInProgress ) {
+	if ( doIrq && this.interruptsEnabled && !this.interruptInProgress ) {
 		//console.log( "[" + this.mainboard.ppu.frameCounter + "]" + pos.x + "x" + pos.y + " IRQ cpu: " + cpupos.x + "x" + cpupos.y );
-		this._interruptInProgress = true;
+		this.interruptInProgress = true;
 		this.mainboard.cpu.holdIrqLineLow( true );
 	}
 };
@@ -353,7 +353,7 @@ mapper64.prototype.calculateNextA12Raise = function( cpuMTC ) {
 		}
 	}
 
-	if ( cpuMTC >= this._A12UpperLimit || pixelEvent < 0 ) {
+	if ( cpuMTC >= this.A12UpperLimit || pixelEvent < 0 ) {
 		return -1;
 	}
 
@@ -364,11 +364,11 @@ mapper64.prototype.calculateNextA12Raise = function( cpuMTC ) {
 
 	if ( startMtc <= cpuMTC )
 		startMtc += MASTER_CYCLES_PER_SCANLINE; // if we have already passed the irq event, move onto next scanline
-	if ( this._A12UpperLimit <= startMtc )
+	if ( this.A12UpperLimit <= startMtc )
 		return -1;
 
-	if ( startMtc < this._A12LowerLimit )
-		startMtc = this._A12LowerLimit + scanlineEvent;
+	if ( startMtc < this.A12LowerLimit )
+		startMtc = this.A12LowerLimit + scanlineEvent;
 
 	return startMtc;
 };
@@ -382,7 +382,7 @@ mapper64.prototype.updateIRQTime = function( cpuTime, doSync ) {
 
 	var newEvent = -1;
 
-	if ( !this._cpuCycleMode ) {
+	if ( !this.cpuCycleMode ) {
 		// tickLimit is the start of the rendering frame - only started being clocked when rendering
 
 		var nextRaise = 0;
@@ -394,7 +394,7 @@ mapper64.prototype.updateIRQTime = function( cpuTime, doSync ) {
 			} else {
 				scanlines = this.mReloadFlag ? 0 : Math.max( this.irqCounter - 1, 0 );
 				newEvent = nextRaise + ( scanlines * MASTER_CYCLES_PER_SCANLINE );
-				if ( newEvent > this._A12UpperLimit ) {
+				if ( newEvent > this.A12UpperLimit ) {
 					newEvent = -1;
 				} else {
 					// RAMBO-1: The actual interrupt triggers one M2 cycle later than one would naively expect.
@@ -402,7 +402,7 @@ mapper64.prototype.updateIRQTime = function( cpuTime, doSync ) {
 				}
 			}
 		}
-		this.mainboard.synchroniser.changeEventTime( this._irqEventId, newEvent );
+		this.mainboard.synchroniser.changeEventTime( this.irqEventId, newEvent );
 	} else {
 		var nextDecrement = 0;
 		var count = 0;
@@ -415,7 +415,7 @@ mapper64.prototype.updateIRQTime = function( cpuTime, doSync ) {
 				newEvent = nextDecrement + ( count * ( COLOUR_ENCODING_MTC_PER_CPU * 4 ) ) + COLOUR_ENCODING_MTC_PER_CPU; // RAMBO-1: The actual interrupt triggers one M2 cycle later than one would naively expect.
 			}
 		}
-		this.mainboard.synchroniser.changeEventTime( this._irqEventId, newEvent );
+		this.mainboard.synchroniser.changeEventTime( this.irqEventId, newEvent );
 	}
 };
 
@@ -442,7 +442,7 @@ mapper64.prototype.calculateNextCpuCycleDecrement = function( startTicks ) {
 
 mapper64.prototype.synchronise = function( startTicks, endTicks ) {
 
-	if ( !this._cpuCycleMode ) {
+	if ( !this.cpuCycleMode ) {
 		/*
 	The heart of the MMC3. The PPU will cause A12 to rise when it fetches CHR from the right pattern table ($1xxx).
 	In "normal" conditions (BG uses $0xxx, all sprites use $1xxx), this will occur 8 times per scanline (once for each sprite).
@@ -461,7 +461,7 @@ mapper64.prototype.synchronise = function( startTicks, endTicks ) {
 		var startMtc = this.calculateNextA12Raise( startTicks+1 );
 		if ( startMtc >= 0 )
 		{
-			for ( var mtc = startMtc; mtc <= Math.min( this._A12UpperLimit, endTicks ); mtc += MASTER_CYCLES_PER_SCANLINE )
+			for ( var mtc = startMtc; mtc <= Math.min( this.A12UpperLimit, endTicks ); mtc += MASTER_CYCLES_PER_SCANLINE )
 			{
 				this.decrementIrqCounter( mtc );
 			}

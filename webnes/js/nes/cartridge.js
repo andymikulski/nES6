@@ -9,16 +9,16 @@ var cartridge = function( mainboard ) {
 
 	this.mainboard = mainboard;
 	this.memoryMapper = null;
-	this._sha1 = '';
-	this._name = '';
-	this._dbData = null;
-	this._colourEncodingType = g_DefaultColourEncoding;
+	this.sha1 = '';
+	this.name = '';
+	this.dbData = null;
+	this.colourEncodingType = g_DefaultColourEncoding;
 };
 
 
 cartridge.prototype.areGameGenieCodesAvailable = function() {
 
-	return !!( this._dbData && this._dbData['gameGenieCodes'] && this._dbData['gameGenieCodes'].length > 0 );
+	return !!( this.dbData && this.dbData['gameGenieCodes'] && this.dbData['gameGenieCodes'].length > 0 );
 };
 
 
@@ -59,9 +59,9 @@ var getHighestFrequencyElement = function( map ) {
 cartridge.prototype._getMapperFromDatabase = function( mapperIdFromInes ) {
 
 	var mapperIdFrequency = {};
-	if ( this._dbData && this._dbData['cartridge'] ) {
+	if ( this.dbData && this.dbData['cartridge'] ) {
 		var foundInesMapper = false;
-		this._dbData['cartridge'].forEach( function( cart ) {
+		this.dbData['cartridge'].forEach( function( cart ) {
 			if ( cart['board'] ) {
 				cart['board'].forEach( function( board ) {
 					if ( board['$']['mapper'] === mapperIdFromInes ) {
@@ -109,8 +109,8 @@ cartridge.prototype._determineColourEncodingType = function( filename ) {
 	};
 
 	var systemFrequency = {};
-	if ( this._dbData && this._dbData['cartridge'] ) {
-		this._dbData['cartridge'].forEach( function( cart ) {
+	if ( this.dbData && this.dbData['cartridge'] ) {
+		this.dbData['cartridge'].forEach( function( cart ) {
 			if ( cart['$']['system'] ) {
 				var lower = cart['$']['system'].toLowerCase();
 
@@ -126,22 +126,22 @@ cartridge.prototype._determineColourEncodingType = function( filename ) {
 
 		var mostFrequentType = getHighestFrequencyElement( systemFrequency );
 		if ( mostFrequentType !== null ) {
-			this._colourEncodingType = mostFrequentType;
+			this.colourEncodingType = mostFrequentType;
 			return;
 		}
 	}
 
-	this._colourEncodingType = this._workOutColourEncodingFromFilename( filename );
+	this.colourEncodingType = this.workOutColourEncodingFromFilename( filename );
 };
 
 
 cartridge.prototype.getName = function() {
-	return this._name;
+	return this.name;
 };
 
 
 cartridge.prototype.getHash = function() {
-	return this._sha1;
+	return this.sha1;
 };
 
 
@@ -158,7 +158,7 @@ cartridge.prototype._loadData = function( name, binaryString, completeCallback )
 
 	var that = this;
 	try {
-		this._name = name;
+		this.name = name;
 
 		var stringIndex = 0;
 		var correctHeader = [ 78, 69, 83, 26 ];
@@ -198,10 +198,10 @@ cartridge.prototype._loadData = function( name, binaryString, completeCallback )
 			stringIndex += 512;
 
 		// calculate SHA1 on PRG and CHR data, look it up in the db, then load it
-		this._sha1 = Nes.calculateSha1( binaryString, stringIndex );
-		console.log( "SHA1: " + this._sha1 );
+		this.sha1 = Nes.calculateSha1( binaryString, stringIndex );
+		console.log( "SHA1: " + this.sha1 );
 
-		Nes.dbLookup( this._sha1, function( err, data ) {
+		Nes.dbLookup( this.sha1, function( err, data ) {
 			if ( err ) {
 				completeCallback( err );
 				return;

@@ -23,40 +23,40 @@ export default class Synchroniser extends EventBus {
 		this.mainboard.connect( 'reset', ::this.reset);
 		this.cpu = mainboard.cpu;
 		this.cpuMtc = 0;
-		this._lastSynchronisedMtc = 0;
-		this._isSynchronising = false;
-		this._newEventInserted = false;
-		this._cpuMTCatEndOfInstruction = new Int32Array( 8 ); // Array of ppu MTC counts which the last X instructions have ended on.
-		this._cpuMTCatEndOfInstructionIndex = 0; // This is for determining if an NMI trigger should delay by an instruction or not.
+		this.lastSynchronisedMtc = 0;
+		this.isSynchronising = false;
+		this.newEventInserted = false;
+		this.cpuMTCatEndOfInstruction = new Int32Array( 8 ); // Array of ppu MTC counts which the last X instructions have ended on.
+		this.cpuMTCatEndOfInstructionIndex = 0; // This is for determining if an NMI trigger should delay by an instruction or not.
 
-		this._events = [];
-		this._objects = [];
+		this.events = [];
+		this.objects = [];
 	}
 
 
 	reset( cold ) {
 		this.cpuMtc = 0;
-		this._lastSynchronisedMtc = 0;
-		this._cpuMTCatEndOfInstructionIndex = 0;
-		this._isSynchronising = false;
-		this._newEventInserted = false;
+		this.lastSynchronisedMtc = 0;
+		this.cpuMTCatEndOfInstructionIndex = 0;
+		this.isSynchronising = false;
+		this.newEventInserted = false;
 	}
 
 	changeEventTime( eventId, tickCount ) {
 
-		var obj = this._getEvent( eventId );
+		var obj = this.getEvent( eventId );
 		obj.tickCount = tickCount;
-		this._executeCallbackIfSynchronising( obj );
-		this._newEventInserted = true;
+		this.executeCallbackIfSynchronising( obj );
+		this.newEventInserted = true;
 	}
 
 
 	_removeEvent( name ) {
 
-		for ( var i=0; i<this._events.length; ++i ) {
-			var ev = this._events[i];
+		for ( var i=0; i<this.events.length; ++i ) {
+			var ev = this.events[i];
 			if ( ev.name === name ) {
-				return this._events.splice( i, 1 )[0];
+				return this.events.splice( i, 1 )[0];
 			}
 		}
 		return null;
@@ -65,25 +65,25 @@ export default class Synchroniser extends EventBus {
 
 	_getEvent( eventId ) {
 
-		return this._events[ eventId ];
+		return this.events[ eventId ];
 	}
 
 
 	addEvent( name, tickCount, callback ) {
 
-		this._removeEvent( name );
+		this.removeEvent( name );
 		var obj = new SyncEvent( name, tickCount, callback );
-		this._executeCallbackIfSynchronising( obj );
-		this._events.push( obj );
-		this._newEventInserted = true;
-		return this._events.length - 1;
+		this.executeCallbackIfSynchronising( obj );
+		this.events.push( obj );
+		this.newEventInserted = true;
+		return this.events.length - 1;
 	}
 
 
 	_executeCallbackIfSynchronising( event ) {
-		if ( this._isSynchronising && event.tickCount >= 0 ) {
+		if ( this.isSynchronising && event.tickCount >= 0 ) {
 			// if a new event has been added during synchronisation, execute it immediately if it is due
-			if ( this._lastSynchronisedMtc < event.tickCount && this._currentSyncValue >= event.tickCount ) {
+			if ( this.lastSynchronisedMtc < event.tickCount && this.currentSyncValue >= event.tickCount ) {
 				event.callback( event.tickCount );
 			}
 		}
@@ -92,7 +92,7 @@ export default class Synchroniser extends EventBus {
 
 	addObject( name, obj ) {
 
-		this._objects.push( { name: name, object: obj, lastSynchronisedTickCount: 0 } );
+		this.objects.push( { name: name, object: obj, lastSynchronisedTickCount: 0 } );
 	}
 
 
@@ -100,7 +100,7 @@ export default class Synchroniser extends EventBus {
 
 		var frameEnd = COLOUR_ENCODING_FRAME_MTC;
 
-		if ( this._isSynchronising ) {
+		if ( this.isSynchronising ) {
 			//debugger;
 			throw new Error( "Cannot call synchronise synchronisation phase" );
 		}
@@ -120,36 +120,36 @@ export default class Synchroniser extends EventBus {
 				syncTo = Math.min( syncTo, frameEnd );
 			}
 
-			if ( this._lastSynchronisedMtc >= syncTo ) {
+			if ( this.lastSynchronisedMtc >= syncTo ) {
 				return;
 			}
 
-			this._isSynchronising = true;
-			this._currentSyncValue = syncTo;
+			this.isSynchronising = true;
+			this.currentSyncValue = syncTo;
 
-			for ( objIndex=0; objIndex<this._objects.length; ++objIndex ) {
+			for ( objIndex=0; objIndex<this.objects.length; ++objIndex ) {
 				// TODO: Objects should be forbidden from calling synchroniser.synchronise() whilst in the synchronise phase - if they
 				// want to force a synchronise they should do so using an event
-				var obj = this._objects[ objIndex ];
+				var obj = this.objects[ objIndex ];
 				if ( obj.lastSynchronisedTickCount < syncTo ) {
 					obj.object.synchronise( obj.lastSynchronisedTickCount, syncTo );
 					obj.lastSynchronisedTickCount = syncTo;
 				}
 			}
-			this._isSynchronising = false;
+			this.isSynchronising = false;
 
-			this._executeEvents( this._lastSynchronisedMtc, syncTo );
-			this._lastSynchronisedMtc = syncTo;
+			this.executeEvents( this.lastSynchronisedMtc, syncTo );
+			this.lastSynchronisedMtc = syncTo;
 
 			// TODO: this should be an event: do end frame stuff if that time has come
 			if ( syncTo >= frameEnd ) {
-				for ( objIndex=0; objIndex<this._objects.length; ++objIndex ) {
-					this._objects[ objIndex ].object.onEndFrame( syncTo );
-					this._objects[ objIndex ].lastSynchronisedTickCount = 0;
+				for ( objIndex=0; objIndex<this.objects.length; ++objIndex ) {
+					this.objects[ objIndex ].object.onEndFrame( syncTo );
+					this.objects[ objIndex ].lastSynchronisedTickCount = 0;
 				}
 
 				this.cpuMtc -= frameEnd;
-				this._lastSynchronisedMtc = 0;
+				this.lastSynchronisedMtc = 0;
 				this.invoke( 'frameEnd' );
 			}
 		}
@@ -159,10 +159,10 @@ export default class Synchroniser extends EventBus {
 	getNextEventTime( currentTime ) {
 
 		var frameEnd = COLOUR_ENCODING_FRAME_MTC;
-		currentTime = currentTime || this._lastSynchronisedMtc;
+		currentTime = currentTime || this.lastSynchronisedMtc;
 		var closestObj = null;
-		for ( var eventIndex=0; eventIndex<this._events.length; ++eventIndex ) {
-			var ev = this._events[ eventIndex ];
+		for ( var eventIndex=0; eventIndex<this.events.length; ++eventIndex ) {
+			var ev = this.events[ eventIndex ];
 			if ( ev.tickCount >= 0 && ev.tickCount > currentTime ) {
 				if ( closestObj === null || ev.tickCount < closestObj.tickCount ) {
 					closestObj = ev;
@@ -175,8 +175,8 @@ export default class Synchroniser extends EventBus {
 
 	_executeEvents( startTime, endTime ) {
 
-		for ( var eventIndex=0; eventIndex<this._events.length; ++eventIndex ) {
-			var ev = this._events[ eventIndex ];
+		for ( var eventIndex=0; eventIndex<this.events.length; ++eventIndex ) {
+			var ev = this.events[ eventIndex ];
 			if ( ev.tickCount >= 0 && ev.tickCount > startTime && ev.tickCount <= endTime ) {
 				ev.callback( ev.tickCount );
 			}
@@ -196,11 +196,11 @@ export default class Synchroniser extends EventBus {
 			}
 			this.mainboard.ppu.handleSpriteTransfer();
 			this.cpuMtc += cpuTicks * COLOUR_ENCODING_MTC_PER_CPU;
-			this._cpuMTCatEndOfInstruction[this._cpuMTCatEndOfInstructionIndex] = this.cpuMtc;
-			this._cpuMTCatEndOfInstructionIndex = ( this._cpuMTCatEndOfInstructionIndex + 1 ) & 0x7;
+			this.cpuMTCatEndOfInstruction[this.cpuMTCatEndOfInstructionIndex] = this.cpuMtc;
+			this.cpuMTCatEndOfInstructionIndex = ( this.cpuMTCatEndOfInstructionIndex + 1 ) & 0x7;
 
-			if ( this._newEventInserted ) {
-				this._newEventInserted = false;
+			if ( this.newEventInserted ) {
+				this.newEventInserted = false;
 				nextEventTime = this.getNextEventTime();
 			}
 		}
@@ -212,8 +212,8 @@ export default class Synchroniser extends EventBus {
 
 	isPpuTickOnLastCycleOfCpuInstruction( ppuCount ) {
 
-		for ( var i=0; i<this._cpuMTCatEndOfInstruction.length; ++i ) {
-			var cpuCount = this._cpuMTCatEndOfInstruction[ i ];
+		for ( var i=0; i<this.cpuMTCatEndOfInstruction.length; ++i ) {
+			var cpuCount = this.cpuMTCatEndOfInstruction[ i ];
 			if ( cpuCount - COLOUR_ENCODING_MTC_PER_CPU <= ppuCount && cpuCount + MASTER_CYCLES_PER_PPU >= ppuCount ) {
 				return true;
 			}
@@ -236,13 +236,13 @@ export default class Synchroniser extends EventBus {
 		// TODO: save event data in state, maybe not necessary as save state is done on the end of a frame?
 		var data = {};
 		data.cpuMtc = this.cpuMtc;
-		data._lastSynchronisedMtc = this._lastSynchronisedMtc;
+		data._lastSynchronisedMtc = this.lastSynchronisedMtc;
 		return data;
 	}
 
 
 	loadState( state ) {
 		this.cpuMtc = state.cpuMtc;
-		this._lastSynchronisedMtc = state._lastSynchronisedMtc;
+		this.lastSynchronisedMtc = state._lastSynchronisedMtc;
 	}
 }

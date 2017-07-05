@@ -27,8 +27,8 @@ var backgroundScrollReloadTime = 0; // this.ppu.screenCoordinatesToTicks( Scroll
 var PpuRenderBg = function( ppu ) {
 
 	this.ppu = ppu;
-	this._spriteZeroHit = false;
-	this._useMMC2Latch = false;
+	this.spriteZeroHit = false;
+	this.useMMC2Latch = false;
 };
 
 
@@ -38,34 +38,34 @@ PpuRenderBg.prototype.reset = function() {
 	backgroundRenderingEnd = this.ppu.screenCoordinatesToTicks( SecondLastTileReloadTime-1, 239 );
 	backgroundScrollReloadTime = this.ppu.screenCoordinatesToTicks( ScrollReloadTime, -1 );
 
-	this._bgTableAddress = 0;
-	this._spriteZeroHit = false;
-	this._renderBuffer = this.ppu.mainboard.renderBuffer;
-	this._useMMC2Latch = this.ppu.mainboard.cart.memoryMapper.MMC2Latch !== undefined;
+	this.bgTableAddress = 0;
+	this.spriteZeroHit = false;
+	this.renderBuffer = this.ppu.mainboard.renderBuffer;
+	this.useMMC2Latch = this.ppu.mainboard.cart.memoryMapper.MMC2Latch !== undefined;
 };
 
 
 PpuRenderBg.prototype.onControl1Change = function( control1 ) {
 
-	this._bgTableAddress = ( control1 & 0x10 ) > 0 /*ppuControl1.screenPatternTableAddress*/ ? 0x1000 : 0;
+	this.bgTableAddress = ( control1 & 0x10 ) > 0 /*ppuControl1.screenPatternTableAddress*/ ? 0x1000 : 0;
 };
 
 
 PpuRenderBg.prototype.onEndFrame = function() {
 
-	this._spriteZeroHit = false;
+	this.spriteZeroHit = false;
 };
 
 
 PpuRenderBg.prototype.saveState = function( data ) {
 
-	data._spriteZeroHit = this._spriteZeroHit;
+	data._spriteZeroHit = this.spriteZeroHit;
 };
 
 
 PpuRenderBg.prototype.loadState = function( state ) {
 
-	this._spriteZeroHit = state._spriteZeroHit;
+	this.spriteZeroHit = state._spriteZeroHit;
 };
 
 
@@ -84,7 +84,7 @@ PpuRenderBg.prototype._renderTile = function( ppuReadAddress, tilenum, posy, cli
 	var tileNumber = this.ppu.readNameTable( nameTableAddress, 0 );
 
 	// (screen address) + (tilenumber * 16) + finey
-	var tileAddress = this._bgTableAddress + tileNumber * 16 + ((ppuReadAddress & 0x7000) >> 12);
+	var tileAddress = this.bgTableAddress + tileNumber * 16 + ((ppuReadAddress & 0x7000) >> 12);
 	var attributeByte = this.ppu.readNameTable( 0x23C0 | (ppuReadAddress & 0x0C00) | ((vtile & 0x1C) << 1) | ( (htile >> 2) & 0x7 ), 1 );
 
 	var mergeByte = 0;
@@ -108,7 +108,7 @@ PpuRenderBg.prototype._renderTile = function( ppuReadAddress, tilenum, posy, cli
 	var firstByte = this.ppu.read8( tileAddress, false, 2 );
 	var secondByte = this.ppu.read8( tileAddress + 8, false, 3 );
 
-	if ( this._useMMC2Latch ) {
+	if ( this.useMMC2Latch ) {
 		this.ppu.mainboard.cart.memoryMapper.MMC2Latch( tileAddress + 8 );
 	}
 
@@ -136,13 +136,13 @@ PpuRenderBg.prototype._renderTile = function( ppuReadAddress, tilenum, posy, cli
 				if ( ( paletteIndex & 0x3 ) === 0 )
 					paletteIndex = 0;
 
-				if ( this._renderBuffer.renderPixel( x, renderScanline, TYPED_ARRAY_GET_INT32( this.ppu.paletteTables[ 0 ], paletteIndex & 0xF ) | 0 ) ) {
+				if ( this.renderBuffer.renderPixel( x, renderScanline, TYPED_ARRAY_GET_INT32( this.ppu.paletteTables[ 0 ], paletteIndex & 0xF ) | 0 ) ) {
 
 					// Sprite zero hit - will happen in the future as this is the prefetch
-					if ( !this._spriteZeroHit ) {
+					if ( !this.spriteZeroHit ) {
 						triggerTime = this.ppu.screenCoordinatesToTicks( x, renderScanline );
-						Nes.Trace.writeLine( Nes.trace_ppu, "[" + this.ppu.frameCounter + "] PPU sprite hit scheduled for @ " + x + "x" + renderScanline + " (" + triggerTime + ")" );
-						this._spriteZeroHit = true;
+						Nes.Trace.writeLine( Nes.tracePpu, "[" + this.ppu.frameCounter + "] PPU sprite hit scheduled for @ " + x + "x" + renderScanline + " (" + triggerTime + ")" );
+						this.spriteZeroHit = true;
 						this.ppu.mainboard.synchroniser.changeEventTime( this.ppu._spriteZeroEventId, triggerTime );
 					}
 				}
@@ -222,7 +222,7 @@ PpuRenderBg.prototype._incrementX = function( ppuReadAddress ) {
 
 PpuRenderBg.prototype.renderTo = function( startTicks, endTicks, ppuReadAddress, ppuLatchAddress ) {
 
-	Nes.Trace.writeLine( Nes.trace_ppu, 'sync: startTicks=' + startTicks + ' endTicks=' + endTicks );
+	Nes.Trace.writeLine( Nes.tracePpu, 'sync: startTicks=' + startTicks + ' endTicks=' + endTicks );
 
 	var ticksInFirstLine = 0;
 	var ticksAtFirstScanline = 0;
@@ -285,14 +285,14 @@ PpuRenderBg.prototype.renderTo = function( startTicks, endTicks, ppuReadAddress,
 			}
 
 			if ( backgroundRenderingEnabled ) {
-				this._renderTile( ppuReadAddress, tilenum, scanline, clippingEnabled );
+				this.renderTile( ppuReadAddress, tilenum, scanline, clippingEnabled );
 			}
-			ppuReadAddress = this._incrementX( ppuReadAddress );
+			ppuReadAddress = this.incrementX( ppuReadAddress );
 		}
 
 		// render last tile on screen, increment Y
 		if ( incrementYTime < backgroundRenderingEnd && incrementYTime > startTicks && incrementYTime <= endTicks ) {
-			ppuReadAddress = this._incrementY( ppuReadAddress );
+			ppuReadAddress = this.incrementY( ppuReadAddress );
 		}
 
 		//Nes.Trace.writeLine( 'ppu', 'reloadTime=' + JSON.stringify( this.ppu.ticksToScreenCoordinates( reloadTime ) ) + " scanlineStart=" + JSON.stringify( this.ppu.ticksToScreenCoordinates( scanlineStart ) ) );

@@ -11,13 +11,13 @@ this.Gui = this.Gui || {};
 
 		globalInstance = this;
 		var that = this;
-		this._strArray = [];
-		this._dataArray = [];
-		this._element = document.createElement('textarea');
-		this._element.rows = 15;
-		this._element.cols = 80;
-		divElement.appendChild( this._element );
-		this._mainboard = mainboard;
+		this.strArray = [];
+		this.dataArray = [];
+		this.element = document.createElement('textarea');
+		this.element.rows = 15;
+		this.element.cols = 80;
+		divElement.appendChild( this.element );
+		this.mainboard = mainboard;
 
 		setInterval( function() { that._onTextRefresh(); }, 1000 );
 	};
@@ -25,14 +25,14 @@ this.Gui = this.Gui || {};
 
 	LogWindow.prototype._onLog = function( log ) {
 		//console.log( log );
-		//this._addData( log );
+		//this.addData( log );
 	};
 
 
 	LogWindow.prototype._addData = function( obj ) {
-		this._dataArray.push( obj );
-		if ( this._dataArray.length > 80 ) {
-			this._dataArray.shift();
+		this.dataArray.push( obj );
+		if ( this.dataArray.length > 80 ) {
+			this.dataArray.shift();
 		}
 	};
 
@@ -40,11 +40,11 @@ this.Gui = this.Gui || {};
 	LogWindow.prototype._onTextRefresh = function( consoleToo ) {
 
 		var tot = '';
-		for ( var i=0; i<this._dataArray.length; ++i ) {
-			var str = this._dataArray[i];
+		for ( var i=0; i<this.dataArray.length; ++i ) {
+			var str = this.dataArray[i];
 			tot += str + "\r\n";
 		}
-		this._element.innerHTML = tot;
+		this.element.innerHTML = tot;
 		if ( consoleToo ) {
 			console.log( tot );
 		}

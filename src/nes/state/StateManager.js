@@ -6,17 +6,17 @@ import {
 
 export default class StateManager {
   constructor(app, createGuiComponents) {
-    this._app = app;
-    this._mainboard = this._app._mainboard;
-    this._renderSurface = this._app._renderSurface;
+    this.app = app;
+    this.mainboard = this.app._mainboard;
+    this.renderSurface = this.app._renderSurface;
 
-    this._loadPending = '';
-    this._loadStatePending = false;
-    this._saveStatePending = false;
+    this.loadPending = '';
+    this.loadStatePending = false;
+    this.saveStatePending = false;
   }
 
   quickSaveState() {
-    this._saveStatePending = true;
+    this.saveStatePending = true;
   }
 
   quickLoadState() {
@@ -24,36 +24,36 @@ export default class StateManager {
   }
 
   loadState(slotName) {
-    this._loadPending = slotName;
-    this._loadStatePending = true;
+    this.loadPending = slotName;
+    this.loadStatePending = true;
   }
 
 
   _doQuickSave() {
 		// push back previous quicksaves by renaming them, pushing them back in the queue
-    const hash = this._mainboard.cart.getHash();
+    const hash = this.mainboard.cart.getHash();
     renameQuickSaveStates('quicksave', hash, 3);
-    const screen = this._renderSurface.screenshotToString();
-    const state = this._mainboard.saveState();
+    const screen = this.renderSurface.screenshotToString();
+    const state = this.mainboard.saveState();
     saveState('quicksave', hash, state, screen);
   }
 
 
   _doQuickLoad() {
-    const state = loadState(this._loadPending, this._mainboard.cart.getHash());
+    const state = loadState(this.loadPending, this.mainboard.cart.getHash());
     if (state) {
-      this._mainboard.loadState(state);
+      this.mainboard.loadState(state);
     }
   }
 
   onFrame() {
-    if (this._mainboard.cart) {
-      if (this._saveStatePending) {
-        this._saveStatePending = false;
-        this._doQuickSave();
-      } else if (this._loadStatePending) {
-        this._loadStatePending = false;
-        this._doQuickLoad();
+    if (this.mainboard.cart) {
+      if (this.saveStatePending) {
+        this.saveStatePending = false;
+        this.doQuickSave();
+      } else if (this.loadStatePending) {
+        this.loadStatePending = false;
+        this.doQuickLoad();
       }
     }
   }
