@@ -1,17 +1,17 @@
 import BaseMapper from './BaseMapper.js';
 import {
-	COLOUR_ENCODING_VBLANK_SCANLINES,
-	MASTER_CYCLES_PER_SCANLINE,
-	COLOUR_ENCODING_FRAME_SCANLINES,
-	MASTER_CYCLES_PER_PPU,
-	PPU_MIRRORING_VERTICAL,
-	PPU_MIRRORING_HORIZONTAL,
-	IS_INT_BETWEEN,
+  COLOUR_ENCODING_VBLANK_SCANLINES,
+  MASTER_CYCLES_PER_SCANLINE,
+  COLOUR_ENCODING_FRAME_SCANLINES,
+  MASTER_CYCLES_PER_PPU,
+  PPU_MIRRORING_VERTICAL,
+  PPU_MIRRORING_HORIZONTAL,
+  IS_INT_BETWEEN,
 } from '../../config/consts.js';
 
 import {
-	uintArrayToString,
-	stringToUintArray,
+  uintArrayToString,
+  stringToUintArray,
 } from '../../utils/serialisation';
 
 export default class Mapper4 extends BaseMapper {
@@ -40,8 +40,8 @@ export default class Mapper4 extends BaseMapper {
     this.banks[7] = 1;
   }
 
-  _eventIrq() {
-		// don't do anything - call to synchronise() will trigger the irq
+  eventIrq() {
+    // don't do anything - call to synchronise() will trigger the irq
     this.mainboard.synchroniser.changeEventTime(this.irqEventId, -1);
   }
 
@@ -53,14 +53,14 @@ export default class Mapper4 extends BaseMapper {
     state.irqCounter = this.irqCounter;
     state.irqLatch = this.irqLatch;
     state.mReloadFlag = this.mReloadFlag;
-    state._isMMC6 = this.isMMC6;
-    state._mmc6PrgRamWriteByte = this.mmc6PrgRamWriteByte;
+    state.isMMC6 = this.isMMC6;
+    state.mmc6PrgRamWriteByte = this.mmc6PrgRamWriteByte;
     state.lastA12Raise = this.lastA12Raise;
     state.mSpriteAddress = this.mSpriteAddress;
     state.mScreenAddress = this.mScreenAddress;
     state.mRenderingEnabled = this.mRenderingEnabled;
     state.banks = uintArrayToString(this.banks);
-    state._interruptInProgress = this.interruptInProgress;
+    state.interruptInProgress = this.interruptInProgress;
   }
 
   mapperLoadState(state) {
@@ -71,14 +71,14 @@ export default class Mapper4 extends BaseMapper {
     this.irqCounter = state.irqCounter;
     this.irqLatch = state.irqLatch;
     this.mReloadFlag = state.mReloadFlag;
-    this.isMMC6 = state._isMMC6;
-    this.mmc6PrgRamWriteByte = state._mmc6PrgRamWriteByte;
+    this.isMMC6 = state.isMMC6;
+    this.mmc6PrgRamWriteByte = state.mmc6PrgRamWriteByte;
     this.lastA12Raise = state.lastA12Raise;
     this.mSpriteAddress = state.mSpriteAddress;
     this.mScreenAddress = state.mScreenAddress;
     this.mRenderingEnabled = state.mRenderingEnabled;
     this.banks = stringToUintArray(state.banks);
-    this.interruptInProgress = state._interruptInProgress;
+    this.interruptInProgress = state.interruptInProgress;
   }
 
   syncBanks(doPrg, doChr) {
@@ -132,9 +132,9 @@ export default class Mapper4 extends BaseMapper {
   }
 
 
-  _lookInDbForMMC6() {
-    if (this.mainboard.cart && this.mainboard.cart._dbData) {
-      const db = this.mainboard.cart._dbData;
+  lookInDbForMMC6() {
+    if (this.mainboard.cart && this.mainboard.cart.dbData) {
+      const db = this.mainboard.cart.dbData;
       if (db.cartridge && db.cartridge[0].board && db.cartridge[0].board[0]) {
         const board = db.cartridge[0].board[0];
         if (board.chip && board.chip[0]) {
@@ -184,9 +184,9 @@ export default class Mapper4 extends BaseMapper {
     }
 
     const that = this;
-		// TODO: Need to remove this event on mapper unload
+    // TODO: Need to remove this event on mapper unload
     this.irqEventId = this.mainboard.synchroniser.addEvent('mmc3 irq', -1, () => {
-      that._eventIrq();
+      that.eventIrq();
     });
 
     this.syncBanks(true, true);
@@ -258,13 +258,13 @@ export default class Mapper4 extends BaseMapper {
             this.mainboard.cpu.holdIrqLineLow(false);
             this.interruptInProgress = false;
           }
-					//				Log::Write( LOG_MAPPER, ( boost::format( "Interrupts disabled on mapper" ) ).str() );
+          //				Log::Write( LOG_MAPPER, ( boost::format( "Interrupts disabled on mapper" ) ).str() );
         } else { // odd
           if (!this.interruptsEnabled) {
             this.mainboard.synchroniser.synchronise();
           }
           this.interruptsEnabled = true;
-					//				Log::Write( LOG_MAPPER, ( boost::format( "Interrupts enabled on mapper" ) ).str() );
+          //				Log::Write( LOG_MAPPER, ( boost::format( "Interrupts enabled on mapper" ) ).str() );
         }
         this.updateIRQTime(this.mainboard.synchroniser.getCpuMTC(), true);
         break;
@@ -272,13 +272,13 @@ export default class Mapper4 extends BaseMapper {
   }
 
   decrementIrqCounter(tickCount) {
-		// var pos = this.mainboard.ppu.ticksToScreenCoordinates( tickCount );
-		// var cpupos = this.mainboard.ppu.ticksToScreenCoordinates( this.mainboard.synchroniser.getCpuMTC() );
+    // var pos = this.mainboard.ppu.ticksToScreenCoordinates( tickCount );
+    // var cpupos = this.mainboard.ppu.ticksToScreenCoordinates( this.mainboard.synchroniser.getCpuMTC() );
 
     this.lastA12Raise = tickCount;
     let doIrq = false;
 
-		// console.log( "[" + this.mainboard.ppu.frameCounter + "] Doing decrement at " + pos.x + "x" + pos.y + " cpu: " + cpupos.x + "x" + cpupos.y + " : " + this.irqCounter );
+    // console.log( "[" + this.mainboard.ppu.frameCounter + "] Doing decrement at " + pos.x + "x" + pos.y + " cpu: " + cpupos.x + "x" + cpupos.y + " : " + this.irqCounter );
 
     if (this.mReloadFlag) {
       doIrq = this.irqLatch === 0; // MMC3 revA behaviour
@@ -295,10 +295,10 @@ export default class Mapper4 extends BaseMapper {
     }
 
     if (doIrq && this.interruptsEnabled && !this.interruptInProgress) {
-			//	if ( this.mainboard.ppu.frameCounter === 43 && pos.x === 260 && pos.y === 0 ) {
-			//				debugger;
-			//		}
-			// console.log( "[" + this.mainboard.ppu.frameCounter + "]" + pos.x + "x" + pos.y + " IRQ cpu: " + cpupos.x + "x" + cpupos.y );
+      //	if ( this.mainboard.ppu.frameCounter === 43 && pos.x === 260 && pos.y === 0 ) {
+      //				debugger;
+      //		}
+      // console.log( "[" + this.mainboard.ppu.frameCounter + "]" + pos.x + "x" + pos.y + " IRQ cpu: " + cpupos.x + "x" + cpupos.y );
       this.interruptInProgress = true;
       this.mainboard.cpu.holdIrqLineLow(true);
     }
@@ -316,7 +316,7 @@ export default class Mapper4 extends BaseMapper {
 
 
   calculateNextA12Raise(cpuMTC) {
-		// TODO: refactor this - could be more efficient
+    // TODO: refactor this - could be more efficient
     let pixelEvent = -1;
     let firstScanline = 0;
     if (this.mRenderingEnabled) {
@@ -324,13 +324,13 @@ export default class Mapper4 extends BaseMapper {
         pixelEvent = 265; // 260
         firstScanline = 0;
       }
-			// else if ( this.mSpriteAddress && this.mScreenAddress )
-			// {
-			// pixelEvent = 340;//324;
-			// firstScanline = -1;
-			// }
+      // else if ( this.mSpriteAddress && this.mScreenAddress )
+      // {
+      // pixelEvent = 340;//324;
+      // firstScanline = -1;
+      // }
       else // if ( this.mScreenAddress && !this.mSpriteAddress )
-			{
+      {
         pixelEvent = 9; // 324; // 9;
         firstScanline = 0; // -1;
       }
@@ -359,7 +359,7 @@ export default class Mapper4 extends BaseMapper {
       this.mainboard.synchroniser.synchronise();
     }
 
-		// tickLimit is the start of the rendering frame - only started being clocked when rendering
+    // tickLimit is the start of the rendering frame - only started being clocked when rendering
     let newEvent = -1;
     let nextRaise = 0;
     let scanlines = 0;
@@ -373,12 +373,12 @@ export default class Mapper4 extends BaseMapper {
         if (newEvent > this.A12UpperLimit) {
           newEvent = -1;
         } else {
-					// var pos = this.mainboard.ppu.ticksToScreenCoordinates( newEvent );
-					// var cpupos = this.mainboard.ppu.ticksToScreenCoordinates( this.mainboard.synchroniser.getCpuMTC() );
-					// if ( this.mainboard.ppu.frameCounter === 43 && pos.x === 260 && pos.y === 0 ) {
-					// debugger;
-					// }
-					// console.log( "Predicting next IRQ at " + pos.x + "x" + pos.y + " cpu: " + cpupos.x + "x" + cpupos.y );
+          // var pos = this.mainboard.ppu.ticksToScreenCoordinates( newEvent );
+          // var cpupos = this.mainboard.ppu.ticksToScreenCoordinates( this.mainboard.synchroniser.getCpuMTC() );
+          // if ( this.mainboard.ppu.frameCounter === 43 && pos.x === 260 && pos.y === 0 ) {
+          // debugger;
+          // }
+          // console.log( "Predicting next IRQ at " + pos.x + "x" + pos.y + " cpu: " + cpupos.x + "x" + cpupos.y );
         }
       }
     }
@@ -412,7 +412,7 @@ export default class Mapper4 extends BaseMapper {
 
 	If sprites are set to $0000-0FFF and the background is set to $1000-1FFF, then A12 will change from 1 to 0 at cycle 256 of each scanline, then change from 0 to 1 at cycle 324 of each scanline.
 	*/
-		// tickLimit is the start of the rendering frame - only started being clocked when rendering
+    // tickLimit is the start of the rendering frame - only started being clocked when rendering
     const startMtc = this.calculateNextA12Raise(startTicks + 1);
     if (startMtc >= 0) {
       for (let mtc = startMtc; mtc <= Math.min(this.A12UpperLimit, endTicks); mtc += MASTER_CYCLES_PER_SCANLINE) {

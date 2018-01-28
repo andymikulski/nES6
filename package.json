@@ -17,8 +17,8 @@
   "scripts": {
     "test": "echo \"No tests specified\" && true",
     "watch": "webpack --progress --config ./webpack.config.js --watch",
-    "server": "cd app && python -m SimpleHTTPServer 8000 & cd ..",
-    "dev": "npm run watch & npm run server",
+    "server": "cd app && python -m http.server & cd ..",
+    "dev": "npm run server & npm run watch",
     "build": "webpack -p --progress --config ./webpack.config.js"
   },
   "devDependencies": {

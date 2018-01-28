@@ -1,14 +1,14 @@
 import {
-	renameQuickSaveStates,
-	saveState,
-	loadState,
+  renameQuickSaveStates,
+  saveState,
+  loadState,
 } from './utils';
 
 export default class StateManager {
   constructor(app, createGuiComponents) {
     this.app = app;
-    this.mainboard = this.app._mainboard;
-    this.renderSurface = this.app._renderSurface;
+    this.mainboard = this.app.mainboard;
+    this.renderSurface = this.app.renderSurface;
 
     this.loadPending = '';
     this.loadStatePending = false;
@@ -29,8 +29,8 @@ export default class StateManager {
   }
 
 
-  _doQuickSave() {
-		// push back previous quicksaves by renaming them, pushing them back in the queue
+  doQuickSave() {
+    // push back previous quicksaves by renaming them, pushing them back in the queue
     const hash = this.mainboard.cart.getHash();
     renameQuickSaveStates('quicksave', hash, 3);
     const screen = this.renderSurface.screenshotToString();
@@ -39,7 +39,7 @@ export default class StateManager {
   }
 
 
-  _doQuickLoad() {
+  doQuickLoad() {
     const state = loadState(this.loadPending, this.mainboard.cart.getHash());
     if (state) {
       this.mainboard.loadState(state);

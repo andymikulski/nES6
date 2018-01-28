@@ -6,7 +6,7 @@ import {
 export default class Memory {
 	constructor(mainboard) {
 		this.mainboard = mainboard;
-		this.mainboard.connect('reset', ::this.reset);
+		this.mainboard.connect('reset', this.reset.bind(this));
 		this.ramPage = new Int32Array(0x800);
 		this.gppu = null;
 		this.gmapper = null;
@@ -26,6 +26,7 @@ export default class Memory {
 			this.ramPage[0x000f] = 0xBF;
 		}
 		this.gppu = this.mainboard.ppu;
+		console.log('adsf');
 		this.gmapper = this.mainboard.cart.memoryMapper;
 		this.ginput = this.mainboard.inputdevicebus;
 		this.gapu = this.mainboard.apu;
@@ -36,7 +37,7 @@ export default class Memory {
 		return this.properRead8(offset & 0xFFFF) & 0xFF;
 	}
 
-	_readRegister4000(offset) {
+	readRegister4000(offset) {
 		var offset4000 = offset & 0x1FE0;
 		if (offset4000 === 0) { // testing top 11 bits - if it's zero it's between 4000 -> 4020
 			if (offset === 0x4016 || offset === 0x4017) {
@@ -53,7 +54,7 @@ export default class Memory {
 		return 0;
 	}
 
-	_properRead8(offset) {
+	properRead8(offset) {
 		// Faster: Top 3 bits are equal to 0x2000 for inbetween 2000 -> 4000, equal to 0 for < 2000 and so on
 		var topbits = offset & 0xE000;
 		var bot3 = offset & 0x7;

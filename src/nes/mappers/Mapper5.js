@@ -1,7 +1,7 @@
 import BaseMapper from './BaseMapper.js';
 import {
-	uintArrayToString,
-	stringToUintArray,
+  uintArrayToString,
+  stringToUintArray,
 } from '../../utils/serialisation';
 
 export default class Mapper5 extends BaseMapper {
@@ -42,76 +42,76 @@ export default class Mapper5 extends BaseMapper {
 
   mapperSaveState(state) {
     state.mRenderingEnabled = this.mRenderingEnabled;
-    state._chrMode = this.chrMode;
-    state._prgMode = this.prgMode;
-    state._exRamMode = this.exRamMode;
+    state.chrMode = this.chrMode;
+    state.prgMode = this.prgMode;
+    state.exRamMode = this.exRamMode;
 
-    state._prgRegisters = uintArrayToString(this.prgRegisters);
-    state._nameTableFill = uintArrayToString(this.nameTableFill);
-    state._internalExRam = uintArrayToString(this.internalExRam);
-    state._prgRam = uintArrayToString(this.prgRam);
+    state.prgRegisters = uintArrayToString(this.prgRegisters);
+    state.nameTableFill = uintArrayToString(this.nameTableFill);
+    state.internalExRam = uintArrayToString(this.internalExRam);
+    state.prgRam = uintArrayToString(this.prgRam);
 
-    state._prgRamPage = this.prgRamPage;
-    state._bigSpritesEnabled = this.bigSpritesEnabled;
+    state.prgRamPage = this.prgRamPage;
+    state.bigSpritesEnabled = this.bigSpritesEnabled;
 
-    state._writeProtectA = this.writeProtectA;
-    state._writeProtectB = this.writeProtectB;
-    state._currentScanline = this.currentScanline;
-    state._irqEnabled = this.irqEnabled;
-    state._irqActive = this.irqActive;
-    state._irqScanlineTrigger = this.irqScanlineTrigger;
-    state._triggerMtc = this.triggerMtc;
-    state._multiplier1 = this.multiplier1;
-    state._multiplier2 = this.multiplier2;
+    state.writeProtectA = this.writeProtectA;
+    state.writeProtectB = this.writeProtectB;
+    state.currentScanline = this.currentScanline;
+    state.irqEnabled = this.irqEnabled;
+    state.irqActive = this.irqActive;
+    state.irqScanlineTrigger = this.irqScanlineTrigger;
+    state.triggerMtc = this.triggerMtc;
+    state.multiplier1 = this.multiplier1;
+    state.multiplier2 = this.multiplier2;
 
-    state._prgRamMap = uintArrayToString(this.prgRamMap);
-    state._prgRamIsActive = uintArrayToString(this.prgRamIsActive);
-    state._nameTableMap = uintArrayToString(this.nameTableMap);
+    state.prgRamMap = uintArrayToString(this.prgRamMap);
+    state.prgRamIsActive = uintArrayToString(this.prgRamIsActive);
+    state.nameTableMap = uintArrayToString(this.nameTableMap);
 
-    state._chrRegsA = uintArrayToString(this.chrRegsA);
-    state._chrRegsB = uintArrayToString(this.chrRegsB);
+    state.chrRegsA = uintArrayToString(this.chrRegsA);
+    state.chrRegsB = uintArrayToString(this.chrRegsB);
 
-    state._chrUseBMap = this.chrUseBMap;
-    state._chrMapA = uintArrayToString(this.chrMapA);
-    state._chrMapB = uintArrayToString(this.chrMapB);
-    state._chrHighBits = this.chrHighBits;
+    state.chrUseBMap = this.chrUseBMap;
+    state.chrMapA = uintArrayToString(this.chrMapA);
+    state.chrMapB = uintArrayToString(this.chrMapB);
+    state.chrHighBits = this.chrHighBits;
   }
 
   mapperLoadState(state) {
     this.mRenderingEnabled = state.mRenderingEnabled;
-    this.chrMode = state._chrMode;
-    this.prgMode = state._prgMode;
-    this.exRamMode = state._exRamMode;
+    this.chrMode = state.chrMode;
+    this.prgMode = state.prgMode;
+    this.exRamMode = state.exRamMode;
 
-    this.prgRegisters = stringToUintArray(state._prgRegisters);
-    this.nameTableFill = stringToUintArray(state._nameTableFill);
-    this.internalExRam = stringToUintArray(state._internalExRam);
-    this.prgRam = stringToUintArray(state._prgRam);
+    this.prgRegisters = stringToUintArray(state.prgRegisters);
+    this.nameTableFill = stringToUintArray(state.nameTableFill);
+    this.internalExRam = stringToUintArray(state.internalExRam);
+    this.prgRam = stringToUintArray(state.prgRam);
 
-    this.prgRamPage = state._prgRamPage;
-    this.bigSpritesEnabled = state._bigSpritesEnabled;
+    this.prgRamPage = state.prgRamPage;
+    this.bigSpritesEnabled = state.bigSpritesEnabled;
 
-    this.writeProtectA = state._writeProtectA;
-    this.writeProtectB = state._writeProtectB;
-    this.currentScanline = state._currentScanline;
-    this.irqEnabled = state._irqEnabled;
-    this.irqActive = state._irqActive;
-    this.irqScanlineTrigger = state._irqScanlineTrigger;
-    this.triggerMtc = state._triggerMtc;
-    this.multiplier1 = state._multiplier1;
-    this.multiplier2 = state._multiplier2;
+    this.writeProtectA = state.writeProtectA;
+    this.writeProtectB = state.writeProtectB;
+    this.currentScanline = state.currentScanline;
+    this.irqEnabled = state.irqEnabled;
+    this.irqActive = state.irqActive;
+    this.irqScanlineTrigger = state.irqScanlineTrigger;
+    this.triggerMtc = state.triggerMtc;
+    this.multiplier1 = state.multiplier1;
+    this.multiplier2 = state.multiplier2;
 
-    this.prgRamMap = stringToUintArray(state._prgRamMap);
-    this.prgRamIsActive = stringToUintArray(state._prgRamIsActive);
-    this.nameTableMap = stringToUintArray(state._nameTableMap);
+    this.prgRamMap = stringToUintArray(state.prgRamMap);
+    this.prgRamIsActive = stringToUintArray(state.prgRamIsActive);
+    this.nameTableMap = stringToUintArray(state.nameTableMap);
 
-    this.chrRegsA = stringToUintArray(state._chrRegsA);
-    this.chrRegsB = stringToUintArray(state._chrRegsB);
+    this.chrRegsA = stringToUintArray(state.chrRegsA);
+    this.chrRegsB = stringToUintArray(state.chrRegsB);
 
-    this.chrUseBMap = state._chrUseBMap;
-    this.chrMapA = stringToUintArray(state._chrMapA);
-    this.chrMapB = stringToUintArray(state._chrMapB);
-    this.chrHighBits = state._chrHighBits;
+    this.chrUseBMap = state.chrUseBMap;
+    this.chrMapA = stringToUintArray(state.chrMapA);
+    this.chrMapB = stringToUintArray(state.chrMapB);
+    this.chrHighBits = state.chrHighBits;
   }
 
 
@@ -163,9 +163,9 @@ export default class Mapper5 extends BaseMapper {
 
     this.mainboard.ppu.changeMirroringMethod(this.mirroringMethod);
 
-		// TODO: Need to remove this event on mapper unload
+    // TODO: Need to remove this event on mapper unload
     const that = this;
-    this.irqEventId = this.mainboard.synchroniser.addEvent('mmc5 irq', -1, (eventTime) => { that._irqEvent(eventTime); });
+    this.irqEventId = this.mainboard.synchroniser.addEvent('mmc5 irq', -1, (eventTime) => { that.irqEvent(eventTime); });
   }
 
   renderingEnabledChanged(enabled) {
@@ -173,7 +173,7 @@ export default class Mapper5 extends BaseMapper {
     this.predictIrq(this.mainboard.synchroniser.getCpuMTC());
   }
 
-  _irqEvent(eventTime) {
+  irqEvent(eventTime) {
     if (this.mRenderingEnabled && !this.irqActive && this.irqEnabled && this.irqScanlineTrigger > 0) {
       this.irqActive = true;
       this.mainboard.cpu.holdIrqLineLow(true);
@@ -181,7 +181,7 @@ export default class Mapper5 extends BaseMapper {
     this.predictIrq(eventTime);
   }
 
-  _syncPrg() {
+  syncPrg() {
     this.mainboard.synchroniser.synchronise();
 
     for (let i = 0; i < this.prgRamMap.length; ++i) {
@@ -192,11 +192,11 @@ export default class Mapper5 extends BaseMapper {
     switch (this.prgMode) {
       default:
       case 0:
-				// 32k bank at 0x8000
+        // 32k bank at 0x8000
         this.switch32kPrgBank((this.prgRegisters[3] & 0x7f) >> 2);
         break;
       case 1:
-				// 16k bank at 0x8000
+        // 16k bank at 0x8000
         if ((this.prgRegisters[1] & 0x80) === 0) {
           this.prgRamIsActive[0] = 1;
           this.prgRamIsActive[1] = 1;
@@ -205,14 +205,14 @@ export default class Mapper5 extends BaseMapper {
         } else {
           this.switch16kPrgBank((this.prgRegisters[1] & 0x7f) >> 1, true);
         }
-				// 16k bank at 0xC000
+        // 16k bank at 0xC000
         this.switch16kPrgBank((this.prgRegisters[3] & 0x7f) >> 1, false);
         break;
       case 2:
-				// 8k bank at 0xE000
+        // 8k bank at 0xE000
         this.switch8kPrgBank((this.prgRegisters[3] & 0x7f), 3);
 
-				// 8k bank at 0xC000
+        // 8k bank at 0xC000
         if ((this.prgRegisters[2] & 0x80) === 0) {
           this.prgRamIsActive[2] = 1;
           this.prgRamMap[2] = (this.prgRegisters[2] & 0x7);
@@ -220,7 +220,7 @@ export default class Mapper5 extends BaseMapper {
           this.switch8kPrgBank((this.prgRegisters[2] & 0x7f), 2);
         }
 
-				// 16k bank at 0x8000
+        // 16k bank at 0x8000
         if ((this.prgRegisters[1] & 0x80) === 0) {
           this.prgRamIsActive[0] = 1;
           this.prgRamIsActive[1] = 1;
@@ -231,23 +231,23 @@ export default class Mapper5 extends BaseMapper {
         }
         break;
       case 3:
-				// 8k bank at 0xE000
+        // 8k bank at 0xE000
         this.switch8kPrgBank((this.prgRegisters[3] & 0x7f), 3);
-				// 8k bank at 0xC000
+        // 8k bank at 0xC000
         if ((this.prgRegisters[2] & 0x80) === 0) {
           this.prgRamIsActive[2] = 1;
           this.prgRamMap[2] = this.prgRegisters[2] & 0x7;
         } else {
           this.switch8kPrgBank((this.prgRegisters[2] & 0x7f), 2);
         }
-				// 8k bank at 0xA000
+        // 8k bank at 0xA000
         if ((this.prgRegisters[1] & 0x80) === 0) {
           this.prgRamIsActive[1] = 1;
           this.prgRamMap[1] = this.prgRegisters[1] & 0x7;
         } else {
           this.switch8kPrgBank((this.prgRegisters[1] & 0x7f), 1);
         }
-				// 8k bank at 0x8000
+        // 8k bank at 0x8000
         if ((this.prgRegisters[0] & 0x80) === 0) {
           this.prgRamIsActive[0] = 1;
           this.prgRamMap[0] = this.prgRegisters[0] & 0x7;
@@ -259,14 +259,14 @@ export default class Mapper5 extends BaseMapper {
   }
 
 
-  _chrBank(chrMap, banksize, bankpos, banknum) {
+  chrBank(chrMap, banksize, bankpos, banknum) {
     for (let i = 0; i < banksize; ++i) {
       chrMap[i + bankpos] = (banknum + i) % this.get1kChrBankCount();
     }
   }
 
 
-  _syncChr() {
+  syncChr() {
     this.mainboard.synchroniser.synchronise();
 
     switch (this.chrMode) {
@@ -322,14 +322,14 @@ export default class Mapper5 extends BaseMapper {
     this.predictIrq(0);
   }
 
-  _predictIrq(cpuMTC) {
-		// TODO: Check if MMC5 counter includes pre-render scanline
+  predictIrq(cpuMTC) {
+    // TODO: Check if MMC5 counter includes pre-render scanline
     if (this.mRenderingEnabled && !this.irqActive && this.irqEnabled && this.irqScanlineTrigger > 0) {
       const targetScanline = this.irqScanlineTrigger;
       const triggerMtc = this.mainboard.ppu.screenCoordinatesToTicks(0, targetScanline);
       if (triggerMtc > cpuMTC) {
         if (this.triggerMtc !== triggerMtc) {
-					// var pos = this.mainboard.ppu.ticksToScreenCoordinates( triggerMtc );
+          // var pos = this.mainboard.ppu.ticksToScreenCoordinates( triggerMtc );
           this.mainboard.synchroniser.changeEventTime(this.irqEventId, triggerMtc);
           this.triggerMtc = triggerMtc;
         }
@@ -344,7 +344,7 @@ export default class Mapper5 extends BaseMapper {
   }
 
   write8EXRam(offset, data) {
-		// 0x4018 -> 0x6000
+    // 0x4018 -> 0x6000
     switch (offset) {
       case 0x5100: // PRG mode
         this.prgMode = data & 0x3;
@@ -465,7 +465,7 @@ export default class Mapper5 extends BaseMapper {
         this.chrHighBits = (data & 0x3) << 8;
         break;
       case 0x5200: // vertical split mode
-			// dont bother with vertical mode as it was only used once in commercial games, for the intro sequence
+        // dont bother with vertical mode as it was only used once in commercial games, for the intro sequence
         break;
       case 0x5201: // vertical split scroll
         break;
@@ -490,33 +490,33 @@ export default class Mapper5 extends BaseMapper {
     }
 
     if (offset >= 0x5C00) {
-			// TODO: Remove synchronise and work out isRendering by mtc
+      // TODO: Remove synchronise and work out isRendering by mtc
       this.mainboard.synchroniser.synchronise();
       if (this.exRamMode === 0 || this.exRamMode === 1) {
-				// only allow writing during rendering, otherwise write 0
+        // only allow writing during rendering, otherwise write 0
         if (this.mainboard.ppu.isRendering(this.mainboard.synchroniser.getCpuMTC(), false)) {
           this.internalExRam[offset - 0x5C00] = data;
         } else {
           this.internalExRam[offset - 0x5C00] = 0;
         }
       } else if (this.exRamMode === 2) {
-				// always write
+        // always write
         this.internalExRam[offset - 0x5C00] = data;
       }
     }
 
-		// BaseMapper.prototype.write8EXRam.call( this, offset, data );
+    // BaseMapper.prototype.write8EXRam.call( this, offset, data );
   }
 
   read8EXRam(offset) {
-		// 0x4018 -> 0x6000
+    // 0x4018 -> 0x6000
     switch (offset) {
       case 0x5015:
-			// sound status
-	//			return soundchip.status();
+        // sound status
+        //			return soundchip.status();
         break;
       case 0x5204:
-			// irq status
+        // irq status
         this.mainboard.synchroniser.synchronise();
         var scan = this.mainboard.ppu.ticksToScreenCoordinates(this.mainboard.synchroniser.getCpuMTC());
         var stat = (this.irqActive ? 0x80 : 0) + (scan.y >= 0 && scan.y < 240 ? 0x40 : 0);
@@ -544,16 +544,16 @@ export default class Mapper5 extends BaseMapper {
   }
 
   write8SRam(offset, data) {
-		// 0x6000 -> 0x8000
+    // 0x6000 -> 0x8000
     this.prgRam[(this.prgRamPage << 13) | (offset & 0x1FFF)] = data; // this.prgRamPage * 0x2000 + ( offset % 0x2000 ) ] = data;
   }
 
   read8SRam(offset) {
-		// 0x6000 -> 0x8000
+    // 0x6000 -> 0x8000
     return this.prgRam[(this.prgRamPage << 13) | (offset & 0x1FFF)];
   }
 
-  _setNametableMirroring(data) {
+  setNametableMirroring(data) {
     for (let nt = 0; nt < 4; ++nt) {
       this.nameTableMap[nt] = data & 0x3;
       data >>= 2;
@@ -562,7 +562,7 @@ export default class Mapper5 extends BaseMapper {
 
   read8ChrRom(offset, renderingSprites, readType) {
     this.int32ChrData = this.int32ChrData || new Int32Array(this.chrData);
-		// Pattern table read < 0x2000
+    // Pattern table read < 0x2000
     if (renderingSprites) {
       var pageid = (offset & 0x1C00) >> 10; // Math.floor( offset / 0x400 );
       var pagepos = this.chrMapA[pageid & 0x7];

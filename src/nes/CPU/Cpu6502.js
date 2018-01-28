@@ -25,7 +25,7 @@ const maximumTracesToStoreForLoopDetection = 32;
 export default class Cpu6502 {
 	constructor(mainboard) {
 		this.mainboard = mainboard;
-		this.mainboard.connect('reset', ::this.reset);
+		this.mainboard.connect('reset', :: this.reset);
 		this.executeCallback = null;
 		this.cmosVersion = false;
 		this.isRunning = true;
@@ -397,7 +397,7 @@ export default class Cpu6502 {
 	}
 
 
-	_hasProgramCounterBeenSeenBefore(pg) {
+	hasProgramCounterBeenSeenBefore(pg) {
 
 		for (var i = 0; i < this.previousTraceProgramCounters.length; ++i) {
 			if (this.previousTraceProgramCounters[i] === pg) {
@@ -408,7 +408,7 @@ export default class Cpu6502 {
 	}
 
 
-	_doTrace() {
+	doTrace() {
 		var instructionData = cpuTrace;
 		// check previous instructions for the same program counter
 		var prevIndex = this.hasProgramCounterBeenSeenBefore(instructionData.programCounter);
@@ -447,14 +447,14 @@ export default class Cpu6502 {
 		data.irqLineLow = this.irqLineLow;
 		data.triggerNmiAfterNextInstruction = this.triggerNmiAfterNextInstruction;
 
-		data._flagCarry = this.flagCarry;
-		data._flagZero = this.flagZero;
-		data._flagInterrupt = this.flagInterrupt;
-		data._flagDecimal = this.flagDecimal;
-		data._flagBreak = this.flagBreak;
-		data._flagUnused = this.flagUnused;
-		data._flagOverflow = this.flagOverflow;
-		data._flagSign = this.flagSign;
+		data.flagCarry = this.flagCarry;
+		data.flagZero = this.flagZero;
+		data.flagInterrupt = this.flagInterrupt;
+		data.flagDecimal = this.flagDecimal;
+		data.flagBreak = this.flagBreak;
+		data.flagUnused = this.flagUnused;
+		data.flagOverflow = this.flagOverflow;
+		data.flagSign = this.flagSign;
 
 		data.regS = this.regS;
 		data.regX = this.regX;
@@ -475,14 +475,14 @@ export default class Cpu6502 {
 		this.irqLineLow = state.irqLineLow;
 		this.triggerNmiAfterNextInstruction = state.triggerNmiAfterNextInstruction;
 
-		this.flagCarry = state._flagCarry;
-		this.flagZero = state._flagZero;
-		this.flagInterrupt = state._flagInterrupt;
-		this.flagDecimal = state._flagDecimal;
-		this.flagBreak = state._flagBreak;
-		this.flagUnused = state._flagUnused;
-		this.flagOverflow = state._flagOverflow;
-		this.flagSign = state._flagSign;
+		this.flagCarry = state.flagCarry;
+		this.flagZero = state.flagZero;
+		this.flagInterrupt = state.flagInterrupt;
+		this.flagDecimal = state.flagDecimal;
+		this.flagBreak = state.flagBreak;
+		this.flagUnused = state.flagUnused;
+		this.flagOverflow = state.flagOverflow;
+		this.flagSign = state.flagSign;
 
 		this.regS = state.regS;
 		this.regX = state.regX;

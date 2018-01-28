@@ -8,7 +8,7 @@ export default class WebAudioRenderer {
       throw new Error('WebAudio not supported in this browser');
     }
     this.audioContext = new root.AudioContext();
-    this.audioContext.sampleRate = sampleRate;
+    // this.audioContext.sampleRate = sampleRate;
     this.gainNode = this.audioContext.createGain();
     this.gainNode.connect(this.audioContext.destination);
   }

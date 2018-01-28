@@ -1,12 +1,12 @@
 import sha1 from 'sha1';
 
 import {
-	g_DefaultColourEncoding,
-	PPU_MIRRORING_VERTICAL,
-	PPU_MIRRORING_HORIZONTAL,
-	setColourEncodingType,
-	mirroringMethodToString,
-	PPU_MIRRORING_FOURSCREEN,
+  g_DefaultColourEncoding,
+  PPU_MIRRORING_VERTICAL,
+  PPU_MIRRORING_HORIZONTAL,
+  setColourEncodingType,
+  mirroringMethodToString,
+  PPU_MIRRORING_FOURSCREEN,
 } from '../config/consts.js';
 
 import mapperFactory from './mappers/mapperFactory';
@@ -34,7 +34,7 @@ export default class Cartridge {
     return mostFrequent;
   }
 
-  _determineColourEncodingType(filename) {
+  determineColourEncodingType(filename) {
     let value = g_DefaultColourEncoding;
 
     if (filename.match(/[\[\(][E][\]\)]/i)) {
@@ -65,8 +65,8 @@ export default class Cartridge {
 
   async loadRom({
 		name,
-		binaryString,
-		fileSize,
+    binaryString,
+    fileSize,
 	}) {
     this.name = name;
     let stringIndex = 0;
@@ -102,29 +102,29 @@ export default class Cartridge {
     stringIndex = 16;
     if (hasTrainer) { stringIndex += 512; }
 
-		// calculate SHA1 on PRG and CHR data, look it up in the db, then load it
+    // calculate SHA1 on PRG and CHR data, look it up in the db, then load it
     this.sha1 = sha1(binaryString, stringIndex);
 
-		// mapper is loaded async so we need to (a)wait for it
+    // mapper is loaded async so we need to (a)wait for it
     this.memoryMapper = await mapperFactory(mapperId, this.mainboard, mirroringMethod);
 
     if (!this.memoryMapper) {
       throw new Error(`No memory mapper selected for "${mapperId}"`);
     }
 
-		// read in program code
+    // read in program code
     const prg8kChunkCount = prgPageCount * 2; // read in 8k chunks, prgPageCount is 16k chunks
     const prgSize = 0x2000 * prg8kChunkCount;
     this.memoryMapper.setPrgData(this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + prgSize), prgSize), prg8kChunkCount);
     stringIndex += prgSize;
 
-		// read in character maps
+    // read in character maps
     const chr1kChunkCount = chrPageCount * 8; // 1kb per pattern table, chrPageCount is the 8kb count
     const chrSize = 0x400 * chr1kChunkCount;
     this.memoryMapper.setChrData(this.create32IntArray(binaryString.subarray(stringIndex, stringIndex + chrSize), chrSize), chr1kChunkCount);
     stringIndex += chrSize;
 
-		// determine NTSC or PAL
+    // determine NTSC or PAL
     this.determineColourEncodingType(name);
     setColourEncodingType(this.colourEncodingType);
     const prgKb = prg8kChunkCount * 8;

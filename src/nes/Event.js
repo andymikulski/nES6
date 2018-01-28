@@ -1,4 +1,4 @@
-export class Event {
+export class BussedEvent {
   constructor() {
     this.callbacks = [];
   }
@@ -9,8 +9,8 @@ export class Event {
 
   invoke() {
     const eventArgs = Array.prototype.slice.call(arguments, 0);
-    const callbacks = this.callbacks;
-    const numCalls = callbacks.length;
+    const callbacks = this.callbacks || [];
+    const numCalls = callbacks.length - 1;
     let i = numCalls;
     for (i; i > 0; i--) {
       callbacks[i].apply(this, eventArgs);
@@ -21,17 +21,24 @@ export class Event {
 export class EventBus {
   constructor() {
     this.map = {};
+    this.connect = this.connect.bind(this);
+    this.getEvent = this.getEvent.bind(this);
+    this.invoke = this.invoke.bind(this);
   }
 
   getEvent(name) {
-    if (!this.map[name]) {
-      this.map[name] = new Event();
+    if (!this.map.hasOwnProperty(name)) {
+      this.map[name] = new BussedEvent();
     }
     return this.map[name];
   }
 
   connect(name, cb) {
-    this.getEvent(name).addCallback(cb);
+    if (!this.map.hasOwnProperty(name)) {
+      this.map[name] = new BussedEvent();
+    }
+    // this.getEvent(name).addCallback(cb);
+    this.map[name].addCallback(cb);
   }
 
   invoke(name) {

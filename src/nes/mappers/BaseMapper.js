@@ -24,8 +24,8 @@ Mapper 069: 11
 
 
 import {
-	uintArrayToString,
-	stringToUintArray,
+  uintArrayToString,
+  stringToUintArray,
 } from '../../utils/serialisation';
 
 export default class BaseMapper {
@@ -62,7 +62,7 @@ export default class BaseMapper {
   synchronise(startTicks, endTicks) {
   }
 
-	// MMC3 specific functions
+  // MMC3 specific functions
   spriteScreenEnabledUpdate(spriteEnabled, screenEnabled) { }
   renderingEnabledChanged(enabled) { }
 
@@ -79,7 +79,7 @@ export default class BaseMapper {
   }
 
 
-	// //// PRG switching
+  // //// PRG switching
 
 
   get1kChrBankCount() {
@@ -118,14 +118,14 @@ export default class BaseMapper {
 
 
   switch8kPrgBank(id, pos) {
-		// Nes.Trace.writeLine( 'mapper', 'switch8kPrgBank:' + id );
+    // Nes.Trace.writeLine( 'mapper', 'switch8kPrgBank:' + id );
     this.setPrgPage(id % this.prgPageCount, pos);
   }
 
 
   switch16kPrgBank(id, low) {
-    if (this.get16kPrgBankCount() > 0)		{
-			// Nes.Trace.writeLine( 'mapper', 'switch16kPrgBank:' + id );
+    if (this.get16kPrgBankCount() > 0) {
+      // Nes.Trace.writeLine( 'mapper', 'switch16kPrgBank:' + id );
       const aid = (id * 2) % this.prgPageCount;
       for (let i = 0; i < 2; ++i) { this.setPrgPage(aid + i, i + (low ? 0 : 2)); }
     }
@@ -133,8 +133,8 @@ export default class BaseMapper {
 
 
   switch32kPrgBank(id) {
-    if (this.get32kPrgBankCount() > 0)		{
-			// Nes.Trace.writeLine( 'mapper', 'switch32kPrgBank:' + id );
+    if (this.get32kPrgBankCount() > 0) {
+      // Nes.Trace.writeLine( 'mapper', 'switch32kPrgBank:' + id );
       const aid = (id * 4) % this.prgPageCount;
       for (let i = 0; i < 4; ++i) { this.setPrgPage(aid + i, i); }
     }
@@ -159,7 +159,7 @@ export default class BaseMapper {
 
 
   switch2kChrBank(id, pos) {
-    if (this.get2kChrBankCount() > 0)		{
+    if (this.get2kChrBankCount() > 0) {
       const aid = (id * 2) % this.chrPageCount;
       for (let i = 0; i < 2; ++i) { this.setChrPage(aid + i, (pos * 2) + i); }
     }
@@ -167,7 +167,7 @@ export default class BaseMapper {
 
 
   switch4kChrBank(id, low) {
-    if (this.get4kChrBankCount() > 0)		{
+    if (this.get4kChrBankCount() > 0) {
       const aid = (id * 4) % this.chrPageCount;
       for (let i = 0; i < 4; ++i) { this.setChrPage(aid + i, i + (low ? 0 : 4)); }
     }
@@ -175,7 +175,7 @@ export default class BaseMapper {
 
 
   switch8kChrBank(id) {
-    if (this.get8kChrBankCount() > 0)		{
+    if (this.get8kChrBankCount() > 0) {
       const aid = (id * 8) % this.chrPageCount;
       for (let i = 0; i < 8; ++i) { this.setChrPage(aid + i, i); }
     }
@@ -194,8 +194,8 @@ export default class BaseMapper {
   }
 
 
-	// 0x8000 -> 0xFFFF
-  write8PrgRom(offset, data) {}
+  // 0x8000 -> 0xFFFF
+  write8PrgRom(offset, data) { }
 
 
   read8PrgRom(offset) {
@@ -204,17 +204,17 @@ export default class BaseMapper {
     const aid = offset & 0x1FFF;
     const readValue = this.prgData[pagepos + aid];
 
-		// if ( this.gameGenieActive ) {
-		// 	if ( this.gameGeniePokes.hasOwnProperty( offset ) ) {
-		// 		return this.checkGameGenieCode( readValue, offset );
-		// 	}
-		// }
+    // if ( this.gameGenieActive ) {
+    // 	if ( this.gameGeniePokes.hasOwnProperty( offset ) ) {
+    // 		return this.checkGameGenieCode( readValue, offset );
+    // 	}
+    // }
     return readValue;
   }
 
 
-  _checkGameGenieCode(readValue, offset) {
-		// Game genie override
+  checkGameGenieCode(readValue, offset) {
+    // Game genie override
     const gg = this.gameGeniePokes[offset];
     if (gg.compare === -1 || gg.compare === readValue) {
       return gg.value;
@@ -223,7 +223,7 @@ export default class BaseMapper {
   }
 
 
-	// VRAM 0x0000 -> 0x2000
+  // VRAM 0x0000 -> 0x2000
   write8ChrRom(offset, data) {
     if (this.usingChrVram) {
       const pageid = (offset & 0x1C00) >> 10; // Math.floor( offset / 0x400 );
@@ -262,9 +262,9 @@ export default class BaseMapper {
   }
 
 
-  reset() {}
+  reset() { }
 
-	// Called from gameGenie.js - modified the PRG at given value
+  // Called from gameGenie.js - modified the PRG at given value
   gameGeniePoke(codeName, address, value, compareValue) {
     this.gameGenieActive = true;
     this.gameGeniePokes[address] = { name: codeName, value, compare: compareValue };
@@ -291,15 +291,15 @@ export default class BaseMapper {
     const data = {};
 
     data.mirroringMethod = this.mirroringMethod;
-    data._usingChrVram = this.usingChrVram;
-		// data.prgPagesMap = Object.assign( {}, this.prgPagesMap );
-		// data.chrPagesMap = Object.assign( {}, this.chrPagesMap ); // TODO: restore
+    data.usingChrVram = this.usingChrVram;
+    // data.prgPagesMap = Object.assign( {}, this.prgPagesMap );
+    // data.chrPagesMap = Object.assign( {}, this.chrPagesMap ); // TODO: restore
     data.sram = uintArrayToString(this.sram);
     data.expansionRam = uintArrayToString(this.expansionRam);
-    data._gameGeniePokes = Object.assign({}, this.gameGeniePokes);
+    data.gameGeniePokes = Object.assign({}, this.gameGeniePokes);
     if (this.usingChrVram) {
-			// data.chrPages = this.chrPages.map( function( page ) { return uintArrayToString( page ); } );
-      data._chrData = uintArrayToString(this.chrData);
+      // data.chrPages = this.chrPages.map( function( page ) { return uintArrayToString( page ); } );
+      data.chrData = uintArrayToString(this.chrData);
     }
     if (this.mapperSaveState) {
       this.mapperSaveState(data);
@@ -310,14 +310,14 @@ export default class BaseMapper {
 
   loadState(state) {
     this.mirroringMethod = state.mirroringMethod;
-    this.usingChrVram = state._usingChrVram;
-		// this.prgPagesMap = Object.assign( {}, state.prgPagesMap );
-		// this.chrPagesMap = Object.assign( {}, state.chrPagesMap ); // TODO: restore
+    this.usingChrVram = state.usingChrVram;
+    // this.prgPagesMap = Object.assign( {}, state.prgPagesMap );
+    // this.chrPagesMap = Object.assign( {}, state.chrPagesMap ); // TODO: restore
     this.sram = stringToUintArray(state.sram);
     this.expansionRam = stringToUintArray(state.expansionRam);
-    this.gameGeniePokes = Object.assign({}, state._gameGeniePokes);
+    this.gameGeniePokes = Object.assign({}, state.gameGeniePokes);
     if (this.usingChrVram) {
-      this.chrData = stringToUintArray(state._chrData);
+      this.chrData = stringToUintArray(state.chrData);
     }
     if (this.mapperLoadState) {
       this.mapperLoadState(state);

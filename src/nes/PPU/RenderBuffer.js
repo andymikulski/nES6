@@ -1,16 +1,16 @@
 import {
-	SCREEN_WIDTH,
-	SCREEN_HEIGHT,
+  SCREEN_WIDTH,
+  SCREEN_HEIGHT,
 } from '../../config/consts';
 
 import {
-	uintArrayToString,
-	stringToUintArray,
+  uintArrayToString,
+  stringToUintArray,
 } from '../../utils/serialisation';
 
 import {
-	gClearScreenArray,
-	COLOUR_ENCODING_NAME,
+  gClearScreenArray,
+  COLOUR_ENCODING_NAME,
 } from '../../config/consts';
 
 
@@ -47,14 +47,14 @@ export default class RenderBuffer {
     const that = this;
     this.clipTopAndBottomY = false;
     this.mainboard.connect('reset', (cold) => {
-      that._reset(cold);
+      that.reset(cold);
     });
     this.priorityBuffer = new Int32Array(SCREEN_WIDTH * SCREEN_HEIGHT);
     this.clearBuffer();
   }
 
 
-  _reset(cold) {
+  reset(cold) {
     this.clipTopAndBottomY = COLOUR_ENCODING_NAME === 'NTSC';
   }
 
@@ -81,7 +81,7 @@ export default class RenderBuffer {
     return this.colorHash[paletteIndex];
   }
 
-  _renderPixel(bufferIndex, insertIndex, y, paletteIndex) {
+  renderPixel(bufferIndex, insertIndex, y, paletteIndex) {
     if (this.clipTopAndBottomY && (y < 8 || y > 231)) {
       return;
     }
@@ -93,7 +93,7 @@ export default class RenderBuffer {
 
   renderSpritePixelDebug(spritenum, x, y) {
 
-		// this.renderSurface.writeToBuffer( 2, x, y, 0xFFE92BFF );
+    // this.renderSurface.writeToBuffer( 2, x, y, 0xFFE92BFF );
   }
 
 

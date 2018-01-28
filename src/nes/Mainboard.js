@@ -25,7 +25,7 @@ export default class Mainboard extends EventBus {
     this.renderBuffer = new RenderBuffer(this, renderSurface);
 
     this.synchroniser = new Synchroniser(this);
-    this.synchroniser.connect('frameEnd', ::this.onFrameEnd);
+    this.synchroniser.connect('frameEnd', this.onFrameEnd.bind(this));
     this.synchroniser.addObject('ppu', this.ppu);
     this.synchroniser.addObject('apu', this.apu);
 
@@ -51,7 +51,7 @@ export default class Mainboard extends EventBus {
     enableType(traceType, checked);
   }
 
-  _onFrameEnd() {
+  onFrameEnd() {
     this.running = false;
     this.invoke('frameEnd');
   }
@@ -112,8 +112,8 @@ export default class Mainboard extends EventBus {
   }
 
   loadState(data) {
-    for(const prop in data) {
-      if(this[prop] && this[prop].loadState){
+    for (const prop in data) {
+      if (this[prop] && this[prop].loadState) {
         this[prop].loadState(data[prop]);
       }
     }

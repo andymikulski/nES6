@@ -1,17 +1,17 @@
 import BaseMapper from './BaseMapper.js';
 import {
-	COLOUR_ENCODING_VBLANK_SCANLINES,
-	MASTER_CYCLES_PER_SCANLINE,
-	COLOUR_ENCODING_FRAME_SCANLINES,
-	MASTER_CYCLES_PER_PPU,
-	PPU_MIRRORING_VERTICAL,
-	PPU_MIRRORING_HORIZONTAL,
-	IS_INT_BETWEEN,
+  COLOUR_ENCODING_VBLANK_SCANLINES,
+  MASTER_CYCLES_PER_SCANLINE,
+  COLOUR_ENCODING_FRAME_SCANLINES,
+  MASTER_CYCLES_PER_PPU,
+  PPU_MIRRORING_VERTICAL,
+  PPU_MIRRORING_HORIZONTAL,
+  IS_INT_BETWEEN,
 } from '../../config/consts.js';
 
 import {
-	uintArrayToString,
-	stringToUintArray,
+  uintArrayToString,
+  stringToUintArray,
 } from '../../utils/serialisation';
 
 export default class Mapper9 extends BaseMapper {
@@ -20,13 +20,13 @@ export default class Mapper9 extends BaseMapper {
   }
 
   mapperSaveState(state) {
-    state._banks = uintArrayToString(this.banks);
-    state._latches = this.latches.slice(0);
+    state.banks = uintArrayToString(this.banks);
+    state.latches = this.latches.slice(0);
   }
 
   mapperLoadState(state) {
-    this.banks = stringToUintArray(state._banks);
-    this.latches = state._latches.slice(0);
+    this.banks = stringToUintArray(state.banks);
+    this.latches = state.latches.slice(0);
   }
 
   reset() {
@@ -39,11 +39,11 @@ export default class Mapper9 extends BaseMapper {
     for (var i = 0; i < 8; ++i) {
       this.switch1kChrBank(0, i);
     }
-	//	this.switch8kChrBank( 0 );
+    //	this.switch8kChrBank( 0 );
     this.mainboard.ppu.changeMirroringMethod(this.mirroringMethod);
   }
 
-  _syncChrBanks(performSync) {
+  syncChrBanks(performSync) {
     if (performSync === undefined ? true : performSync) {
       this.mainboard.synchroniser.synchronise();
     }
@@ -54,7 +54,7 @@ export default class Mapper9 extends BaseMapper {
   }
 
   MMC2Latch(ppuReadAddress) {
-		// http://wiki.nesdev.com/w/index.php/MMC2
+    // http://wiki.nesdev.com/w/index.php/MMC2
     if (ppuReadAddress === 0xFD8) {
       this.latches[0] = false;
       this.syncChrBanks(false);
@@ -68,13 +68,13 @@ export default class Mapper9 extends BaseMapper {
       this.latches[1] = true;
       this.syncChrBanks(false);
     }
-		// var latchId = ( ppuReadAddress & 0x1000 ) > 0 ? 1 : 0;
-		// var tilenum = ( ppuReadAddress >> 4 ) & 0xFF;
-		// var isFE = tilenum === 0xFE;
-		// if ( tilenum === 0xFD || isFE ) {
-			// this.latches[ latchId ] = isFE;
-			// this.syncChrBanks();
-		// }
+    // var latchId = ( ppuReadAddress & 0x1000 ) > 0 ? 1 : 0;
+    // var tilenum = ( ppuReadAddress >> 4 ) & 0xFF;
+    // var isFE = tilenum === 0xFE;
+    // if ( tilenum === 0xFD || isFE ) {
+    // this.latches[ latchId ] = isFE;
+    // this.syncChrBanks();
+    // }
   }
 
   write8PrgRom(offset, data) {

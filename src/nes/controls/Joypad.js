@@ -31,7 +31,7 @@ export default class Joypad {
   }
 
 
-  _getDuplicateMask(buttonIndex) {
+  getDuplicateMask(buttonIndex) {
     // disallow pressing up+down and left+right at the same time - always keep the button that is already pressed
     switch (buttonIndex) {
       case 4: // UP
@@ -59,18 +59,18 @@ export default class Joypad {
 
   saveState() {
     return {
-      _currentState: this.currentState,
-      _strobedState: this.strobedState,
-      _strobeByte: this.strobeByte,
-      _readCount: this.readCount,
+      currentState: this.currentState,
+      strobedState: this.strobedState,
+      strobeByte: this.strobeByte,
+      readCount: this.readCount,
     };
   }
 
 
   loadState(state) {
-    this.currentState = state._currentState;
-    this.strobedState = state._strobedState;
-    this.readCount = state._readCount;
-    this.strobeByte = state._strobeByte;
+    this.currentState = state.currentState;
+    this.strobedState = state.strobedState;
+    this.readCount = state.readCount;
+    this.strobeByte = state.strobeByte;
   }
 }

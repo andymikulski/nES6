@@ -1,7 +1,7 @@
 import {
-	SCREEN_WIDTH,
-	SCREEN_HEIGHT,
-	gClearScreenArray,
+  SCREEN_WIDTH,
+  SCREEN_HEIGHT,
+  gClearScreenArray,
 } from '../../config/consts';
 
 import { saveAs } from 'file-saver';
@@ -9,12 +9,12 @@ import { saveAs } from 'file-saver';
 import { rusha } from '../../utils/serialisation';
 
 import {
-	getGlContext,
-	OrthoCamera,
-	FillableTexture,
-	ShaderProgram,
-	VertexBuffer,
-	IndexBuffer,
+  getGlContext,
+  OrthoCamera,
+  FillableTexture,
+  ShaderProgram,
+  VertexBuffer,
+  IndexBuffer,
 } from './utils';
 
 // Must be power of 2
@@ -60,43 +60,43 @@ export default class WebGlRenderSurface {
   loadShader(shaderFilename, callback) {
     const that = this;
     this.shader.loadAndLink(shaderFilename, () => {
-      that._shader.use();
+      that.shader.use();
 
-      that._glContext.uniform2fv(that._shader.getUniformLocation('rubyInputSize'), that._inputSizeShaderArray);
-      that._glContext.uniform2fv(that._shader.getUniformLocation('rubyOutputSize'), that._outputSizeShaderArray);
-      that._glContext.uniform2fv(that._shader.getUniformLocation('rubyTextureSize'), that._textureSizeShaderArray);
+      that.glContext.uniform2fv(that.shader.getUniformLocation('rubyInputSize'), that.inputSizeShaderArray);
+      that.glContext.uniform2fv(that.shader.getUniformLocation('rubyOutputSize'), that.outputSizeShaderArray);
+      that.glContext.uniform2fv(that.shader.getUniformLocation('rubyTextureSize'), that.textureSizeShaderArray);
 
-      that._glContext.uniformMatrix4fv(that._shader.getUniformLocation('aModelViewProjectionMatrix'), false, that._camera.getMVPMatrix());
+      that.glContext.uniformMatrix4fv(that.shader.getUniformLocation('aModelViewProjectionMatrix'), false, that.camera.getMVPMatrix());
 
-      that._vertexBuffer.bind(that._shader.getAttrib('aVertexPosition'));
-      that._textureCoordBuffer.bind(that._shader.getAttrib('aTextureCoord'));
-      that._indexBuffer.bind();
-      that._texture.bind();
+      that.vertexBuffer.bind(that.shader.getAttrib('aVertexPosition'));
+      that.textureCoordBuffer.bind(that.shader.getAttrib('aTextureCoord'));
+      that.indexBuffer.bind();
+      that.texture.bind();
 
-      that._glContext.uniform1i(that._shader.getUniformLocation('rubyTexture'), 0); // Texture unit 0 is for base images.
+      that.glContext.uniform1i(that.shader.getUniformLocation('rubyTexture'), 0); // Texture unit 0 is for base images.
 
       callback();
     });
   }
 
 
-  _initBuffers() {
+  initBuffers() {
     const t = SCREEN_WIDTH / TEXTURE_WIDTH;
     const u = SCREEN_HEIGHT / TEXTURE_HEIGHT;
 
     const vertices = new Float32Array([
-      0, 0,							0.0, 1.0,
-      SCREEN_WIDTH,	0,				0.0, 1.0,
-      SCREEN_WIDTH,	SCREEN_HEIGHT,	0.0, 1.0,
-      0,				SCREEN_HEIGHT,	0.0, 1.0,
+      0, 0, 0.0, 1.0,
+      SCREEN_WIDTH, 0, 0.0, 1.0,
+      SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, 1.0,
+      0, SCREEN_HEIGHT, 0.0, 1.0,
     ]);
     const texCoords = new Float32Array([
-      0.0,	0.0,
-      t,		0.0,
-      t,		u,
-      0.0,	u,
+      0.0, 0.0,
+      t, 0.0,
+      t, u,
+      0.0, u,
     ]);
-    const indices = new Uint16Array([0, 1, 2,	0, 2, 3]);
+    const indices = new Uint16Array([0, 1, 2, 0, 2, 3]);
 
     this.vertexBuffer = new VertexBuffer(this.glContext);
     this.vertexBuffer.setData(vertices, 4, 4);
@@ -109,7 +109,7 @@ export default class WebGlRenderSurface {
   }
 
 
-  _onResize() {
+  onResize() {
     this.glContext.viewport(0, 0, this.element.width, this.element.height);
     this.glContext.clearColor(0.0, 0.0, 0.0, 1.0);
   }
@@ -130,7 +130,7 @@ export default class WebGlRenderSurface {
 
 
   clearBuffers(backgroundColour) {
-		// update clear array if background colour changes
+    // update clear array if background colour changes
     if (backgroundColour !== this.clearArrayColour) {
       for (let i = 0; i < this.clearArray.length; ++i) {
         this.clearArray[i] = 0xFF000000 | backgroundColour;
@@ -138,10 +138,10 @@ export default class WebGlRenderSurface {
       this.clearArrayColour = backgroundColour;
     }
 
-		// set background colour
+    // set background colour
     this.offscreen32BitView.set(this.clearArray);
 
-		// Nes.ClearScreenArray is a quicker way of clearing this array
+    // Nes.ClearScreenArray is a quicker way of clearing this array
     this.bufferIndexArray.set(gClearScreenArray);
   }
 
@@ -157,8 +157,8 @@ export default class WebGlRenderSurface {
   }
 
 
-  _createCanvasWithScreenshotOn() {
-		// create copy of offscreen buffer into a new canvas element
+  createCanvasWithScreenshotOn() {
+    // create copy of offscreen buffer into a new canvas element
     const element = document.createElement('canvas');
     element.width = SCREEN_WIDTH;
     element.height = SCREEN_HEIGHT;
@@ -185,6 +185,6 @@ export default class WebGlRenderSurface {
 
 
   loadShaderFromUrl(url) {
-    this.loadShader(url, () => {});
+    this.loadShader(url, () => { });
   }
 }

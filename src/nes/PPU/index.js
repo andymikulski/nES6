@@ -26,7 +26,7 @@ export default class PPU {
 	constructor(mainboard) {
 		var that = this;
 		this.mainboard = mainboard;
-		this.mainboard.connect('reset', ::this.reset);
+		this.mainboard.connect('reset', this.reset.bind(this));
 		this.lastTransferredValue = 0;
 		this.mirroringMethod = null;
 		this.spriteMemory = new Int32Array(0x100);
@@ -95,21 +95,21 @@ export default class PPU {
 	hookSyncEvents(synchroniser) {
 
 		var that = this;
-		this.clockSkipEventId = synchroniser.addEvent('ppu clockskip', this.getMasterTicksTillClockSkip(), function() {
-			that._eventClockskip();
+		this.clockSkipEventId = synchroniser.addEvent('ppu clockskip', this.getMasterTicksTillClockSkip(), function () {
+			that.eventClockskip();
 		});
-		this.vblankClearEventId = synchroniser.addEvent('ppu vblank clear', COLOUR_ENCODING_VBLANK_MTC, function(eventTime) {
-			that._eventVblankClear(eventTime);
+		this.vblankClearEventId = synchroniser.addEvent('ppu vblank clear', COLOUR_ENCODING_VBLANK_MTC, function (eventTime) {
+			that.eventVblankClear(eventTime);
 		});
-		this.ppuNmiEventId = synchroniser.addEvent('ppu NMI', -1, function(eventTime) {
-			that._eventNmiTrigger(eventTime);
+		this.ppuNmiEventId = synchroniser.addEvent('ppu NMI', -1, function (eventTime) {
+			that.eventNmiTrigger(eventTime);
 		});
-		this.spriteZeroEventId = synchroniser.addEvent('ppu sprite zero hit', -1, function(eventTime) {
-			that._eventSpriteZeroHit(eventTime);
+		this.spriteZeroEventId = synchroniser.addEvent('ppu sprite zero hit', -1, function (eventTime) {
+			that.eventSpriteZeroHit(eventTime);
 		});
 	}
 
-	_eventClockskip() {
+	eventClockskip() {
 
 		// Skip a PPU clock cycle if the background is enabled
 		if (this.isOddFrame && (this.control2 & 0x8) > 0 /*ppuControl2.backgroundSwitch*/ && COLOUR_ENCODING_NAME === "NTSC") {
@@ -117,7 +117,7 @@ export default class PPU {
 		}
 	}
 
-	_eventVblankClear(eventTime) {
+	eventVblankClear(eventTime) {
 
 		// clear vblank flags after vblank period (in this emultor, at the start of the frame)
 		// clear bits 5,6,7 in 0x2002
@@ -125,16 +125,16 @@ export default class PPU {
 		this.status &= 0x1F;
 	}
 
-	_eventNmiTrigger(eventTime) {
+	eventNmiTrigger(eventTime) {
 
-		if (((this.control1 & 0x80) > 0 /* ppuControl1.vBlankNmi*/ && (this.status & 0x80) > 0 /* ppuStatus.vBlank*/ )) {
+		if (((this.control1 & 0x80) > 0 /* ppuControl1.vBlankNmi*/ && (this.status & 0x80) > 0 /* ppuStatus.vBlank*/)) {
 			this.mainboard.cpu.nonMaskableInterrupt(eventTime);
 		}
 
 		this.sync.changeEventTime(this.ppuNmiEventId, -1);
 	}
 
-	_eventSpriteZeroHit(eventTime) {
+	eventSpriteZeroHit(eventTime) {
 
 		writeLine(tracePpu, "PPU sprite hit set");
 		// var realmtc = this.sync.getCpuMTC();
@@ -144,7 +144,7 @@ export default class PPU {
 		this.sync.changeEventTime(this.spriteZeroEventId, -1);
 	}
 
-	_eventSpriteOverflow(eventTime) {
+	eventSpriteOverflow(eventTime) {
 
 		//var realmtc = this.sync.getCpuMTC();
 		//console.log( "Sprite overflow at: " + realmtc + " [" + JSON.stringify( this.ticksToScreenCoordinates( realmtc ) )
@@ -203,32 +203,32 @@ export default class PPU {
 			var name = '';
 			switch (this.mirroringMethod) {
 				default:
-					case PPU_MIRRORING_HORIZONTAL: // mirrors 3 & 4 point to the second nametable
+				case PPU_MIRRORING_HORIZONTAL: // mirrors 3 & 4 point to the second nametable
 					this.nameTablesMap[0] = 0;
-				this.nameTablesMap[1] = 0;
-				this.nameTablesMap[2] = 1;
-				this.nameTablesMap[3] = 1;
-				//name = 'horizontal';
-				break;
+					this.nameTablesMap[1] = 0;
+					this.nameTablesMap[2] = 1;
+					this.nameTablesMap[3] = 1;
+					//name = 'horizontal';
+					break;
 				case PPU_MIRRORING_VERTICAL: // mirrors 2 & 4 point to the second nametable
-						this.nameTablesMap[0] = 0;
+					this.nameTablesMap[0] = 0;
 					this.nameTablesMap[1] = 1;
 					this.nameTablesMap[2] = 0;
 					this.nameTablesMap[3] = 1;
 					//name = 'vertical';
 					break;
 				case PPU_MIRRORING_FOURSCREEN: // no mirroring done, requires an extra 0x800 of memory kept on cart
-						for (var i = 0; i < 4; ++i)
+					for (var i = 0; i < 4; ++i)
 						this.nameTablesMap[i] = i;
 					//name = 'four screen';
 					break;
 				case PPU_MIRRORING_SINGLESCREEN_NT0:
-						for (var j = 0; j < 4; ++j)
+					for (var j = 0; j < 4; ++j)
 						this.nameTablesMap[j] = 0;
 					//name = 'single 0';
 					break;
 				case PPU_MIRRORING_SINGLESCREEN_NT1:
-						for (var k = 0; k < 4; ++k)
+					for (var k = 0; k < 4; ++k)
 						this.nameTablesMap[k] = 1;
 					//name = 'single 1';
 					break;
@@ -270,7 +270,7 @@ export default class PPU {
 		}
 	}
 
-	_writeTo2000(offset, data) {
+	writeTo2000(offset, data) {
 		var cpuMtc = this.sync.getCpuMTC();
 		var vblankSetTime = COLOUR_ENCODING_FRAME_MTC;
 		var ticksTillSet = vblankSetTime - cpuMtc;
@@ -314,7 +314,7 @@ export default class PPU {
 		}
 	}
 
-	_writeTo2001(offset, data) {
+	writeTo2001(offset, data) {
 		this.sync.synchronise();
 		var renderingEnabledChanged = ((this.control2 & 0x18) > 0) !== ((data & 0x18) > 0);
 		//var spriteVisibleOrClippingChanged = ( ( this.control2 & 0x14 ) > 0 ) !== ( ( data & 0x14 ) > 0 );
@@ -325,7 +325,7 @@ export default class PPU {
 			this.mainboard.cart.memoryMapper.renderingEnabledChanged((this.control2 & 0x18) > 0);
 	}
 
-	_writeTo2005(offset, data) {
+	writeTo2005(offset, data) {
 		this.sync.synchronise();
 
 		/*
@@ -358,7 +358,7 @@ export default class PPU {
 		//writeLine( 'ppu', '2005 write: ' + data.toString( 16 ) );
 	}
 
-	_writeTo2006(offset, data) {
+	writeTo2006(offset, data) {
 		// first write is upper byte of address, second is lower
 		this.sync.synchronise();
 
@@ -379,7 +379,7 @@ export default class PPU {
 		//writeLine( 'ppu', '2006 write: ' + data.toString( 16 ) );
 	}
 
-	_writeTo2007(offset, data) {
+	writeTo2007(offset, data) {
 		/*
 		$2007 reads and writes:
 		Outside of rendering, reads from or writes to $2007 will add either 1 or 32 to v depending on the VRAM increment bit set via $2000.
@@ -402,7 +402,7 @@ export default class PPU {
 			// increment PPU address as according to bit 2 of 0x2000
 			newAddress = this.ppuReadAddress + ((this.control1 & 0x04) > 0 ? 32 : 1); // verticalwrite flag
 			this.updatePPUReadAddress(newAddress, true);
-			this.write8(bufferedAddress /*& 0x3FFF*/ , data);
+			this.write8(bufferedAddress /*& 0x3FFF*/, data);
 		} else {
 			// TODO: disallow if due to occur this tick anyway
 			//	this.background_IncrementXTile();
@@ -452,7 +452,7 @@ export default class PPU {
 		this.spriteTransferArgument = data;
 	}
 
-	_readFromRegister2002() {
+	readFromRegister2002() {
 		var cpuMtc = this.sync.getCpuMTC();
 		var vblankSetTime = COLOUR_ENCODING_FRAME_MTC;
 		var ticksTillSet = vblankSetTime - cpuMtc;
@@ -495,7 +495,7 @@ export default class PPU {
 		return ret;
 	}
 
-	_readFromRegister2007() {
+	readFromRegister2007() {
 		var ret = 0;
 		// dont buffer reads from palette space
 		var bufferedaddress = this.ppuReadAddress;
@@ -537,14 +537,14 @@ export default class PPU {
 				ret = this.readFromRegister2007();
 				break;
 
-				//case 0x2005:
-				//	Log::Write( LOG_ERROR, "Read from PPU register 0x2005 - Emulation may be inaccurate and problematic" );
-				//	ret = mLastTransferredValue;
-				//	throw std::runtime_error( "Read to 0x2005" );
-				//case 0x2006:
-				//	Log::Write( LOG_ERROR, "Read from PPU register 0x2006 - Emulation may be inaccurate and problematic" );
-				//	ret = mLastTransferredValue;
-				//	throw std::runtime_error( "Read to 0x2006" );
+			//case 0x2005:
+			//	Log::Write( LOG_ERROR, "Read from PPU register 0x2005 - Emulation may be inaccurate and problematic" );
+			//	ret = mLastTransferredValue;
+			//	throw std::runtime_error( "Read to 0x2005" );
+			//case 0x2006:
+			//	Log::Write( LOG_ERROR, "Read from PPU register 0x2006 - Emulation may be inaccurate and problematic" );
+			//	ret = mLastTransferredValue;
+			//	throw std::runtime_error( "Read to 0x2006" );
 			default:
 				ret = this.lastTransferredValue;
 				break;
@@ -694,7 +694,7 @@ export default class PPU {
 
 		data.lastTransferredValue = this.lastTransferredValue;
 		data.frameCounter = this.frameCounter;
-		data._invokeA12Latch = this.invokeA12Latch;
+		data.invokeA12Latch = this.invokeA12Latch;
 
 		data.doSpriteTransferAfterNextCpuInstruction = this.doSpriteTransferAfterNextCpuInstruction;
 		data.spriteTransferArgument = this.spriteTransferArgument;
@@ -740,7 +740,7 @@ export default class PPU {
 
 		this.doSpriteTransferAfterNextCpuInstruction = state.doSpriteTransferAfterNextCpuInstruction;
 		this.spriteTransferArgument = state.spriteTransferArgument;
-		this.invokeA12Latch = state._invokeA12Latch;
+		this.invokeA12Latch = state.invokeA12Latch;
 
 		this.spriteMemory = stringToUintArray(state.spriteMemory);
 		this.nameTables = [];

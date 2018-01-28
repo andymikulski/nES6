@@ -1,10 +1,10 @@
 import { writeLine, tracePpu } from '../../utils/Trace';
 
 import {
-	MASTER_CYCLES_PER_PPU,
-	MASTER_CYCLES_PER_SCANLINE,
-	SCREEN_HEIGHT,
-	SCREEN_WIDTH,
+  MASTER_CYCLES_PER_PPU,
+  MASTER_CYCLES_PER_SCANLINE,
+  SCREEN_HEIGHT,
+  SCREEN_WIDTH,
 } from '../../config/consts';
 
 // consts use by renderPartialScanline
@@ -57,16 +57,16 @@ export default class PPURenderBG {
 
 
   saveState(data) {
-    data._spriteZeroHit = this.spriteZeroHit;
+    data.spriteZeroHit = this.spriteZeroHit;
   }
 
 
   loadState(state) {
-    this.spriteZeroHit = state._spriteZeroHit;
+    this.spriteZeroHit = state.spriteZeroHit;
   }
 
 
-  _renderTile(ppuReadAddress, tilenum, posy, clippingEnabled) {
+  renderTile(ppuReadAddress, tilenum, posy, clippingEnabled) {
     let triggerTime = 0;
     const renderScanline = posy | 0; // ( tilenum <= 2 ? posy + 1 : posy );
     const startXRendering = clippingEnabled ? 8 : 0;
@@ -74,12 +74,12 @@ export default class PPURenderBG {
 
     const htile = (ppuReadAddress & 0x001F);
     const vtile = (ppuReadAddress & 0x03E0) >> 5;
-		// var finey = ((this.ppu.ppuReadAddress & 0x7000) >> 12);
+    // var finey = ((this.ppu.ppuReadAddress & 0x7000) >> 12);
 
     const nameTableAddress = (0x2000 + (ppuReadAddress & 0x0FFF)) & 0xFFFF;
     const tileNumber = this.ppu.readNameTable(nameTableAddress, 0);
 
-		// (screen address) + (tilenumber * 16) + finey
+    // (screen address) + (tilenumber * 16) + finey
     const tileAddress = this.bgTableAddress + tileNumber * 16 + ((ppuReadAddress & 0x7000) >> 12);
     const attributeByte = this.ppu.readNameTable(0x23C0 | (ppuReadAddress & 0x0C00) | ((vtile & 0x1C) << 1) | ((htile >> 2) & 0x7), 1);
 
@@ -96,7 +96,7 @@ export default class PPURenderBG {
       mergeByte = (attributeByte & 0xC0) >> 4;
     }
 
-		// pattern table reads
+    // pattern table reads
     const firstByte = this.ppu.read8(tileAddress, false, 2);
     const secondByte = this.ppu.read8(tileAddress + 8, false, 3);
 
@@ -104,8 +104,8 @@ export default class PPURenderBG {
       this.ppu.mainboard.cart.memoryMapper.MMC2Latch(tileAddress + 8);
     }
 
-		// render tiles from right-most pixel first - allows us to shift the first & second pattern table byte to get the palette
-		// index we want.
+    // render tiles from right-most pixel first - allows us to shift the first & second pattern table byte to get the palette
+    // index we want.
 
     const startPixel = baseindex - this.ppu.fineX;
     const endPixel = startPixel + 7;
@@ -127,12 +127,12 @@ export default class PPURenderBG {
           if ((paletteIndex & 0x3) === 0) { paletteIndex = 0; }
 
           if (this.renderBuffer.renderPixel(x, renderScanline, this.ppu.paletteTables[0][paletteIndex & 0xF] | 0)) {
-									// Sprite zero hit - will happen in the future as this is the prefetch
+            // Sprite zero hit - will happen in the future as this is the prefetch
             if (!this.spriteZeroHit) {
               triggerTime = this.ppu.screenCoordinatesToTicks(x, renderScanline);
               writeLine(tracePpu, `[${this.ppu.frameCounter}] PPU sprite hit scheduled for @ ${x}x${renderScanline} (${triggerTime})`);
               this.spriteZeroHit = true;
-              this.ppu.mainboard.synchroniser.changeEventTime(this.ppu._spriteZeroEventId, triggerTime);
+              this.ppu.mainboard.synchroniser.changeEventTime(this.ppu.spriteZeroEventId, triggerTime);
             }
           }
         }
@@ -141,7 +141,7 @@ export default class PPURenderBG {
   }
 
 
-  _incrementY(ppuReadAddress) {
+  incrementY(ppuReadAddress) {
 		/*
 			Y increment
 			At dot 256 of each scanline, fine Y is incremented, overflowing to coarse Y, and finally adjusted to wrap among the nametables vertically.
@@ -160,32 +160,32 @@ export default class PPURenderBG {
 						y += 1                         // increment coarse Y
 					v = (v & ~0x03E0) | (y << 5)     // put coarse Y back into v
 		*/
-		// INCREMENT Y LOGIC
+    // INCREMENT Y LOGIC
     if ((ppuReadAddress & 0x7000) === 0x7000) {
-			// wrap when tile y offset = 7
-			// ppuReadAddress &= ~0x7000;
+      // wrap when tile y offset = 7
+      // ppuReadAddress &= ~0x7000;
       ppuReadAddress &= 0x8FFF;
 
       if ((ppuReadAddress & 0x03E0) === 0x03A0) {
-				// wrap tile y and switch name table bit 11, if tile y is 29
+        // wrap tile y and switch name table bit 11, if tile y is 29
         ppuReadAddress ^= 0x0800;
         ppuReadAddress &= 0xFC1F;
       } else if ((ppuReadAddress & 0x03E0) === 0x03E0) {
-				// wrap tile y if it is 31
+        // wrap tile y if it is 31
         ppuReadAddress &= 0xFC1F;
       } else {
-				// just increment tile y
+        // just increment tile y
         ppuReadAddress += 0x0020;
       }
     } else {
-			// increment tile y offset
+      // increment tile y offset
       ppuReadAddress += 0x1000;
     }
     return ppuReadAddress;
   }
 
 
-  _incrementX(ppuReadAddress) {
+  incrementX(ppuReadAddress) {
 		/*
 		The coarse X component of v needs to be incremented when the next tile is reached. Bits 0-4 are incremented, with overflow toggling bit 10. This means that bits 0-4 count from 0 to 31 across a single nametable, and bit 10 selects the current nametable horizontally.
 		if ((v & 0x001F) == 31) // if coarse X == 31
@@ -194,12 +194,12 @@ export default class PPURenderBG {
 		else
 		  v += 1                // increment coarse X
 		*/
-		// INCREMENT X LOGIC
+    // INCREMENT X LOGIC
     if ((ppuReadAddress & 0x001F) === 0x001F) {
-			// switch name tables (bit 10) and reset tile x to 0
+      // switch name tables (bit 10) and reset tile x to 0
       ppuReadAddress = (ppuReadAddress ^ 0x0400) & 0xFFE0;
     } else {
-			// next tile
+      // next tile
       ppuReadAddress = (ppuReadAddress + 1) & 0xFFFF;
     }
     return ppuReadAddress;
@@ -244,7 +244,7 @@ export default class PPURenderBG {
     }
 
     if (backgroundScrollReloadTime > startTicks && backgroundScrollReloadTime <= endTicks) {
-			// reset ppu address on cycle 304 of pre-render scanline
+      // reset ppu address on cycle 304 of pre-render scanline
       ppuReadAddress = (ppuReadAddress & 0x41F) | (ppuLatchAddress & 0x7BE0);
     }
 
@@ -252,7 +252,7 @@ export default class PPURenderBG {
     scanline = (Math.floor((ticksAtFirstRenderingScanline - backgroundRenderingStart) / MASTER_CYCLES_PER_SCANLINE)) | 0;
 
 
-		// tile prefetches between SecondLastTileReloadTime (previous line) for 34 tiles
+    // tile prefetches between SecondLastTileReloadTime (previous line) for 34 tiles
     while (scanlineStart <= endTicks) {
       incrementYTime = scanlineStart + YIncrementTimeRendering;
       reloadTime = scanlineStart + XReloadTimeRendering;
@@ -273,7 +273,7 @@ export default class PPURenderBG {
         ppuReadAddress = this.incrementX(ppuReadAddress);
       }
 
-			// render last tile on screen, increment Y
+      // render last tile on screen, increment Y
       if (incrementYTime < backgroundRenderingEnd && incrementYTime > startTicks && incrementYTime <= endTicks) {
         ppuReadAddress = this.incrementY(ppuReadAddress);
       }

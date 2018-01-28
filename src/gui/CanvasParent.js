@@ -23,7 +23,7 @@ export default class CanvasParent extends EventBus {
     return this.canvasElement;
   }
 
-  _setSize() {
+  setSize() {
     const parentBounds = this.canvasElement.parentElement.getBoundingClientRect();
     const parentHeight = parentBounds.height;
 

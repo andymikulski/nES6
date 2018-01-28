@@ -58,9 +58,9 @@ export default class nES6 extends EventBus {
     this.pauseNextFrame = false;
     this.pauseOnFrame = -1;
 
-    this.animate = ::this.animate;
+    this.animate = this.animate.bind(this);
 
-    window.onerror = ::this.showError;
+    window.onerror = this.showError.bind(this);
 
 
     // Apply plugins
@@ -72,18 +72,14 @@ export default class nES6 extends EventBus {
   addPlugins(plugs) {
     const plugins = plugs instanceof Array ? plugs : [plugs];
     // Pass this nES6 instance to each plugin
-    plugins.map(plugin=>plugin(this));
-  }
-
-  connect(name, cb) {
-    this.connect(name, cb);
+    plugins.map(plugin => plugin(this));
   }
 
   setColourEncodingType(encodingType) {
     this.encodingTypeToSet = encodingType;
   }
 
-  _loadRomCallback(name, binaryString) {
+  loadRomCallback(name, binaryString) {
     this.newRomWaiting = true;
     this.newRomLoaded = {
       name,
@@ -95,14 +91,14 @@ export default class nES6 extends EventBus {
   start() {
     if (this.options.fps) {
       this.fpsMeter = new Stats();
-      this.fpsMeter.showPanel( 1 );
-      document.body.appendChild( this.fpsMeter.dom );
+      this.fpsMeter.showPanel(1);
+      document.body.appendChild(this.fpsMeter.dom);
     }
 
     this.renderSurface = this.createRenderSurface();
 
     this.mainboard = new Mainboard(this.renderSurface);
-    this.mainboard.connect('reset', ::this.onReset);
+    this.mainboard.connect('reset', this.onReset.bind(this));
 
     // disable audio for headless rendering
     if (this.options.render === 'headless'
@@ -129,14 +125,15 @@ export default class nES6 extends EventBus {
   }
 
 
-  _onReset() {
+  onReset() {
     this.calculateFrameTimeTarget();
   }
 
-  _calculateFrameTimeTarget() {
+  calculateFrameTimeTarget() {
     if (this.gameSpeed) {
       const base = (100000 / this.gameSpeed); // 100000 = 1000 * 100 ( 1000 milliseconds, multiplied by 100 as gameSpeed is a %)
       this.frameTimeTarget = (base / COLOUR_ENCODING_REFRESHRATE);
+      console.log(this.frameTimeTarget);
     }
   }
 
@@ -189,7 +186,7 @@ export default class nES6 extends EventBus {
   }
 
 
-  _readyToRender() {
+  readyToRender() {
     if (this.gameSpeed <= 0) {
       return true;
     }
@@ -224,7 +221,7 @@ export default class nES6 extends EventBus {
     this.renderSurface.screenshotToFile();
   }
 
-  _animate() {
+  animate() {
     if ((this.options.forceTimeSync || this.gameSpeed !== 100) && !this.readyToRender()) {
       requestAnimationFrame(this.animate);
       return;
@@ -267,15 +264,15 @@ export default class nES6 extends EventBus {
     requestAnimationFrame(this.animate);
   }
 
-  exportState(fullSave){
+  exportState(fullSave) {
     return this.mainboard.saveState(fullSave);
   }
 
-  importState(loadedData){
+  importState(loadedData) {
     return this.mainboard.loadState(loadedData);
   }
 
-  _doRomLoad({
+  doRomLoad({
     name,
     binaryString
   }) {
@@ -285,19 +282,19 @@ export default class nES6 extends EventBus {
       binaryString,
       fileSize: binaryString.length / 1000 // in KB
     })
-    .catch(::this.showError)
-    .then(()=>{
-      this.romLoaded = true;
-    });
+      .catch(this.showError.bind(this))
+      .then(() => {
+        this.romLoaded = true;
+      });
   }
 
   loadRomFromUrl(url) {
     var that = this;
-    loadRomFromUrl(url, function(err, name, binary) {
+    loadRomFromUrl(url, function (err, name, binary) {
       if (!err) {
-        that._loadRomCallback(name, binary);
+        that.loadRomCallback(name, binary);
       } else {
-        that._showError(err);
+        that.showError(err);
       }
     });
   }
@@ -315,7 +312,7 @@ export default class nES6 extends EventBus {
     this.loadRomCallback(name, binaryString);
   }
 
-  _showError(err) {
+  showError(err) {
     console.log(err);
     var errorType = typeof err;
     var msg = '';
@@ -348,7 +345,7 @@ export default class nES6 extends EventBus {
     const buttonIdPressed = JOYPAD_NAME_TO_ID(button);
 
     if (typeof buttonIdPressed !== 'undefined') {
-      joypad.pressButton( buttonIdPressed, true );
+      joypad.pressButton(buttonIdPressed, true);
     }
   }
 
@@ -357,7 +354,7 @@ export default class nES6 extends EventBus {
     const buttonIdPressed = JOYPAD_NAME_TO_ID(button);
 
     if (typeof buttonIdPressed !== 'undefined') {
-      joypad.pressButton( buttonIdPressed, false );
+      joypad.pressButton(buttonIdPressed, false);
     }
   }
 
@@ -393,7 +390,7 @@ export default class nES6 extends EventBus {
 
   setRenderer(type) {
     this.renderSurface = this.createRenderSurface(type);
-    this.mainboard.renderBuffer._renderSurface = this.renderSurface;
+    this.mainboard.renderBuffer.renderSurface = this.renderSurface;
     // this will come back to haunt me
     this.mainboard.enableSound(type !== 'headless');
   }

@@ -19,7 +19,7 @@ export default class APULegacy {
 		this.soundRate = 44100;
 
 		this.mainboard = mainboard;
-		this.mainboard.connect('reset', ::this.onReset);
+		this.mainboard.connect('reset', this.onReset.bind(this));
 		this.nextIrq = -1;
 		this.irqActive = false;
 		this.mLastCalculatedNextIrqTime = -1;
@@ -45,10 +45,10 @@ export default class APULegacy {
 			console.log("WebAudio unsupported in this browser. Sound will be disabled...", err);
 		}
 
-		this.apu.dmc_reader(function(addr) {
+		this.apu.dmc_reader(function (addr) {
 			return mainboard.memory.read8(addr);
 		});
-		this.apu.irq_notifier(::this.CalculateWhenIrqDue);
+		this.apu.irq_notifier(this.CalculateWhenIrqDue.bind(this));
 		// called when the next predicted nmi changes
 		//that.mainboard.synchroniser.synchronise();
 	}
@@ -82,7 +82,7 @@ export default class APULegacy {
 	}
 
 
-	_onReset(cold) {
+	onReset(cold) {
 
 		this.nextIrq = -1;
 		this.apu.reset(COLOUR_ENCODING_NAME !== "NTSC");
@@ -148,7 +148,7 @@ export default class APULegacy {
 	}
 
 
-	_eventIrqTrigger(eventTime) {
+	eventIrqTrigger(eventTime) {
 		// done in the synchronise method
 		//	this.mainboard.cpu.holdIrqLineLow();
 	}
@@ -162,7 +162,7 @@ export default class APULegacy {
 			this.nextIrq = earliestIrq * COLOUR_ENCODING_MTC_PER_CPU;
 			if (this.nextIrq >= 0) {
 				writeLine(traceApu, 'IRQ scheduled for: ' + this.nextIrq);
-				//this.mainboard.synchroniser.addEvent( 'apu irq', this.nextIrq, function( eventTime ) { that._eventIrqTrigger( eventTime ); } );
+				//this.mainboard.synchroniser.addEvent( 'apu irq', this.nextIrq, function( eventTime ) { that.eventIrqTrigger( eventTime ); } );
 			}
 		} else {
 			this.nextIrq = -1;

@@ -2,13 +2,13 @@ import root from 'window-or-global';
 import mat4 from 'gl-mat4';
 
 const defaultVertexShader =
-    `void main(void) {
+  `void main(void) {
       gl_Position = aModelViewProjectionMatrix * aVertexPosition;
       vTextureCoord[0] = aTextureCoord;
     }`;
 
 const defaultFragmentShader =
-    `uniform sampler2D rubyTexture;
+  `uniform sampler2D rubyTexture;
     void main(void) {
       gl_FragColor = texture2D(rubyTexture, vec2(vTextureCoord[0].s, vTextureCoord[0].t));
     }`;
@@ -79,7 +79,7 @@ export class ShaderProgram {
   }
 
 
-  _compileShader(glType, str) {
+  compileShader(glType, str) {
     let glString = str;
     const shader = this.glContext.createShader(glType);
 
@@ -116,7 +116,7 @@ export class ShaderProgram {
   }
 
 
-  _shaderLoadSuccess(xmlRaw, callback) {
+  shaderLoadSuccess(xmlRaw, callback) {
     let fragmentStr = defaultFragmentShader;
     let vertexStr = defaultVertexShader;
     let fragmentXml;
@@ -169,7 +169,7 @@ export class ShaderProgram {
       // #TODO god damned jquery
       $.ajax({
         url: `shaders/${shaderFile}`,
-        success(xmlDoc) { that._shaderLoadSuccess(xmlDoc, callback); },
+        success(xmlDoc) { that.shaderLoadSuccess(xmlDoc, callback); },
         dataType: 'xml',
       });
     } else {
