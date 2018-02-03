@@ -72,21 +72,16 @@ export const PPU_MIRRORING_FOURSCREEN = 2;
 export const PPU_MIRRORING_SINGLESCREEN_NT0 = 3;
 export const PPU_MIRRORING_SINGLESCREEN_NT1 = 4;
 
+const mirrorMethods = {
+	[PPU_MIRRORING_HORIZONTAL]: 'horizontal',
+	[PPU_MIRRORING_VERTICAL]: 'vertical',
+	[PPU_MIRRORING_FOURSCREEN]: 'fourscreen',
+	[PPU_MIRRORING_SINGLESCREEN_NT0]: 'singlescreen 0',
+	[PPU_MIRRORING_SINGLESCREEN_NT1]: 'singlescreen 1',
+};
 
 export function mirroringMethodToString( method ) {
-	switch ( method ) {
-		case PPU_MIRRORING_HORIZONTAL: // default
-			return 'horizontal';
-		case PPU_MIRRORING_VERTICAL:
-			return 'vertical';
-		case PPU_MIRRORING_FOURSCREEN:
-			return 'fourscreen';
-		case PPU_MIRRORING_SINGLESCREEN_NT0:
-			return 'singlescreen 0';
-		case PPU_MIRRORING_SINGLESCREEN_NT1:
-			return 'singlescreen 1';
-	}
-	return '';
+	return mirrorMethods[method] || '';
 };
 
 
@@ -99,29 +94,42 @@ export const JOYPAD_DOWN = 5;
 export const JOYPAD_LEFT = 6;
 export const JOYPAD_RIGHT = 7;
 
-export const JOYPAD_NAME_TO_ID = function( name ) {
-	if ( name === 'UP' ) { return JOYPAD_UP; }
-	else if ( name === 'DOWN' ) { return JOYPAD_DOWN; }
-	else if ( name === 'LEFT' ) { return JOYPAD_LEFT; }
-	else if ( name === 'RIGHT' ) { return JOYPAD_RIGHT; }
-	else if ( name === 'A' ) { return JOYPAD_A; }
-	else if ( name === 'B' ) { return JOYPAD_B; }
-	else if ( name === 'SELECT' ) { return JOYPAD_SELECT; }
-	else if ( name === 'START' ) { return JOYPAD_START; }
-	else { throw new Error( "JOYPAD_NAME_TO_ID: Invalid parameter" ); }
+const joypadNameMap = {
+	'UP': JOYPAD_UP,
+	'DOWN': JOYPAD_DOWN,
+	'RIGHT': JOYPAD_RIGHT,
+	'LEFT': JOYPAD_LEFT,
+	'A': JOYPAD_A,
+	'B': JOYPAD_B,
+	'SELECT': JOYPAD_SELECT,
+	'START': JOYPAD_START,
+};
+export const JOYPAD_NAME_TO_ID = ( name ) => {
+	const foundId = joypadNameMap[name];
+	if (!joypadNameMap.hasOwnProperty(name)) {
+		throw new Error(`Joypad button name not recognized: "${name}"`)
+	}
+
+	return foundId;
 };
 
+const joypadIdMap = {
+	[JOYPAD_UP]: 'UP',
+	[JOYPAD_DOWN]: 'DOWN',
+	[JOYPAD_LEFT]: 'LEFT',
+	[JOYPAD_RIGHT]: 'RIGHT',
+	[JOYPAD_SELECT]: 'SELECT',
+	[JOYPAD_START]: 'START',
+	[JOYPAD_A]: 'A',
+	[JOYPAD_B]: 'B',
+};
+export const JOYPAD_ID_TO_NAME = ( id )=>{
+	const foundId = joypadIdMap[id];
+	if (!foundId) {
+		throw new Error(`Joypad button ID not recognized: "${id}"`)
+	}
 
-export const JOYPAD_ID_TO_NAME = function( id ) {
-	if ( id === JOYPAD_UP ) { return 'UP'; }
-	else if ( id === JOYPAD_DOWN ) { return 'DOWN'; }
-	else if ( id === JOYPAD_LEFT ) { return 'LEFT'; }
-	else if ( id === JOYPAD_RIGHT ) { return 'RIGHT'; }
-	else if ( id === JOYPAD_A ) { return 'A'; }
-	else if ( id === JOYPAD_B ) { return 'B'; }
-	else if ( id === JOYPAD_SELECT ) { return 'SELECT'; }
-	else if ( id === JOYPAD_START ) { return 'START'; }
-	else { throw new Error( "JOYPAD_ID_TO_NAME: Invalid parameter " + id ); }
+	return foundId;
 };
 
 export const g_ClearScreenArray = (new Int32Array( SCREEN_WIDTH * SCREEN_HEIGHT )).fill(0);

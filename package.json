@@ -1,7 +1,7 @@
 {
   "name": "nES6",
   "version": "0.0.1",
-  "description": "",
+  "description": "NES emulator written in ES6.",
   "main": "index.js",
   "dependencies": {
     "file-saver": "1.3.3",
@@ -14,7 +14,7 @@
     "stats.js": "^0.17.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"No tests specified\" && true",
     "watch": "webpack --progress --config ./webpack.config.js --watch",
     "server": "cd app && python -m SimpleHTTPServer 8000 & cd ..",
     "dev": "npm run watch & npm run server",
@@ -24,6 +24,7 @@
     "babel-cli": "6.23.0",
     "babel-core": "^6.23.1",
     "babel-loader": "^6.3.2",
+    "babel-plugin-transform-async-functions": "^6.22.0",
     "babel-plugin-transform-class-properties": "6.23.0",
     "babel-plugin-transform-es2015-classes": "6.23.0",
     "babel-preset-es2015": "6.22.0",
@@ -35,6 +36,6 @@
     "type": "git",
     "url": "git@github.com:andymikulski/nES6.git"
   },
-  "author": "",
-  "license": "GPL-3.0"
+  "author": "Andy Mikulski",
+  "license": "MIT"
 }

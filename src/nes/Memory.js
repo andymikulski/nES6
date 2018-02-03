@@ -96,7 +96,8 @@ export default class Memory {
 								break;
 							case 0x4016: // input
 							case 0x4017:
-								this.mainboard.inputdevicebus.writeToRegister(offset, data);
+								this.mainboard.inputdevicebus.writeToRegister(0x4016, data);
+								this.mainboard.inputdevicebus.writeToRegister(0x4017, data);
 								break;
 						}
 						// APU (write input 4016 + 4017 to APU as well) <-- is that right??

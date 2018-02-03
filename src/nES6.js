@@ -26,10 +26,12 @@ export default class nES6 {
       plugins: { is: Array, with: Function },
       render: ['auto', 'canvas', 'webgl', 'headless'],
       audio: { is: Boolean },
+      forceTimeSync: { is: Boolean },
+      fps: { is: Boolean },
     }, options);
     // if we're still here, then the options are all good
 
-    this._options = options || {};
+    this.options = options || {};
 
     this._cart = null;
     this._romLoaded = false;
@@ -59,11 +61,17 @@ export default class nES6 {
 
     window.onerror = ::this._showError;
 
+
     // Apply plugins
-    if (this._options.plugins) {
-      // Pass this nES6 instance to each plugin
-      this._options.plugins.map(plugin=>plugin(this));
+    if (this.options.plugins) {
+      this.addPlugins(this.options.plugins);
     }
+  }
+
+  addPlugins(plugs) {
+    const plugins = plugs instanceof Array ? plugs : [plugs];
+    // Pass this nES6 instance to each plugin
+    plugins.map(plugin=>plugin(this));
   }
 
   connect(name, cb) {
@@ -84,41 +92,20 @@ export default class nES6 {
   }
 
   start() {
-    this._fpsMeter = new Stats();
-    this._fpsMeter.showPanel( 1 );
-    document.body.appendChild( this._fpsMeter.dom );
-
-    this._canvasParent = new CanvasParent();
-    this._renderSurface = null;
-
-    switch (this._options['render']) {
-      // headless render
-      case 'headless':
-        this._renderSurface = new HeadlessRenderSurface();
-        break;
-      // canvas render
-      case 'canvas':
-        this._renderSurface = new CanvasRenderSurface(this._canvasParent);
-        break;
-      // webgl is the same as auto - webgl will run if possible but will
-      // fallback to canvas automatically
-      case 'webgl':
-      case 'auto':
-      default:
-        if (webGlSupported()) {
-          this._renderSurface = new WebGlRenderSurface(this._canvasParent);
-        } else {
-          this._renderSurface = new CanvasRenderSurface(this._canvasParent);
-        }
-        break;
+    if (this.options.fps) {
+      this._fpsMeter = new Stats();
+      this._fpsMeter.showPanel( 1 );
+      document.body.appendChild( this._fpsMeter.dom );
     }
+
+    this._renderSurface = this.createRenderSurface();
 
     this._mainboard = new Mainboard(this._renderSurface);
     this._mainboard.connect('reset', ::this._onReset);
 
     // disable audio for headless rendering
-    if (this._options['render'] === 'headless'
-      || this._options['audio'] === false) {
+    if (this.options.render === 'headless'
+      || this.options.audio === false) {
       this._mainboard.enableSound(false);
     }
 
@@ -216,15 +203,6 @@ export default class nES6 {
   }
 
 
-  showFpsMeter(show) {
-    if (show) {
-      // this._fpsMeter.show();
-    } else {
-      // this._fpsMeter.hide();
-    }
-  }
-
-
   startTrace() {
     this._eventBus.invoke('traceRunning', true);
     // if ( traceType === 'cpuInstructions' ) {
@@ -246,7 +224,7 @@ export default class nES6 {
   }
 
   _animate() {
-    if (this._gameSpeed !== 100 && !this._readyToRender()) {
+    if ((this.options.forceTimeSync || this._gameSpeed !== 100) && !this._readyToRender()) {
       requestAnimationFrame(this.animate);
       return;
     }
@@ -288,12 +266,12 @@ export default class nES6 {
     requestAnimationFrame(this.animate);
   }
 
-  exportState(){
-    return this._mainboard.saveState();
+  exportState(fullSave){
+    return this._mainboard.saveState(fullSave);
   }
 
   importState(loadedData){
-    return this._mainboard.importState(loadedData);
+    return this._mainboard.loadState(loadedData);
   }
 
   _doRomLoad({
@@ -380,5 +358,42 @@ export default class nES6 {
     if (typeof buttonIdPressed !== 'undefined') {
       joypad.pressButton( buttonIdPressed, false );
     }
+  }
+
+  createRenderSurface(type = this.options.render) {
+    let surface;
+
+    this.canvasParent = this.canvasParent || new CanvasParent();
+
+    switch (type) {
+      // headless render
+      case 'headless':
+        surface = new HeadlessRenderSurface();
+        break;
+      // canvas render
+      case 'canvas':
+        surface = new CanvasRenderSurface(this.canvasParent);
+        break;
+      // webgl is the same as auto - webgl will run if possible but will
+      // fallback to canvas automatically
+      case 'webgl':
+      case 'auto':
+      default:
+        if (webGlSupported()) {
+          surface = new WebGlRenderSurface(this.canvasParent);
+        } else {
+          surface = new CanvasRenderSurface(this.canvasParent);
+        }
+        break;
+    }
+
+    return surface;
+  }
+
+  setRenderer(type) {
+    this._renderSurface = this.createRenderSurface(type);
+    this._mainboard.renderBuffer._renderSurface = this._renderSurface;
+    // this will come back to haunt me
+    this._mainboard.enableSound(type !== 'headless');
   }
 }

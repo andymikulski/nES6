@@ -92,6 +92,7 @@ export default function dragDropLoader(options = {}) {
     dropZone.addEventListener('drop', (evt) => {
       // If the user dropped on something that ISN'T the dropzone, just ignore it.
       if (evt.target !== dropZone && !containedIn(evt.target, dropZone)) {
+        console && console.warn(`DragDropLoader: drop target not in zone (${evt.target})`);
         return;
       }
       // Otherwise, prevent the normal browser drop events (tries to open it, or
@@ -114,7 +115,16 @@ export default function dragDropLoader(options = {}) {
       // nES6 instance through its binary string.
       const reader = new FileReader();
       reader.onload = () => {
+        const formatName = (name)=>
+          name
+            .replace('.nes', '')
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, str => str.toUpperCase());
+
         nesInstance.loadRomFromBinary(reader.result, requestedRom.name);
+        if (options.onRomLoad) {
+          options.onRomLoad(formatName(requestedRom.name), reader.result);
+        }
       };
       reader.readAsArrayBuffer(requestedRom);
     }, false);
